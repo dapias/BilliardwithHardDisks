@@ -9,12 +9,6 @@ abstract Object
 abstract Wall <: Object
 
 
-
-
-
-
-
-
 type Particle <: Object
     r::Array{Float64,1}
     v::Array{Float64,1}
@@ -44,7 +38,7 @@ Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
 type Cell
     walls::Vector{Wall}
     disk::Disk
-    label
+    label::Int
 end
 
 #Cell(walls,label) = Cell(walls,label,Disk([-100.,-100.],[0.,0.],0.))
