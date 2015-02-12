@@ -13,6 +13,7 @@ mass = 1.0
 velocity = 1.0
 Lx1 = 0
 Ly1 = 0
+hole_size = 0.5*radius
 
 @doc doc"""Creates a Disk enclosed in the cell with boundaries at Lx1, Lx2, Ly1, Ly2; and with a random velocity
 with constant norm"""->
@@ -45,9 +46,9 @@ function create_initial_cell(size_x,size_y)
     wall1 = VerticalWall(Lx1,[Ly1,Ly2])
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-    Ly1Hole = Ly1+(Ly2-Ly1)*rand()
-    Ly2Hole = Ly1+(Ly2-Ly1)*rand()
-    Ly1Hole, Ly2Hole = sort([Ly1Hole,Ly2Hole])
+    Ly1Hole = Ly1+(Ly2-Ly1-hole_size)*rand()
+    Ly2Hole = Ly1Hole + hole_size
+    #Ly1Hole, Ly2Hole = sort([Ly1Hole,Ly2Hole])
     sharedwall = VerticalHoleWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2])
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocity)
     label = 1
@@ -63,9 +64,9 @@ function create_new_right_cell(cell,size_x,size_y)
     Ly2 = size_y
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-    Ly1Hole = Ly1+(Ly2-Ly1)*rand()
-    Ly2Hole = Ly1+(Ly2-Ly1)*rand()
-    Ly1Hole, Ly2Hole = sort([Ly1Hole,Ly2Hole])
+    Ly1Hole = Ly1+(Ly2-Ly1-hole_size)*rand()
+    Ly2Hole = Ly1Hole + hole_size
+    #Ly1Hole, Ly2Hole = sort([Ly1Hole,Ly2Hole])
     sharedwall = VerticalHoleWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2])
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocity)
     label = cell.label + 1
@@ -81,9 +82,6 @@ function create_last_right_cell(cell,size_x,size_y)
     Ly2 = size_y
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-    Ly1Hole = Ly1+(Ly2-Ly1)*rand()
-    Ly2Hole = Ly1+(Ly2-Ly1)*rand()
-    Ly1Hole, Ly2Hole = sort([Ly1Hole,Ly2Hole])
     wall4 = VerticalWall(Lx2,[Ly1,Ly2])
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocity)
     label = cell.label+1
@@ -136,17 +134,17 @@ function create_particle(board, mass, velocity,delta_x,delta_y)
     disk = board.cells[1].disk
     Lx2 = Lx1 + delta_x
     Ly2 = Ly1 +delta_y
-    x = randuniform(Lx1, Lx2)
-    y = randuniform(Ly1, Ly2)
     theta = rand()*2*pi
     vx = cos(theta)*velocity
     vy = sin(theta)*velocity
     v = [vx, vy]
-    p = Particle([x,y],v, mass, cell.label)
-    while  overlap(p,disk)
+    solape = true
+    p = Particle([-100,-100],v, mass, cell.label)
+    while solape
         x = randuniform(Lx1, Lx2)[1]
         y = randuniform(Ly1, Ly2)[1]
         p = Particle([x,y],v, mass, cell.label)
+        solape = overlap(p,disk)
     end
     p
 end

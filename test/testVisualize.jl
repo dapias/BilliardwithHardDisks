@@ -16,8 +16,8 @@ pygui(true)
 @pyimport matplotlib.animation as animation
 
 numberofcells = 3
-size_x = 10
-size_y = 10
+size_x = 3.
+size_y = 3.
 board = Init.create_board(numberofcells,size_x,size_y)
 
 
@@ -64,7 +64,7 @@ ax[:add_line](line3)
 ax[:add_line](line4)
 
 particula = Init.create_particle(board, 1.0, 1.0 ,size_x,size_y)
-ax[:plot]([particula.r[1]], [particula.r[1]], "+")
+ax[:plot]([particula.r[1]], [particula.r[2]], markersize = 5., "go")
 
 
 ax[:set_xlim](0, numberofcells*size_x)
