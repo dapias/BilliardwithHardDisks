@@ -6,9 +6,9 @@ VERSION < v"0.4-" && using Docile
 
 using Objects
 
-export create_board
+#export create_board
 
-radius = 0.4
+radius = 1.0
 mass = 1.0
 velocity = 1.0
 Lx1 = 0

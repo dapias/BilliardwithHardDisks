@@ -1,5 +1,5 @@
 include("../src/objects.jl")
-include("../src/creatingobjects.jl")
+include("../src/creategobjects.jl")
 
 
 using FactCheck

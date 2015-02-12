@@ -1,3 +1,7 @@
+include("objects.jl")
+include("createobjects.jl")
+
+using Init
 using PyCall
 using PyPlot
 
@@ -7,6 +11,18 @@ pygui(true)
 @pyimport matplotlib.patches as patch
 @pyimport matplotlib.lines as lines
 @pyimport matplotlib.animation as animation
+
+numberofcells = 3
+size_x = 10
+size_y = 10
+board = Init.create_board(numberofcells,size_x,size_y)
+println(board)
+
+
+
+for i in 1:4
+println(board.cells[1].walls[i])
+end
 
 nDiscos= 5
 radio = 1
