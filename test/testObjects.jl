@@ -53,7 +53,7 @@ end
 
 facts("Create disk test") do
     cell = Init.create_initial_cell(10.,10.)
-    disk = Init.create_disk(0.,10,0,10.)
+    disk = Init.create_disk(0.,10,0,10.,0.4,1.0,1.0)
 
     @fact disk.radius => 0.4
     @fact disk.mass => 1.0
