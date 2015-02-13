@@ -2,12 +2,15 @@ module Objects
 
 VERSION < v"0.4-" && using Docile
 
-export Object, Wall, Disk
-export VerticalWall, HorizontalWall, Event, Cell, VerticalHoleWall, Particle, Board
+export Wall, Disk
+export VerticalWall, HorizontalWall, Event, Cell, VerticalSharedWall, Particle, Board, Vertical
 
-abstract Object
-abstract DynamicObject <: Object
-abstract Wall <: Object
+#abstract Object
+#abstract DynamicObject <: Object
+abstract DynamicObject
+abstract Wall
+abstract Vertical <: Wall
+
 
 
 type Particle <: DynamicObject
@@ -50,7 +53,7 @@ end
 
 @doc doc"""Type with attributes x and y. x corresponds to its horizontal position in a Cartesian Plane
 (just a number) and y represents its initial and final height in the Plane (Array of length equal to 2)."""  ->
-type VerticalWall <:Wall
+type VerticalWall <: Vertical
   x :: Float64
   y :: Array{Float64,1}
 end
@@ -65,17 +68,18 @@ type HorizontalWall <:Wall
 end
 
 
-type VerticalHoleWall <: VerticalWall
+type VerticalSharedWall <: Vertical
   x :: Float64
   y :: Array{Float64,1}  #Array of a length greater than the VerticalWall
+  label::(Int,Int)  #Label of associated cells.
 end
 
 @doc doc"""Type with attributes time, collider1, collider2 and label. The label makes reference to the cycle
 within the main loop in which the event was predicted (see simulacionanimada in main.jl)."""->
 type Event
-    tiempo :: Number
-    referencedisk::Disk
-    diskorwall ::Object
+    time :: Number
+    referenceobject::DynamicObject
+    cell ::Cell
     predictedcollision :: Int
 end
 
