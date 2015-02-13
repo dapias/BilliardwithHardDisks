@@ -6,10 +6,11 @@ export Object, Wall, Disk
 export VerticalWall, HorizontalWall, Event, Cell, VerticalHoleWall, Particle, Board
 
 abstract Object
+abstract DynamicObject <: Object
 abstract Wall <: Object
 
 
-type Particle <: Object
+type Particle <: DynamicObject
     r::Array{Float64,1}
     v::Array{Float64,1}
     mass::Float64
@@ -19,7 +20,7 @@ end
 Particle(r,v) = Particle(r,v,1.0,1) #Number of cell and mass equal to 1 by default
 Particle(r,v,mass) = Particle(r,v,mass,1)
 
-type Disk <:Object
+type Disk <: DynamicObject
   r::Array{Float64,1}
   v::Array{Float64,1}
   radius::Float64
@@ -64,9 +65,19 @@ type HorizontalWall <:Wall
 end
 
 
-type VerticalHoleWall <:Wall
+type VerticalHoleWall <: VerticalWall
   x :: Float64
   y :: Array{Float64,1}  #Array of a length greater than the VerticalWall
 end
+
+@doc doc"""Type with attributes time, collider1, collider2 and label. The label makes reference to the cycle
+within the main loop in which the event was predicted (see simulacionanimada in main.jl)."""->
+type Event
+    tiempo :: Number
+    referencedisk::Disk
+    diskorwall ::Object
+    predictedcollision :: Int
+end
+
 
 end
