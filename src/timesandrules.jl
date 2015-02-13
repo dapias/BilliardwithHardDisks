@@ -13,8 +13,11 @@ export move, dtcollision, collision
 during a time interval dt"""->
 move(d::Disk, dt::Real) = d.r += d.v * dt
 
-@doc doc"""Calculates the time of collision between the Disk and a VerticalWall"""->
-function dtcollision(d::Disk, VW::VerticalWall)
+
+#######################################Disk#################################################3
+
+@doc doc"""Calculates the time of collision between the Disk and a Vertical (Wall)"""->
+function dtcollision(d::Disk, VW::Vertical)
     #La pared siempre va a estar acotada por números positivos
     dt = Inf
     if d.v[1] > 0
@@ -47,9 +50,25 @@ function dtcollision(d::Disk, HW::HorizontalWall)
     dt
 end
 
+
+function dtcollision(d::Disk, c::Cell)
+    time = zeros(4)
+    index = 1
+    for wall in c.walls
+        dt = dtcollision(d,wall)
+        time[index] = dt
+        index += 1
+    end
+    dt,k = findmin(time)
+    dt
+end
+
+
+################################Particle#############################################################3
+
 #Parece ser igual para la pared independiente de la velocidad
 @doc doc"""Calculates the time of collision between a Particle and a VerticalWall"""->
-function dtcollision(p::Particle, VW::VerticalWall)
+function dtcollision(p::Particle, VW::Vertical)
     #La pared siempre va a estar acotada por números positivos
     dt = Inf
     if p.v[1] > 0
@@ -79,9 +98,6 @@ function dtcollision(p::Particle, HW::HorizontalWall)
 end
 
 
-
-
-
 @doc doc"""Calculates the time of collision between two Disks."""->
 function dtcollision(p::Particle,d::Disk)
     deltar = p.r - d.r
@@ -97,9 +113,26 @@ function dtcollision(p::Particle,d::Disk)
         return Inf
     end
     #dt = min((-rdotv+ sqrt(d))/vcuadrado, (-rdotv - sqrt(d))/vcuadrado)
-    dt = (rcuadrado - (d.radius)^2)/(-rdotv + sqrt(dist))
+    dt = (rcuadrado - (d.radius)^2)/(-rdotv + sqrt(dis))
     return dt
 end
+
+function dtcollision(p::Particle,c::Cell)
+    time = zeros(5)
+    index = 1
+    for wall in c.walls
+        dt = dtcollision(p,wall)
+        time[index] = dt
+        index += 1
+    end
+    time[end] = dtcollision(p,c.disk)
+    dt,k = findmin(time)
+    dt
+end
+
+
+
+###########################################################################
 
 
 @doc doc"""Update the velocity vector of a disk (Disk.v) after it collides with a VerticalWall."""->
@@ -116,7 +149,7 @@ function collision(p1::Particle, V::VerticalWall )
     p1.v = [-p1.v[1], p1.v[2]]
 end
 
-function collision(p1::Particle, VH::VerticalHoleWall )
+function collision(p1::Particle, VH::VerticalSharedWall )
     Ly1Hole = VH.y[2]
     Ly2Hole = VH.y[3]
     if Ly1Hole < p1.r[2] < Ly2Hole
