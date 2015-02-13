@@ -6,6 +6,14 @@ module Simulation
 
 VERSION < v"0.4-" && using Docile
 
+# radius = 1.0
+# mass = 1.0
+# velocity = 1.0
+# Lx1 = 0
+# Ly1 = 0
+# hole_size = 0.5*radius
+
+
 importall Objects
 importall Rules
 importall Init
@@ -15,6 +23,9 @@ export simulation, energy
 #This allow to use the PriorityQueue providing a criterion to select the priority of an Event.
 isless(e1::Event, e2::Event) = e1.time < e2.time
 
+
+@doc doc"""Calculates the initial feasible Events and push them into the PriorityQueue with label
+equal to 0"""->
 function initialcollisions!(board::Board,particle::Particle,tinicial::Number,tmax::Number,pq)
     for cell in board.cells
         dt,k = dtcollision(cell.disk,cell)
@@ -33,134 +44,58 @@ function initialcollisions!(board::Board,particle::Particle,tinicial::Number,tma
     end
 end
 
-
-
-
-
-@doc doc"""Calculates the initial feasible Events and push them into the PriorityQueue with label
-equal to 0"""->
-function initialcollisions!(particulas::Array, paredes::Array, tinicial::Number, tmax::Number, pq)
-    #Puts the initial label of the
-    for i in 1:length(particulas)
-        tiempo = Float64[]
-        for pared in paredes
-            dt = dtcollision(particulas[i], pared)
-            push!(tiempo,dt)
-        end
-        dt = minimum(tiempo)
-        k = findin(tiempo,dt)
-        if tinicial + dt < tmax
-            Collections.enqueue!(pq,Event(tinicial+dt, particulas[i], paredes[k[1]],0),tinicial+dt)
-        end
-        for j in i+1:length(particulas) #Numero de pares sin repetición N(N-1)/2
-            dt = dtcollision(particulas[i], particulas[j])
-            if tinicial + dt < tmax
-                Collections.enqueue!(pq,Event(tinicial+dt, particulas[i], particulas[j],0),tinicial+dt)
-            end
-        end
-    end
-    pq
-end
-
-
-@doc doc"""Updates the PriorityQueue pushing into it all the feasible Events that can occur after the collision
-of a Disk with a Wall"""->
-function futurecollisions!(particula, particulas, paredes, tinicial, tmax, pq, etiqueta )
-    tiempo = Float64[]
-    for pared in paredes
-        dt = dtcollision(particula, pared)
-        push!(tiempo,dt)
-    end
-    dt = minimum(tiempo)
-    k = findin(tiempo,dt)
+@doc doc"""Updates the PriorityQueue pushing into it all the feasible Events that can occur after a valid collision"""->
+function futurecollisions!(particle::Particle,board::Board, tinicial::Number,tmax::Number,pq, labelprediction)
+    cell = board.cells[particle.numberofcell]
+    dt,k = dtcollision(particle,cell)
     if tinicial + dt < tmax
-        Collections.enqueue!(pq,Event(tinicial+dt, particula, paredes[k[1]], etiqueta),tinicial+dt)
-    end
-
-    tiempo = Float64[]
-    for p in particulas
-        if particula != p
-            dt = dtcollision(particula, p)
-            if tinicial + dt < tmax
-                Collections.enqueue!(pq,Event(tinicial+dt, particula, p, etiqueta),tinicial+dt)
-            end
+        if k == 5
+            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.disk,labelprediction),tinicial+dt)
+        else
+            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.walls[k],labelprediction),tinicial+dt)
         end
     end
-    pq
 end
 
-@doc doc"""Updates the PriorityQueue pushing into it all the possible Events that can occur after the collision
-of two Disks."""->
-function futurecollisions!(particula1, particula2, particulas, paredes, tinicial, tmax, pq, etiqueta)
 
-    tiempo = Float64[]
-    for pared in paredes
-        dt = dtcollision(particula1, pared)
-        push!(tiempo,dt)
-    end
-    dt = minimum(tiempo)
-    k = findin(tiempo,dt)
+function futurecollisions!(disk::Disk,board::Board, tinicial::Number,tmax::Number,pq, labelprediction)
+    cell = board.cells[disk.numberofcell]
+    dt,k = dtcollision(disk,cell)
     if tinicial + dt < tmax
-        Collections.enqueue!(pq,Event(tinicial+dt, particula1, paredes[k[1]], etiqueta),tinicial+dt)
-    end
-
-    tiempo = Float64[]
-    for pared in paredes
-        dt = dtcollision(particula2, pared)
-        push!(tiempo,dt)
-    end
-    dt = minimum(tiempo)
-    k = findin(tiempo,dt)
-    if tinicial + dt < tmax
-        Collections.enqueue!(pq,Event(tinicial+dt, particula2, paredes[k[1]], etiqueta),tinicial+dt)
-    end
-
-    #Voy a considerar que no hay recolisión entre las partículas que acaban de chocar, por consiguiente ajusto el tiempo de colisión entre disk1 y
-    #disk2 igual a infinito.
-    tiempo = Float64[]
-    for p in particulas
-        if (particula1 != p) & (particula2 != p)
-            dt = dtcollision(particula1, p)
-            if tinicial + dt < tmax
-                Collections.enqueue!(pq,Event(tinicial+dt, particula1, p, etiqueta),tinicial+dt)
-            end
+        if k == 5
+            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.disk,labelprediction),tinicial+dt)
+        else
+            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.walls[k],labelprediction),tinicial+dt)
         end
     end
-
-    tiempo = Float64[]
-    for p in particulas
-        if (particula1 != p) & (particula2 != p)
-            dt = dtcollision(particula2, p)
-            if tinicial + dt < tmax
-                Collections.enqueue!(pq,Event(tinicial+dt, particula2, p, etiqueta),tinicial+dt)
-            end
-        end
-    end
-    pq
 end
 
-@doc doc"""Calculates the total energy (kinetic) of the system."""->
-function energy(masas,velocidades)
-    e = 0.
-    for i in 1:length(masas)
-        e += masas[i]*norm(velocidades[i])^2/2.
-    end
-    e
-end
 
-function startingsimulation(tinicial, tmax, N, Lx1, Lx2, Ly1, Ly2, vmin, vmax)
-    particulas = createdisks(N,Lx1,Lx2,Ly1,Ly2,vmin,vmax)
-    paredes = createwalls(Lx1,Lx2,Ly1,Ly2)
-    posiciones = [particula.r for particula in particulas]
-    velocidades = [particula.v for particula in particulas]
-    masas = [particula.mass for particula in particulas]
+
+# @doc doc"""Calculates the total energy (kinetic) of the system."""->
+# function energy(masas,velocidades)
+#     e = 0.
+#     for i in 1:length(masas)
+#         e += masas[i]*norm(velocidades[i])^2/2.
+#     end
+#     e
+# end
+
+function startingsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity)
+    board = create_board(numberofcells,size_x,size_y)
+    particle = create_particle(board, particle_mass, particle_velocity,size_x,size_y)
+    disks_positions = [board.cells[i].disk.r for i in 1:numberofcells ]
+    particle_positions = [particle.r]
+    disks_velocities = [board.cells[i].disk.v for i in 1:numberofcells ]
+    particle_velocities = [particle.v]
+    #masas = [particula.mass for particula in particulas]
     pq = Collections.PriorityQueue()
-    Collections.enqueue!(pq,Event(0.0, Disk([0.,0.],[0.,0.],1.0),Disk([0.,0.],[0.,0.],1.0), 0),0.)
-    pq = initialcollisions!(particulas,paredes,tinicial,tmax, pq)
+    Collections.enqueue!(pq,Event(0.0, Particle([0.,0.],[0.,0.],1.0),Disk([0.,0.],[0.,0.],1.0), 0),0.)
+    pq = initialcollisions!(board,particle,tinicial,tmax,pq)
     evento = Collections.dequeue!(pq)
-    t = evento.tiempo
-    tiempo = [evento.tiempo]
-    return particulas, paredes, posiciones, velocidades, masas, pq, t, tiempo
+    t = evento.time
+    tiempo = [evento.time]
+    return board, particle, t, time, disks_positions, particle_positions, disks_velocities, particle_velocities
 end
 
 
