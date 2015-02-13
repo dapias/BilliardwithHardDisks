@@ -2,13 +2,14 @@ module Objects
 
 VERSION < v"0.4-" && using Docile
 
-export Wall, Disk
+export Wall, Disk, Object
 export VerticalWall, HorizontalWall, Event, Cell, VerticalSharedWall, Particle, Board, Vertical
 
 #abstract Object
 #abstract DynamicObject <: Object
-abstract DynamicObject
-abstract Wall
+abstract Object
+abstract DynamicObject <: Object
+abstract Wall <: Object
 abstract Vertical <: Wall
 
 
@@ -79,7 +80,7 @@ within the main loop in which the event was predicted (see simulacionanimada in 
 type Event
     time :: Number
     referenceobject::DynamicObject
-    cell ::Cell
+    diskorwall ::Object
     predictedcollision :: Int
 end
 

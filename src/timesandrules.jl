@@ -13,7 +13,7 @@ export move, dtcollision, collision
 during a time interval dt"""->
 move(d::Disk, dt::Real) = d.r += d.v * dt
 
-
+####Time
 #######################################Disk#################################################3
 
 @doc doc"""Calculates the time of collision between the Disk and a Vertical (Wall)"""->
@@ -60,7 +60,6 @@ function dtcollision(d::Disk, c::Cell)
         index += 1
     end
     dt,k = findmin(time)
-    dt
 end
 
 
@@ -127,40 +126,62 @@ function dtcollision(p::Particle,c::Cell)
     end
     time[end] = dtcollision(p,c.disk)
     dt,k = findmin(time)
-    dt
+    dt,k
 end
 
 
 
-###########################################################################
+##########################################################################################
 
+
+#Rules
+
+###############Disk##################################################
 
 @doc doc"""Update the velocity vector of a disk (Disk.v) after it collides with a VerticalWall."""->
-function collision(d1::Disk, V::VerticalWall )
-    p1.v = [-d1.v[1], d1.v[2]]
+function collision(d::Disk, V::Vertical)
+    p1.v = [-d.v[1], d.v[2]]
 end
 
 @doc doc"""Update the velocity vector of a disk (Disk.v) after it collides with a HorizontallWall."""->
-function collision(d1::Disk, H::HorizontalWall )
-    p1.v = [d1.v[1],-d1.v[2]]
+function collision(d::Disk, H::HorizontalWall )
+    d.v = [d.v[1],-d.v[2]]
 end
 
-function collision(p1::Particle, V::VerticalWall )
-    p1.v = [-p1.v[1], p1.v[2]]
+###################Particle##############################################33
+function collision(p::Particle, V::VerticalWall )
+    p.v = [-p.v[1], p.v[2]]
 end
 
-function collision(p1::Particle, VH::VerticalSharedWall )
-    Ly1Hole = VH.y[2]
-    Ly2Hole = VH.y[3]
-    if Ly1Hole < p1.r[2] < Ly2Hole
-        nothing
+function collision(p::Particle, H::HorizontalWall )
+    p1.v = [p.v[1],-p.v[2]]
+end
+
+function updatelabel(p::Particle, VSW::VerticalSharedWall)
+    update = false
+    Ly1Hole = VSW.y[2]
+    Ly2Hole = VSW.y[3]
+    if Ly1Hole < p.r[2] < Ly2Hole
+        plabel = p.numberofcell
+        for label in VSW.label
+            if plabel != label
+                p.numberofcell = label
+            end
+        end
+        update = true
+    end
+    update
+end
+
+
+function collision(p::Particle, VSW::VerticalSharedWall )
+    if updatelabel(p,VSW)
     else
-        p1.v = [-p1.v[1], p1.v[2]]
+        p.v = [-p.v[1], p.v[2]]
     end
 end
 
 
-@doc doc"""Update the velocity vector of two Disks after they collides."""->
 function collision(p::Particle, d::Disk)
     deltar = p.r - d.r
     deltav = p.v - d.v
@@ -170,5 +191,6 @@ function collision(p::Particle, d::Disk)
     p.v -= J*deltar/(sigma*p.mass)
     d.v += J*deltar/(sigma*d.mass)
 end
+
 
 end

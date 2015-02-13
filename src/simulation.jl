@@ -2,7 +2,7 @@ include("./objects.jl")
 include("./timesandrules.jl")
 include("./creatingobjects.jl")
 
-module HardDisksSimulation
+module Simulation
 
 VERSION < v"0.4-" && using Docile
 
@@ -13,12 +13,34 @@ import Base.isless
 export simulation, energy
 
 #This allow to use the PriorityQueue providing a criterion to select the priority of an Event.
-isless(e1::Event, e2::Event) = e1.tiempo < e2.tiempo
+isless(e1::Event, e2::Event) = e1.time < e2.time
+
+function initialcollisions!(board::Board,particle::Particle,tinicial::Number,tmax::Number,pq)
+    for cell in board.cells
+        dt,k = dtcollision(cell.disk,cell)
+        if tinicial + dt < tmax
+            Collections.enqueue!(pq,Event(tinicial+dt, cell.disk, cell.walls[k],0),tinicial+dt)
+        end
+    end
+    cell = board.cells[1]
+    dt,k = dtcollision(particle,cell)
+    if tinicial + dt < tmax
+        if k == 5
+            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.disk,0),tinicial+dt)
+        else
+            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.walls[k],0),tinicial+dt)
+        end
+    end
+end
+
+
+
+
 
 @doc doc"""Calculates the initial feasible Events and push them into the PriorityQueue with label
 equal to 0"""->
 function initialcollisions!(particulas::Array, paredes::Array, tinicial::Number, tmax::Number, pq)
-#Puts the initial label of the
+    #Puts the initial label of the
     for i in 1:length(particulas)
         tiempo = Float64[]
         for pared in paredes
