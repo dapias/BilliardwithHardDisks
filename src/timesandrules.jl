@@ -9,9 +9,8 @@ importall Objects
 
 export move, dtcollision, collision
 
-@doc doc"""Update the position of the Disk through moving it as a free particle with velocity Disk.v
-during a time interval dt"""->
 move(d::Disk, dt::Real) = d.r += d.v * dt
+move(p::Particle, dt::Real) = p.r += p.v*dt
 
 ####Time
 #######################################Disk#################################################3

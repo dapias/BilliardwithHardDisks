@@ -35,11 +35,11 @@ end
 facts("Create new cell test") do
     cell = Init.create_initial_cell(10.,10.)
     cell = Init.create_new_right_cell(cell,10.,10.)
-   # @fact cell.walls[1].x => 10.
-    @fact cell.walls[1].y => 0.
-    @fact cell.walls[2].y => 10.
-    @fact cell.walls[3].x => 20.
-    @fact length(cell.walls[3].y) => 4
+    @fact cell.walls[1].x => 10.
+    @fact cell.walls[2].y => 0.
+    @fact cell.walls[3].y => 10.
+    @fact cell.walls[4].x => 20.
+    @fact length(cell.walls[4].y) => 4
     @fact cell.label => 2
 end
 

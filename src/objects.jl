@@ -19,10 +19,11 @@ type Particle <: DynamicObject
     v::Array{Float64,1}
     mass::Float64
     numberofcell::Int
+    lastcollision::Int
 end
 
-Particle(r,v) = Particle(r,v,1.0,1) #Number of cell and mass equal to 1 by default
-Particle(r,v,mass) = Particle(r,v,mass,1)
+Particle(r,v) = Particle(r,v,1.,1,0)  #Default values: mass equal to 1; numberofcell: 1; lastcollision:0.
+Particle(r,v,mass) = Particle(r,v,mass,1,0)
 
 type Disk <: DynamicObject
   r::Array{Float64,1}

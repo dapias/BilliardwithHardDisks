@@ -5,8 +5,8 @@ include("../src/createobjects.jl")
 #Cuadrar Lx1 y Lx2 en general
 
 using Init
-using PyCall
 using PyPlot
+using PyCall
 
 pygui(true)
 

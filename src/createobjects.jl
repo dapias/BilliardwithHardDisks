@@ -139,11 +139,11 @@ function create_particle(board, mass, velocity,delta_x,delta_y)
     vy = sin(theta)*velocity
     v = [vx, vy]
     solape = true
-    p = Particle([-100,-100],v, mass, cell.label)
+    p = Particle([-100,-100],v, mass, cell.label,0)
     while solape
         x = randuniform(Lx1, Lx2)[1]
         y = randuniform(Ly1, Ly2)[1]
-        p = Particle([x,y],v, mass, cell.label)
+        p = Particle([x,y],v, mass, cell.label,0)
         solape = overlap(p,disk)
     end
     p
