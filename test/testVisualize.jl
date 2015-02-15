@@ -42,17 +42,18 @@ ax[:add_line](line3)
 ax[:add_line](line4)
 ax[:add_line](line5)
 
-
-for i in 2:numberofcells-1
-    walls = board.cells[i].walls
-    line2 = lines.Line2D([walls[2].x[1],walls[2].x[2]],[walls[2].y,walls[2].y])
-    line3 = lines.Line2D([walls[3].x[1],walls[3].x[2]],[walls[3].y,walls[3].y])
-    line4 = lines.Line2D([walls[4].x,walls[4].x],[walls[4].y[1],walls[4].y[2]])
-    line5 = lines.Line2D([walls[4].x,walls[4].x],[walls[4].y[3],walls[4].y[4]])
-    ax[:add_line](line2)
-    ax[:add_line](line3)
-    ax[:add_line](line4)
-    ax[:add_line](line5)
+if numberofcells > 2
+    for i in 2:numberofcells-1
+        walls = board.cells[i].walls
+        line2 = lines.Line2D([walls[2].x[1],walls[2].x[2]],[walls[2].y,walls[2].y])
+        line3 = lines.Line2D([walls[3].x[1],walls[3].x[2]],[walls[3].y,walls[3].y])
+        line4 = lines.Line2D([walls[4].x,walls[4].x],[walls[4].y[1],walls[4].y[2]])
+        line5 = lines.Line2D([walls[4].x,walls[4].x],[walls[4].y[3],walls[4].y[4]])
+        ax[:add_line](line2)
+        ax[:add_line](line3)
+        ax[:add_line](line4)
+        ax[:add_line](line5)
+    end
 end
 
 walls = board.cells[end].walls

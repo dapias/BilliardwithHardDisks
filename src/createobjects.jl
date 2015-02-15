@@ -6,11 +6,11 @@ VERSION < v"0.4-" && using Docile
 
 using Objects
 
-#export create_board
+export create_board, create_particle
 
 radius = 1.0
 mass = 1.0
-velocity = 1.0
+velocity = 0.
 Lx1 = 0
 Ly1 = 0
 hole_size = 0.5*radius

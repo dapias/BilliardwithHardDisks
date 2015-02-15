@@ -1,6 +1,6 @@
 include("./objects.jl")
 include("./timesandrules.jl")
-include("./creatingobjects.jl")
+include("./createobjects.jl")
 
 module Simulation
 
@@ -18,7 +18,7 @@ importall Objects
 importall Rules
 importall Init
 import Base.isless
-export simulation, energy
+#export simulation, energy
 
 #This allow to use the PriorityQueue providing a criterion to select the priority of an Event.
 isless(e1::Event, e2::Event) = e1.time < e2.time
@@ -26,76 +26,89 @@ isless(e1::Event, e2::Event) = e1.time < e2.time
 
 @doc doc"""Calculates the initial feasible Events and push them into the PriorityQueue with label
 equal to 0"""->
-function initialcollisions!(board::Board,particle::Particle,tinicial::Number,tmax::Number,pq)
+function initialcollisions!(board::Board,particle::Particle,t_initial::Number,t_max::Number,pq)
     for cell in board.cells
         dt,k = dtcollision(cell.disk,cell)
-        if tinicial + dt < tmax
-            Collections.enqueue!(pq,Event(tinicial+dt, cell.disk, cell.walls[k],0),tinicial+dt)
+        if t_initial + dt < t_max
+            Collections.enqueue!(pq,Event(t_initial+dt, cell.disk, cell.walls[k],0),t_initial+dt)
         end
     end
+
     cell = board.cells[1]
     dt,k = dtcollision(particle,cell)
-    if tinicial + dt < tmax
+    if t_initial + dt < t_max
         if k == 5
-            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.disk,0),tinicial+dt)
+            Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.disk,0),t_initial+dt)
         else
-            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.walls[k],0),tinicial+dt)
+            Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],0),t_initial+dt)
         end
     end
 end
+
 
 @doc doc"""Updates the PriorityQueue pushing into it all the feasible Events that can occur after a valid collision"""->
-function futurecollisions!(particle::Particle,board::Board, tinicial::Number,tmax::Number,pq, labelprediction)
-    cell = board.cells[particle.numberofcell]
-    dt,k = dtcollision(particle,cell)
-    if tinicial + dt < tmax
-        if k == 5
-            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.disk,labelprediction),tinicial+dt)
-        else
-            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.walls[k],labelprediction),tinicial+dt)
+function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::Number,pq, labelprediction, particle :: Particle)
+    cell = board.cells[event.referenceobject.numberofcell]
+
+    function future(particle::Particle, disk::Disk)
+        dt,k = dtcollision_without_disk(particle,cell)
+        if t_initial + dt < t_max
+            Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
+        end
+
+        dt,k = dtcollision(disk,cell)
+        if t_initial + dt < t_max
+            Collections.enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
         end
     end
+
+    function future(particle::Particle, wall::Wall)
+        dt,k = dtcollision(particle,cell)
+        if t_initial + dt < t_max
+            if k == 5
+                Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.disk,labelprediction),t_initial+dt)
+            else
+                Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
+            end
+        end
+    end
+
+    function future(disk::Disk, wall::Wall)
+        dt,k = dtcollision(disk,cell)
+        if t_initial + dt < t_max
+            Collections.enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
+        end
+
+        if cell.label == particle.numberofcell
+            dt = dtcollision(particle,disk)
+            if t_initial + dt < t_max
+                Collections.enqueue!(pq,Event(t_initial+dt, particle, disk,labelprediction),t_initial+dt)
+            end
+        end
+    end
+
+    future(event.referenceobject,event.diskorwall)
 end
 
 
-function futurecollisions!(disk::Disk,board::Board, tinicial::Number,tmax::Number,pq, labelprediction)
-    cell = board.cells[disk.numberofcell]
-    dt,k = dtcollision(disk,cell)
-    if tinicial + dt < tmax
-        if k == 5
-            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.disk,labelprediction),tinicial+dt)
-        else
-            Collections.enqueue!(pq,Event(tinicial+dt, particle, cell.walls[k],labelprediction),tinicial+dt)
-        end
-    end
-end
 
-
-
-# @doc doc"""Calculates the total energy (kinetic) of the system."""->
-# function energy(masas,velocidades)
-#     e = 0.
-#     for i in 1:length(masas)
-#         e += masas[i]*norm(velocidades[i])^2/2.
-#     end
-#     e
-# end
-
-function startingsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity)
+function startingsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
     board = create_board(numberofcells,size_x,size_y)
     particle = create_particle(board, particle_mass, particle_velocity,size_x,size_y)
     disks_positions = [board.cells[i].disk.r for i in 1:numberofcells ]
-    particle_positions = [particle.r]
+    particle_x = [particle.r[1]]
+    particle_y = [particle.r[2]]
     disks_velocities = [board.cells[i].disk.v for i in 1:numberofcells ]
-    particle_velocities = [particle.v]
+    particle_vx = [particle.v[1]]
+    particle_vy = [particle.v[2]]
     #masas = [particula.mass for particula in particulas]
     pq = Collections.PriorityQueue()
     Collections.enqueue!(pq,Event(0.0, Particle([0.,0.],[0.,0.],1.0),Disk([0.,0.],[0.,0.],1.0), 0),0.)
-    pq = initialcollisions!(board,particle,tinicial,tmax,pq)
+    pq = initialcollisions!(board,particle,t_initial,t_max,pq)
     event = Collections.dequeue!(pq)
     t = event.time
-    tiempo = [event.time]
-    return board, particle, t, time, disks_positions, particle_positions, disks_velocities, particle_velocities
+    time = [event.time]
+    return board, particle, t, time, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, pq
 end
 
 
@@ -138,44 +151,50 @@ end
 
 
 
-function moveparticles(particulas, delta_t)
-    for particula in particulas
-        move(particula,delta_t)
+function move(board::Board,particle::Particle,delta_t, numberofcells)
+    for i in 1:numberofcells
+        move(board.cells[i].disk,delta_t)
     end
+    move(particle,delta_t)
 end
 
 
-function updateanimationlists(particulas, posiciones,velocidades,N)
-    for i in 1:N
-        push!(posiciones, particulas[i].r)
-        push!(velocidades, particulas[i].v)
+function updateanimationlists(board::Board,particle::Particle, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, numberofcells)
+    for i in 1:numberofcells
+        push!(disks_positions,board.cells[i].disk.r)
+        push!(disks_velocities, board.cells[i].disk.v)
     end
+    push!(particle_x, particle.r[1])
+    push!(particle_y, particle.r[2])
+    push!(particle_vx, particle.v[1])
+    push!(particle_vy, particle.v[2])
 end
 
 
 @doc doc"""Contains the main loop of the project. The PriorityQueue is filled at each step with Events associated
 to the collider Disk(s); and the element with the highest physical priority (lowest time) is removed
 from the Queue and ignored if it is physically meaningless. The loop goes until the last Event is removed
-from the Data Structure, which is delimited by the maximum time(tmax)."""->
-function simulation(tinicial, tmax, N, Lx1, Lx2, Ly1, Ly2, vmin, vmax)
-    particulas, paredes, posiciones, velocidades, masas, pq, t, tiempo = startingsimulation(tinicial, tmax, N, Lx1, Lx2, Ly1, Ly2, vmin, vmax)
+from the Data Structure, which is delimited by the maximum time(t_max)."""->
+function simulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
+    board, particle, t, time, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, pq =
+        startingsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
     label = 0
     while(!isempty(pq))
         label += 1
         event = Collections.dequeue!(pq)
         validcollision = validatecollision(event)
-        if validcollision == true
+        if validcollision
             updatelabels(event,label)
-            moveparticles(particulas,event.tiempo-t)
-            t = event.tiempo
-            push!(tiempo,t)
+            move(board,particle,event.time-t,numberofcells)
+            t = event.time
+            push!(time,t)
             collision(event.referenceobject,event.diskorwall)
-            updateanimationlists(particulas, posiciones,velocidades,N)
-            futurecollisions!(event.referenceobject, event.diskorwall, particulas, paredes, t, tmax, pq,label)
+            updateanimationlists(board,particle,disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, numberofcells)
+            futurecollisions!(event, board, t,t_max,pq, label, particle)
         end
     end
-    push!(tiempo, tmax)
-    posiciones, velocidades, tiempo, particulas, masas
+    push!(time, t_max)
+    board, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, time
 end
 
 #Fin del módulo

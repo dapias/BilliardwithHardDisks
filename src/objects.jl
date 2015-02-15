@@ -2,7 +2,7 @@ module Objects
 
 VERSION < v"0.4-" && using Docile
 
-export Wall, Disk, Object
+export Wall, Disk, Object, DynamicObject
 export VerticalWall, HorizontalWall, Event, Cell, VerticalSharedWall, Particle, Board, Vertical
 
 #abstract Object

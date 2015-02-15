@@ -7,7 +7,7 @@ VERSION < v"0.4-" && using Docile
 
 importall Objects
 
-export move, dtcollision, collision
+export move, dtcollision, collision, dtcollision_without_disk
 
 move(d::Disk, dt::Real) = d.r += d.v * dt
 move(p::Particle, dt::Real) = p.r += p.v*dt
@@ -72,13 +72,19 @@ function dtcollision(p::Particle, VW::Vertical)
     if p.v[1] > 0
         if p.r[1] < VW.x
             dt = (VW.x - p.r[1])/p.v[1]
+            if dt < 1e-15
+                dt = 100
+            end
         end
     elseif p.v[1] < 0
         if p.r[1] > VW.x
             dt = (p.r[1] - VW.x)/-p.v[1]
+            if dt < 1e-15
+                dt = 100
+            end
         end
     end
-    dt
+
 end
 
 function dtcollision(p::Particle, HW::HorizontalWall)
@@ -86,10 +92,16 @@ function dtcollision(p::Particle, HW::HorizontalWall)
     if p.v[2] > 0
         if p.r[2] < HW.y
             dt = (HW.y - p.r[2])/p.v[2]
+            if dt < 1e-15
+                dt = 100
+            end
         end
     elseif p.v[2] < 0
         if p.r[2] > HW.y
             dt = (p.r[2] - HW.y)/-p.v[2]
+            if dt < 1e-15
+                dt = 100
+            end
         end
     end
     dt
@@ -115,6 +127,28 @@ function dtcollision(p::Particle,d::Disk)
     return dt
 end
 
+@doc doc"""Calculates the time of collision between two Disks."""->
+function dtcollision(d::Disk,p::Particle)
+    deltar = p.r - d.r
+    deltav = p.v - d.v
+    rdotv = dot(deltar, deltav)
+    rcuadrado = dot(deltar,deltar)
+    vcuadrado = dot(deltav, deltav)
+    if rdotv >= 0
+        return Inf
+    end
+    dis = (rdotv)^2 -(vcuadrado)*(rcuadrado - (d.radius)^2)
+    if dis < 0
+        return Inf
+    end
+    #dt = min((-rdotv+ sqrt(d))/vcuadrado, (-rdotv - sqrt(d))/vcuadrado)
+    dt = (rcuadrado - (d.radius)^2)/(-rdotv + sqrt(dis))
+    return dt
+end
+
+
+
+
 function dtcollision(p::Particle,c::Cell)
     time = zeros(5)
     index = 1
@@ -128,6 +162,19 @@ function dtcollision(p::Particle,c::Cell)
     dt,k
 end
 
+function dtcollision_without_disk(p::Particle,c::Cell)
+    time = zeros(4)
+    index = 1
+    for wall in c.walls
+        dt = dtcollision(p,wall)
+        time[index] = dt
+        index += 1
+    end
+    dt,k = findmin(time)
+    dt,k
+end
+
+
 
 
 ##########################################################################################
@@ -139,7 +186,7 @@ end
 
 @doc doc"""Update the velocity vector of a disk (Disk.v) after it collides with a VerticalWall."""->
 function collision(d::Disk, V::Vertical)
-    p1.v = [-d.v[1], d.v[2]]
+    d.v = [-d.v[1], d.v[2]]
 end
 
 @doc doc"""Update the velocity vector of a disk (Disk.v) after it collides with a HorizontallWall."""->
@@ -153,7 +200,7 @@ function collision(p::Particle, V::VerticalWall )
 end
 
 function collision(p::Particle, H::HorizontalWall )
-    p1.v = [p.v[1],-p.v[2]]
+    p.v = [p.v[1],-p.v[2]]
 end
 
 function updatelabel(p::Particle, VSW::VerticalSharedWall)
@@ -191,5 +238,24 @@ function collision(p::Particle, d::Disk)
     d.v += J*deltar/(sigma*d.mass)
 end
 
+function collision(d::Disk, p::Particle)
+    deltar = p.r - d.r
+    deltav = p.v - d.v
+    h = dot(deltar,deltav)
+    sigma = d.radius
+    J = 2*p.mass*d.mass*h/(sigma*(p.mass + d.mass))
+    p.v += J*deltar/(sigma*p.mass)
+    d.v -= J*deltar/(sigma*d.mass)
+end
+
+function collision(p1::Disk, p2::Disk)
+    deltar = p1.r - p2.r
+    deltav = p1.v - p2.v
+    h = dot(deltar,deltav)
+    sigma = p1.radius+p2.radius
+    J = 2*p1.mass*p2.mass*h/(sigma*(p1.mass + p2.mass))
+    p1.v -= J*deltar/(sigma*p1.mass)
+    p2.v += J*deltar/(sigma*p2.mass)
+end
 
 end
