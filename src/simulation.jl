@@ -204,5 +204,14 @@ function simulation(numberofcells,size_x,size_y,particle_mass,particle_velocity,
     board, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, time
 end
 
+function energy(mass_disks, mass_particle, v_particle, v_disks)
+    e = 0
+    e += mass_particle * dot(v_particle, v_particle)/2.
+    for i in 1:length(v_disks)
+        e+= mass_disks*dot(v_disks[i],v_disks[i])/2.
+    end
+    e
+end
+
 #Fin del módulo
 end

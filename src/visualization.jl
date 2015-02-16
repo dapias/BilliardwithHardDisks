@@ -1,14 +1,15 @@
-include("../src/objects.jl")
-include("../src/createobjects.jl")
-
 VERSION < v"0.4-" && using Docile
 
 
 #Cuadrar Lx1 y Lx2 en general
 module Visual
 
+include("../src/objects.jl")
+include("../src/createobjects.jl")
+
 #export visualize
 
+using Simulation
 using Init
 using PyPlot
 using PyCall
@@ -23,6 +24,8 @@ pygui(true)
 
 radius_disks = 1.
 radius_puntual_particle = 0.02
+mass_disks = 1.0
+mass_particle = 1.0
 
 function visualize(simulation_results, numberofcells, size_x, size_y)
     board, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, time = simulation_results
@@ -34,9 +37,12 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
 
     fig = plt.figure()
     ax = fig[:add_axes]([0.05, 0.05, 0.9, 0.9])
+    energy_text = plt.text(0.02,0.9,"",transform=ax[:transAxes])
+
+
 
     ax[:set_xlim](0, numberofcells*size_x)
-    ax[:set_ylim](0, size_y)
+    ax[:set_ylim](0, size_y+1.0)
     plt.gca()[:set_aspect]("equal")
 
     c = patch.Circle(d_pos[1][1],radius_disks) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
@@ -55,6 +61,8 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
     p = patch.Circle([particle_x[1],particle_y[1]],radius_puntual_particle)
     puntual = [p]
     ax[:add_patch](p)
+
+
 
 
 
@@ -111,6 +119,10 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
             end
 
             puntual[1][:center] = (particle_x[k] + particle_vx[k]*(i/10-time[k]), particle_y[k]+particle_vy[k]*(i/10-time[k]))
+
+            energy_text[:set_text]("Energy = $(Simulation.energy(mass_disks,mass_particle, [particle_vx[k], particle_vy[k]],
+                                                                 [d_vel[j][k] for j in 1:numberofcells]))")
+
         end
 
         return (circles, puntual,)
