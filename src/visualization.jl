@@ -5,9 +5,10 @@ VERSION < v"0.4-" && using Docile
 using Simulation
 using PyPlot
 using PyCall
+#using Formatting
 
 
-#export visualize
+export visualize
 
 pygui(true)
 
@@ -15,6 +16,8 @@ pygui(true)
 @pyimport matplotlib.patches as patch
 @pyimport matplotlib.lines as lines
 @pyimport matplotlib.animation as animation
+
+
 
 
 radius_disks = 1.
@@ -115,8 +118,11 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
 
             puntual[1][:center] = (particle_x[k] + particle_vx[k]*(i/10-time[k]), particle_y[k]+particle_vy[k]*(i/10-time[k]))
 
-            energy_text[:set_text]("Energy = $(Simulation.energy(mass_disks,mass_particle, [particle_vx[k], particle_vy[k]],
-                                                                 [d_vel[j][k] for j in 1:numberofcells]))")
+            e_text = energy(mass_disks,mass_particle, [particle_vx[k], particle_vy[k]],
+                                                                 [d_vel[j][k] for j in 1:numberofcells])
+            #e_textt = format(e_text,precision=6)
+
+            energy_text[:set_text]("Energy = $(e_text)")
 
         end
 
