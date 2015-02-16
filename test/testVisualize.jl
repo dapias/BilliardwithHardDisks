@@ -64,7 +64,7 @@ ax[:add_line](line2)
 ax[:add_line](line3)
 ax[:add_line](line4)
 
-particula = Init.create_particle(board, 1.0, 1.0 ,size_x,size_y)
+particula = Init.create_particle(board, 1.0, 1.0 ,size_x,size_y,1)
 ax[:plot]([particula.r[1]], [particula.r[2]], markersize = 5., "go")
 
 

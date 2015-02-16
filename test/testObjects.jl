@@ -19,7 +19,7 @@ facts("Create Cell test") do
     @fact cell.walls[3].y => 10.
     @fact cell.walls[4].x => 10.
     @fact length(cell.walls[4].y) => 4
-    @fact cell.label => 1
+    @fact cell.numberofcell => 1
 end
 
 facts("Disk tests") do
@@ -40,15 +40,15 @@ facts("Create new cell test") do
     @fact cell.walls[3].y => 10.
     @fact cell.walls[4].x => 20.
     @fact length(cell.walls[4].y) => 4
-    @fact cell.label => 2
+    @fact cell.numberofcell => 2
 end
 
 
 facts("Create board test") do
     board = Init.create_board(3,10.,10.)
     @fact length(board.cells) => 3
-    @fact board.cells[1].label => 1
-    @fact board.cells[end].label => 3
+    @fact board.cells[1].numberofcell => 1
+    @fact board.cells[end].numberofcell => 3
 end
 
 facts("Create disk test") do
@@ -63,7 +63,7 @@ end
 
 facts("Create particle test") do
     board = Init.create_board(3,10.,10.)
-    particle = Init.create_particle(board,1.0, 1.0, 10.,10.)
+    particle = Init.create_particle(board,1.0, 1.0, 10.,10.,1)
 
     @fact particle.mass => 1.0
     @fact particle.numberofcell => 1
