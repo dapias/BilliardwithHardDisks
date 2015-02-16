@@ -39,6 +39,7 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
 
 
 
+    #ax[:set_xlim](0, (numberofcells-2)*size_x)
     ax[:set_xlim](0, numberofcells*size_x)
     ax[:set_ylim](0, size_y+1.0)
     plt.gca()[:set_aspect]("equal")
@@ -124,7 +125,15 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
 
             energy_text[:set_text]("Energy = $(e_text)")
 
+#         if particle_x[k] > (numberofcells-4)*size_x+0.01
+#             ax[:set_xlim](0, (numberofcells)*size_x)
+#         end
+
+
         end
+
+
+
 
         return (circles, puntual,)
     end
