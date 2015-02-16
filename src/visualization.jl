@@ -20,22 +20,42 @@ pygui(true)
 @pyimport matplotlib.lines as lines
 @pyimport matplotlib.animation as animation
 
-#numberofcells = 3
-#size_x = 3.
-#size_y = 3.
-radius = 1.0
 
+radius_disks = 1.
+radius_puntual_particle = 0.02
 
-function visualize(simulation_results,numberofcells,size_x,size_y)
+function visualize(simulation_results, numberofcells, size_x, size_y)
     board, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, time = simulation_results
-    d_pos = [[disks_positions[k] for k in j:numberofcells:length(disks_positions)] for j in 1:numberofcells]
-    d_vel = [[disks_velocities[k] for k in j:numberofcells:length(disks_velocities)] for j in 1:numberofcells]
+
+    d_pos = [[disks_positions[k] for k in j:numberofcells:length(disks_positions)] for j in 1:numberofcells];
+    d_vel = [[disks_velocities[k] for k in j:numberofcells:length(disks_velocities)] for j in 1:numberofcells];
+
+
 
     fig = plt.figure()
     ax = fig[:add_axes]([0.05, 0.05, 0.9, 0.9])
+
     ax[:set_xlim](0, numberofcells*size_x)
     ax[:set_ylim](0, size_y)
     plt.gca()[:set_aspect]("equal")
+
+    c = patch.Circle(d_pos[1][1],radius_disks) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
+    #segundo se refiere al evento.
+    c[:set_color]((rand(),rand(),rand()))
+    circles = [c]
+    ax[:add_patch](c)
+
+    for k in 2:numberofcells
+        c = patch.Circle(d_pos[k][1],radius_disks)
+        c[:set_color]((rand(),rand(),rand()))
+        push!(circles,c)
+        ax[:add_patch](c)
+    end
+
+    p = patch.Circle([particle_x[1],particle_y[1]],radius_puntual_particle)
+    puntual = [p]
+    ax[:add_patch](p)
+
 
 
     walls = board.cells[1].walls
@@ -72,29 +92,6 @@ function visualize(simulation_results,numberofcells,size_x,size_y)
     ax[:add_line](line3)
     ax[:add_line](line4)
 
-    c = patch.Circle(d_pos[1][1],radius) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
-    #segundo se refiere al evento.
-    c[:set_color]((rand(),rand(),rand()))
-    circles = [c]
-    ax[:add_patch](c)
-
-
-    for i in 2:numberofcells
-        c = patch.Circle(d_pos[i][1],radius)
-        c[:set_color]((rand(),rand(),rand()))
-        push!(circles,c)
-        ax[:add_patch](c)
-    end
-
-
-    #ax[:plot]([particle_x[1]], [particle_y[1]], markersize = 5., "go")
-
-    particle = patch.Circle([particle_x[1],particle_y[1]],0.03)
-    ax[:add_patch](particle)
-
-
-
-
 
     function animate(i)
 
@@ -105,35 +102,23 @@ function visualize(simulation_results,numberofcells,size_x,size_y)
             for j in 1:numberofcells
                 circles[j][:center] = (d_pos[j][1][1], d_pos[j][1][2])
             end
-            particle[:center] = (particle_x[1],particle_y[1])
-
-
+            p[:center] = (particle_x[1], particle_y[1])
 
         else
             #if time[k] < i/10 < time[k+1]
             for j in 1:numberofcells
                 circles[j][:center] = (d_pos[j][k][1] + d_vel[j][k][1]*(i/10-time[k]), d_pos[j][k][2] + d_vel[j][k][2]*(i/10-time[k]))
-                particle[:center] = (particle_x[k] + particle_vx[k]*(i/10-time[k]),particle_y[k]+particle_vy[k]*(i/10-time[k]))
-
-                #circulos[2][:center] = (pos2[k][1] + vel2[k][1]*(i/10-time[k]), pos2[k][2] + vel2[k][2]*(i/10-time[k]))
             end
 
-            #  energy_text[:set_text]("energy = $(energy(masas, [vel[j][k] for j in 1:N]))")
-
+            puntual[1][:center] = (particle_x[k] + particle_vx[k]*(i/10-time[k]), particle_y[k]+particle_vy[k]*(i/10-time[k]))
         end
-        return (circles,particle,)
+
+        return (circles, puntual,)
     end
+
 
     anim = animation.FuncAnimation(fig, animate, frames=1000, interval=20, blit=false, repeat = false)
 end
 
-
 end
-
-
-
-
-
-
-
 

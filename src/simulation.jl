@@ -63,7 +63,7 @@ function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::N
     end
 
     function future(particle::Particle, wall::Wall)
-        dt,k = dtcollision(particle,cell)
+        dt,k = dtcollision_without_wall(particle,board.cells[particle.numberofcell], wall)
         if t_initial + dt < t_max
             if k == 5
                 Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.disk,labelprediction),t_initial+dt)

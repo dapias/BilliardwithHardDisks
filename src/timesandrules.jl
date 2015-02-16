@@ -7,7 +7,7 @@ VERSION < v"0.4-" && using Docile
 
 importall Objects
 
-export move, dtcollision, collision, dtcollision_without_disk
+export move, dtcollision, collision, dtcollision_without_disk, dtcollision_without_wall
 
 move(d::Disk, dt::Real) = d.r += d.v * dt
 move(p::Particle, dt::Real) = p.r += p.v*dt
@@ -72,19 +72,13 @@ function dtcollision(p::Particle, VW::Vertical)
     if p.v[1] > 0
         if p.r[1] < VW.x
             dt = (VW.x - p.r[1])/p.v[1]
-            if dt < 1e-15
-                dt = 100
-            end
         end
     elseif p.v[1] < 0
         if p.r[1] > VW.x
             dt = (p.r[1] - VW.x)/-p.v[1]
-            if dt < 1e-15
-                dt = 100
-            end
         end
     end
-
+    dt
 end
 
 function dtcollision(p::Particle, HW::HorizontalWall)
@@ -92,20 +86,16 @@ function dtcollision(p::Particle, HW::HorizontalWall)
     if p.v[2] > 0
         if p.r[2] < HW.y
             dt = (HW.y - p.r[2])/p.v[2]
-            if dt < 1e-15
-                dt = 100
-            end
         end
     elseif p.v[2] < 0
         if p.r[2] > HW.y
             dt = (p.r[2] - HW.y)/-p.v[2]
-            if dt < 1e-15
-                dt = 100
-            end
         end
     end
     dt
 end
+
+
 
 
 @doc doc"""Calculates the time of collision between two Disks."""->
@@ -127,27 +117,6 @@ function dtcollision(p::Particle,d::Disk)
     return dt
 end
 
-@doc doc"""Calculates the time of collision between two Disks."""->
-function dtcollision(d::Disk,p::Particle)
-    deltar = p.r - d.r
-    deltav = p.v - d.v
-    rdotv = dot(deltar, deltav)
-    rcuadrado = dot(deltar,deltar)
-    vcuadrado = dot(deltav, deltav)
-    if rdotv >= 0
-        return Inf
-    end
-    dis = (rdotv)^2 -(vcuadrado)*(rcuadrado - (d.radius)^2)
-    if dis < 0
-        return Inf
-    end
-    #dt = min((-rdotv+ sqrt(d))/vcuadrado, (-rdotv - sqrt(d))/vcuadrado)
-    dt = (rcuadrado - (d.radius)^2)/(-rdotv + sqrt(dis))
-    return dt
-end
-
-
-
 
 function dtcollision(p::Particle,c::Cell)
     time = zeros(5)
@@ -161,6 +130,27 @@ function dtcollision(p::Particle,c::Cell)
     dt,k = findmin(time)
     dt,k
 end
+
+==(w1::Wall,w2::Wall) = (w1.x == w2.x && w1.y == w2.y)
+
+function dtcollision_without_wall(p::Particle,c::Cell, w::Wall)
+    time = zeros(5)
+    index = 1
+    for walle in c.walls
+        if walle == w
+            dt = Inf
+        else
+            dt = dtcollision(p,walle)
+        end
+        time[index] = dt
+        index += 1
+    end
+    time[end] = dtcollision(p,c.disk)
+    dt,k = findmin(time)
+    dt,k
+end
+
+
 
 function dtcollision_without_disk(p::Particle,c::Cell)
     time = zeros(4)
