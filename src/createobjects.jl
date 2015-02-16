@@ -27,11 +27,11 @@ function create_initial_cell(size_x,size_y)
     wall1 = VerticalWall(Lx1,[Ly1,Ly2])
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-    Ly1Hole = Ly1+(Ly2-Ly1-hole_size)*rand()
-    Ly2Hole = Ly1Hole + hole_size
+    Ly1Hole = Ly1+(Ly2-Ly1-maxholesize)*rand()
+    Ly2Hole = Ly1Hole + maxholesize
     nofcell = 1
     sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2],(nofcell,nofcell+1))
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius_disk, mass_disk, velocity_disk)
+    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk)
     disk.numberofcell = nofcell
     cell = Cell([wall1,wall2,wall3,sharedwall],disk,nofcell)
     cell
@@ -44,9 +44,9 @@ function create_new_right_cell(cell,size_x,size_y)
     Ly2 = size_y
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-    Ly1Hole = Ly1+(Ly2-Ly1-hole_size)*rand()
-    Ly2Hole = Ly1Hole + hole_size
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius_disk, mass_disk, velocity_disk)
+    Ly1Hole = Ly1+(Ly2-Ly1-maxholesize)*rand()
+    Ly2Hole = Ly1Hole + maxholesize
+    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk)
     nofcell  = cell.numberofcell +1
     sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2],(nofcell,nofcell+1))
     disk.numberofcell = nofcell
@@ -62,7 +62,7 @@ function create_last_right_cell(cell,size_x,size_y)
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
     wall4 = VerticalWall(Lx2,[Ly1,Ly2])
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius_disk, mass_disk, velocity_disk)
+    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk)
     nofcell  = cell.numberofcell +1
     disk.numberofcell = nofcell
     cell = Cell([wall1,wall2,wall3,wall4],disk,nofcell)

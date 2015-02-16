@@ -106,7 +106,7 @@ end
 
 function startsimulation(t_initial, t_max)
     board = create_board(numberofcells,size_x,size_y)
-    particle = create_particle(board, mass_particle, velocity_particle,size_x,size_y,cellforinitialparticle)
+    particle = create_particle(board, massparticle, velocityparticle,size_x,size_y,cellforinitialparticle)
     pq = PriorityQueue()
     enqueue!(pq,Event(0.0, Particle([0.,0.],[0.,0.],1.0),Disk([0.,0.],[0.,0.],1.0), 0),0.)
     initialcollisions!(board,particle,t_initial,t_max,pq)

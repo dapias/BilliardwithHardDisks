@@ -38,20 +38,20 @@ function visualize(simulation_results)
     ax[:set_ylim](0, size_y+1.0)
     plt.gca()[:set_aspect]("equal")
 
-    c = patch.Circle(d_pos[1][1],radius_disk) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
+    c = patch.Circle(d_pos[1][1],radiusdisk) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
     #segundo se refiere al evento.
     c[:set_color]((rand(),rand(),rand()))
     circles = [c]
     ax[:add_patch](c)
 
     for k in 2:numberofcells
-        c = patch.Circle(d_pos[k][1],radius_disk)
+        c = patch.Circle(d_pos[k][1],radiusdisk)
         c[:set_color]((rand(),rand(),rand()))
         push!(circles,c)
         ax[:add_patch](c)
     end
 
-    p = patch.Circle([particle_positions[1],particle_positions[2]],radius_puntual_particle)
+    p = patch.Circle([particle_positions[1],particle_positions[2]],radiusparticle)
     puntual = [p]
     ax[:add_patch](p)
 
@@ -113,7 +113,7 @@ function visualize(simulation_results)
 
             puntual[1][:center] = (particle_positions[1+2*(k-1)] + particle_velocities[1+2*(k-1)]*(i/10-time[k]), particle_positions[2+2*(k-1)]+particle_velocities[2+2*(k-1)]*(i/10-time[k]))
 
-            e_text = energy(mass_disk,mass_particle, [particle_velocities[1+2*(k-1)], particle_velocities[2+2*(k-1)]],
+            e_text = energy(massdisk,massparticle, [particle_velocities[1+2*(k-1)], particle_velocities[2+2*(k-1)]],
                                                                  [d_vel[j][k] for j in 1:numberofcells])
             #e_textt = format(e_text,precision=6)
 
