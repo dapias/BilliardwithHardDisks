@@ -28,18 +28,6 @@ function create_disk(Lx1,Lx2,Ly1,Ly2,radius, mass, velocity)
     d
 end
 
-
-# function create_disks(board, delta_x, delta_y, velocity = 1)
-#     radius_max = min(delta_x,delta_y)/2.
-#     radius = randuniform(radius_max*0.2,radius_max*0.8)[1]
-#     mass = randuniform(0.5,1.0)[1]
-#     for cell in board.cells
-#         disk = create_disk(cell,radius, mass, velocity)
-#         cell.disk = disk
-#     end
-# end
-
-
 function create_initial_cell(size_x,size_y)
     Lx2 = size_x
     Ly2 = size_y
@@ -48,12 +36,11 @@ function create_initial_cell(size_x,size_y)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
     Ly1Hole = Ly1+(Ly2-Ly1-hole_size)*rand()
     Ly2Hole = Ly1Hole + hole_size
-    #Ly1Hole, Ly2Hole = sort([Ly1Hole,Ly2Hole])
-    label = 1
-    sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2],(label,label+1))
+    nofcell = 1
+    sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2],(nofcell,nofcell+1))
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocity)
-    disk.numberofcell = label
-    cell = Cell([wall1,wall2,wall3,sharedwall],disk,label)
+    disk.numberofcell = nofcell
+    cell = Cell([wall1,wall2,wall3,sharedwall],disk,nofcell)
     cell
 end
 
@@ -66,12 +53,11 @@ function create_new_right_cell(cell,size_x,size_y)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
     Ly1Hole = Ly1+(Ly2-Ly1-hole_size)*rand()
     Ly2Hole = Ly1Hole + hole_size
-    #Ly1Hole, Ly2Hole = sort([Ly1Hole,Ly2Hole])
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocity)
-    label = cell.label + 1
-    sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2],(label,label+1))
-    disk.numberofcell = label
-    cell = Cell([wall1,wall2,wall3,sharedwall],disk,label)
+    nofcell  = cell.numberofcell +1
+    sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2],(nofcell,nofcell+1))
+    disk.numberofcell = nofcell
+    cell = Cell([wall1,wall2,wall3,sharedwall],disk,nofcell)
     cell
 end
 
@@ -84,16 +70,20 @@ function create_last_right_cell(cell,size_x,size_y)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
     wall4 = VerticalWall(Lx2,[Ly1,Ly2])
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocity)
-    label = cell.label+1
-    disk.numberofcell = label
-    cell = Cell([wall1,wall2,wall3,wall4],disk,label)
+    nofcell  = cell.numberofcell +1
+    disk.numberofcell = nofcell
+    cell = Cell([wall1,wall2,wall3,wall4],disk,nofcell)
     cell
 end
 
 function create_board(numberofcells,size_x,size_y)
     cell = create_initial_cell(size_x,size_y)
     board = [cell]
-    if numberofcells > 1
+
+    if numberofcells == 2
+        cell = create_last_right_cell(cell,size_x,size_y)
+        push!(board,cell)
+    elseif numberofcells > 1
         for i in 2:numberofcells-1
             cell = create_new_right_cell(cell,size_x,size_y)
             push!(board,cell)
@@ -101,22 +91,9 @@ function create_board(numberofcells,size_x,size_y)
             cell = create_last_right_cell(cell,size_x,size_y)
             push!(board,cell)
     end
+
     board = Board(board)
 end
-
-# function get_coordinates_cell(cell)
-#     label = cell.label
-#     if label == 1
-#         Lx2 = cell.walls[4].x
-#         Ly2 = cell.walls[3].y
-#     else
-#         Lx1 = cell.walls[1].x[1]
-#         Lx2 = cell.walls[1].x[2]
-#         Ly2 = cell.walls[2].y
-#     end
-#     Lx1, Ly1, Lx2, Ly2
-# end
-
 
 @doc doc"""Creates an random Array(Vector) of *dimension* dim with limits: liminf, limsup""" ->
 function randuniform(a, b, c=1)
@@ -129,9 +106,9 @@ function overlap(p::Particle, d::Disk)
     return r < d.radius
 end
 
-function create_particle(board, mass, velocity,delta_x,delta_y)
-    cell = board.cells[1]
-    disk = board.cells[1].disk
+function create_particle(board, mass, velocity,delta_x,delta_y, numberofcell)
+    cell = board.cells[numberofcell]
+    disk = board.cells[numberofcell].disk
     Lx2 = Lx1 + delta_x
     Ly2 = Ly1 +delta_y
     theta = rand()*2*pi
@@ -139,25 +116,15 @@ function create_particle(board, mass, velocity,delta_x,delta_y)
     vy = sin(theta)*velocity
     v = [vx, vy]
     solape = true
-    p = Particle([-100,-100],v, mass, cell.label,0)
+    p = Particle([-100,-100],v, mass, numberofcell,0)
     while solape
         x = randuniform(Lx1, Lx2)[1]
         y = randuniform(Ly1, Ly2)[1]
-        p = Particle([x,y],v, mass, cell.label,0)
+        p = Particle([x,y],v, mass, numberofcell,0)
         solape = overlap(p,disk)
     end
     p
 end
-
-# function create_particles(board, velocity = 1)
-#     mass = randuniform(0.5,1.0)[1]
-#     for cell in board.cells
-#         create_particle(cell, velocity)
-#     end
-# end
-
-
-
 
 end
 

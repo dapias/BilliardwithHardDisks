@@ -32,8 +32,6 @@ function dtcollision(d::Disk, VW::Vertical)
 end
 
 
-#Hacer esto con metaprogramming o con un macro!
-
 @doc doc"""Calculates the time of collision between the Disk and a HorizontallWall"""->
 function dtcollision(d::Disk, HW::HorizontalWall)
     dt = Inf
@@ -49,7 +47,6 @@ function dtcollision(d::Disk, HW::HorizontalWall)
     dt
 end
 
-
 function dtcollision(d::Disk, c::Cell)
     time = zeros(4)
     index = 1
@@ -62,44 +59,8 @@ function dtcollision(d::Disk, c::Cell)
 end
 
 
-################################Particle#############################################################3
-
-#Parece ser igual para la pared independiente de la velocidad
-@doc doc"""Calculates the time of collision between a Particle and a VerticalWall"""->
-function dtcollision(p::Particle, VW::Vertical)
-    #La pared siempre va a estar acotada por números positivos
-    dt = Inf
-    if p.v[1] > 0
-        if p.r[1] < VW.x
-            dt = (VW.x - p.r[1])/p.v[1]
-        end
-    elseif p.v[1] < 0
-        if p.r[1] > VW.x
-            dt = (p.r[1] - VW.x)/-p.v[1]
-        end
-    end
-    dt
-end
-
-function dtcollision(p::Particle, HW::HorizontalWall)
-    dt = Inf
-    if p.v[2] > 0
-        if p.r[2] < HW.y
-            dt = (HW.y - p.r[2])/p.v[2]
-        end
-    elseif p.v[2] < 0
-        if p.r[2] > HW.y
-            dt = (p.r[2] - HW.y)/-p.v[2]
-        end
-    end
-    dt
-end
-
-
-
-
 @doc doc"""Calculates the time of collision between two Disks."""->
-function dtcollision(p::Particle,d::Disk)
+function dtcollision(d::Disk, p::Particle)
     deltar = p.r - d.r
     deltav = p.v - d.v
     rdotv = dot(deltar, deltav)
@@ -112,11 +73,31 @@ function dtcollision(p::Particle,d::Disk)
     if dis < 0
         return Inf
     end
-    #dt = min((-rdotv+ sqrt(d))/vcuadrado, (-rdotv - sqrt(d))/vcuadrado)
     dt = (rcuadrado - (d.radius)^2)/(-rdotv + sqrt(dis))
     return dt
 end
 
+
+################################Particle#############################################################3
+
+@doc doc"""Calculates the time of collision between a Particle and a VerticalWall"""->
+function dtcollision(p::Particle, VW::Vertical)
+    dt = (VW.x - p.r[1])/p.v[1]
+    if dt < 0
+        return Inf
+    end
+    dt
+end
+
+function dtcollision(p::Particle, HW::HorizontalWall)
+    dt = (HW.y - p.r[2])/p.v[2]
+    if dt < 0
+        return Inf
+    end
+    dt
+end
+
+dtcollision(p::Particle, d::Disk) = dtcollision(d::Disk, p::Particle)
 
 function dtcollision(p::Particle,c::Cell)
     time = zeros(5)
@@ -128,7 +109,6 @@ function dtcollision(p::Particle,c::Cell)
     end
     time[end] = dtcollision(p,c.disk)
     dt,k = findmin(time)
-    dt,k
 end
 
 ==(w1::Wall,w2::Wall) = (w1.x == w2.x && w1.y == w2.y)
@@ -147,7 +127,6 @@ function dtcollision_without_wall(p::Particle,c::Cell, w::Wall)
     end
     time[end] = dtcollision(p,c.disk)
     dt,k = findmin(time)
-    dt,k
 end
 
 
@@ -161,7 +140,6 @@ function dtcollision_without_disk(p::Particle,c::Cell)
         index += 1
     end
     dt,k = findmin(time)
-    dt,k
 end
 
 
@@ -198,10 +176,10 @@ function updatelabel(p::Particle, VSW::VerticalSharedWall)
     Ly1Hole = VSW.y[2]
     Ly2Hole = VSW.y[3]
     if Ly1Hole < p.r[2] < Ly2Hole
-        plabel = p.numberofcell
-        for label in VSW.label
-            if plabel != label
-                p.numberofcell = label
+        pcell = p.numberofcell
+        for nofcell in VSW.sharedcells
+            if pcell != nofcell
+                p.numberofcell = nofcell
             end
         end
         update = true
@@ -228,24 +206,6 @@ function collision(p::Particle, d::Disk)
     d.v += J*deltar/(sigma*d.mass)
 end
 
-function collision(d::Disk, p::Particle)
-    deltar = p.r - d.r
-    deltav = p.v - d.v
-    h = dot(deltar,deltav)
-    sigma = d.radius
-    J = 2*p.mass*d.mass*h/(sigma*(p.mass + d.mass))
-    p.v += J*deltar/(sigma*p.mass)
-    d.v -= J*deltar/(sigma*d.mass)
-end
-
-function collision(p1::Disk, p2::Disk)
-    deltar = p1.r - p2.r
-    deltav = p1.v - p2.v
-    h = dot(deltar,deltav)
-    sigma = p1.radius+p2.radius
-    J = 2*p1.mass*p2.mass*h/(sigma*(p1.mass + p2.mass))
-    p1.v -= J*deltar/(sigma*p1.mass)
-    p2.v += J*deltar/(sigma*p2.mass)
-end
+collision(d::Disk, p::Particle) = collision(p::Particle, d::Disk)
 
 end

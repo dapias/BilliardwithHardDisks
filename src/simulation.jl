@@ -6,12 +6,8 @@ module Simulation
 
 VERSION < v"0.4-" && using Docile
 
-# radius = 1.0
-# mass = 1.0
-# velocity = 1.0
-# Lx1 = 0
-# Ly1 = 0
-# hole_size = 0.5*radius
+
+cellforinitialparticle = 1
 
 
 importall Objects
@@ -34,7 +30,7 @@ function initialcollisions!(board::Board,particle::Particle,t_initial::Number,t_
         end
     end
 
-    cell = board.cells[1]
+    cell = board.cells[particle.numberofcell]
     dt,k = dtcollision(particle,cell)
     if t_initial + dt < t_max
         if k == 5
@@ -79,7 +75,7 @@ function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::N
             Collections.enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
         end
 
-        if cell.label == particle.numberofcell
+        if  is_particle_in_cell(particle,cell)
             dt = dtcollision(particle,disk)
             if t_initial + dt < t_max
                 Collections.enqueue!(pq,Event(t_initial+dt, particle, disk,labelprediction),t_initial+dt)
@@ -90,11 +86,20 @@ function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::N
     future(event.referenceobject,event.diskorwall)
 end
 
+function is_particle_in_cell(p::Particle,c::Cell)
+    contain = false
+    if c.numberofcell == p.numberofcell
+        contain = true
+    end
+    contain
+end
+
+
 
 
 function startingsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
     board = create_board(numberofcells,size_x,size_y)
-    particle = create_particle(board, particle_mass, particle_velocity,size_x,size_y)
+    particle = create_particle(board, particle_mass, particle_velocity,size_x,size_y,cellforinitialparticle)
     disks_positions = [board.cells[i].disk.r for i in 1:numberofcells ]
     particle_x = [particle.r[1]]
     particle_y = [particle.r[2]]
@@ -117,7 +122,7 @@ end
 function validatecollision(event::Event)
     validcollision = false
     function validate(d::Disk)
-        if (event.predictedcollision >= event.diskorwall.lastcollision)
+        if (event.whenwaspredicted >= event.diskorwall.lastcollision)
             validcollision = true
         end
     end
@@ -125,7 +130,7 @@ function validatecollision(event::Event)
         validcollision  = true
     end
 
-    if event.predictedcollision >= event.referenceobject.lastcollision
+    if event.whenwaspredicted >= event.referenceobject.lastcollision
         validate(event.diskorwall)
     end
     validcollision

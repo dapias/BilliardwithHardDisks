@@ -5,8 +5,6 @@ VERSION < v"0.4-" && using Docile
 export Wall, Disk, Object, DynamicObject
 export VerticalWall, HorizontalWall, Event, Cell, VerticalSharedWall, Particle, Board, Vertical
 
-#abstract Object
-#abstract DynamicObject <: Object
 abstract Object
 abstract DynamicObject <: Object
 abstract Wall <: Object
@@ -44,7 +42,7 @@ Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
 type Cell
     walls::Vector{Wall}
     disk::Disk
-    label::Int
+    numberofcell::Int
 end
 
 #Cell(walls,label) = Cell(walls,label,Disk([-100.,-100.],[0.,0.],0.))
@@ -55,7 +53,7 @@ end
 
 @doc doc"""Type with attributes x and y. x corresponds to its horizontal position in a Cartesian Plane
 (just a number) and y represents its initial and final height in the Plane (Array of length equal to 2)."""  ->
-type VerticalWall <: Vertical
+immutable VerticalWall <: Vertical
   x :: Float64
   y :: Array{Float64,1}
 end
@@ -63,17 +61,17 @@ end
 @doc doc"""Type with attributes x and y. x corresponds to its horizontal extension in a Cartesian plane
 (initial and final position -Array of length equal to 2- and y corresponds to its vertical position
 (a number).""" ->
-type HorizontalWall <:Wall
+immutable HorizontalWall <:Wall
   x :: Array{Float64,1}
   y :: Float64
 
 end
 
 
-type VerticalSharedWall <: Vertical
+immutable VerticalSharedWall <: Vertical
   x :: Float64
   y :: Array{Float64,1}  #Array of a length greater than the VerticalWall
-  label::(Int,Int)  #Label of associated cells.
+  sharedcells::(Int,Int)
 end
 
 @doc doc"""Type with attributes time, collider1, collider2 and label. The label makes reference to the cycle
@@ -82,7 +80,7 @@ type Event
     time :: Number
     referenceobject::DynamicObject
     diskorwall ::Object
-    predictedcollision :: Int
+    whenwaspredicted:: Int
 end
 
 
