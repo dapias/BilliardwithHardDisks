@@ -1,5 +1,3 @@
-#include("../src/objects.jl")
-
 module Init
 
 VERSION < v"0.4-" && using Docile

@@ -1,18 +1,13 @@
-VERSION < v"0.4-" && using Docile
-
-
-#Cuadrar Lx1 y Lx2 en general
 module Visual
 
-include("../src/objects.jl")
-include("../src/createobjects.jl")
-
-#export visualize
+VERSION < v"0.4-" && using Docile
 
 using Simulation
-using Init
 using PyPlot
 using PyCall
+
+
+#export visualize
 
 pygui(true)
 

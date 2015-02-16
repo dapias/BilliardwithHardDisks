@@ -1,20 +1,18 @@
 include("./objects.jl")
-include("./timesandrules.jl")
 include("./createobjects.jl")
+include("./timesandrules.jl")
 
 module Simulation
 
 VERSION < v"0.4-" && using Docile
 
-
 cellforinitialparticle = 1
-
 
 importall Objects
 importall Rules
 importall Init
 import Base.isless
-#export simulation, energy
+export simulation, energy
 
 #This allow to use the PriorityQueue providing a criterion to select the priority of an Event.
 isless(e1::Event, e2::Event) = e1.time < e2.time
