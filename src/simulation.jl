@@ -33,11 +33,12 @@ function initialcollisions!(board::Board,particle::Particle,t_initial::Number,t_
     cell = board.cells[particle.numberofcell]
     dt,k = dtcollision(particle,cell)
     if t_initial + dt < t_max
-        if k == 5
-            Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.disk,0),t_initial+dt)
-        else
             Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],0),t_initial+dt)
-        end
+    end
+
+    dt = dtcollision(particle,cell.disk)
+    if t_initial + dt < t_max
+                Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.disk,0),t_initial+dt)
     end
 end
 
@@ -47,7 +48,7 @@ function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::N
     cell = board.cells[event.referenceobject.numberofcell]
 
     function future(particle::Particle, disk::Disk)
-        dt,k = dtcollision_without_disk(particle,cell)
+        dt,k = dtcollision(particle,cell)
         if t_initial + dt < t_max
             Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
         end
@@ -59,13 +60,14 @@ function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::N
     end
 
     function future(particle::Particle, wall::Wall)
-        dt,k = dtcollision_without_wall(particle,board.cells[particle.numberofcell], wall)
+        dt,k = dtcollision(particle,cell, wall)
         if t_initial + dt < t_max
-            if k == 5
-                Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.disk,labelprediction),t_initial+dt)
-            else
                 Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
-            end
+        end
+
+        dt = dtcollision(particle,cell.disk)
+         if t_initial + dt < t_max
+                Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.disk,labelprediction),t_initial+dt)
         end
     end
 
@@ -109,7 +111,7 @@ function startingsimulation(numberofcells,size_x,size_y,particle_mass,particle_v
     #masas = [particula.mass for particula in particulas]
     pq = Collections.PriorityQueue()
     Collections.enqueue!(pq,Event(0.0, Particle([0.,0.],[0.,0.],1.0),Disk([0.,0.],[0.,0.],1.0), 0),0.)
-    pq = initialcollisions!(board,particle,t_initial,t_max,pq)
+    initialcollisions!(board,particle,t_initial,t_max,pq)
     event = Collections.dequeue!(pq)
     t = event.time
     time = [event.time]

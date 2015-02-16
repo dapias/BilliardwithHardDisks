@@ -100,21 +100,20 @@ end
 dtcollision(p::Particle, d::Disk) = dtcollision(d::Disk, p::Particle)
 
 function dtcollision(p::Particle,c::Cell)
-    time = zeros(5)
+    time = zeros(4)
     index = 1
     for wall in c.walls
         dt = dtcollision(p,wall)
         time[index] = dt
         index += 1
     end
-    time[end] = dtcollision(p,c.disk)
     dt,k = findmin(time)
 end
 
 ==(w1::Wall,w2::Wall) = (w1.x == w2.x && w1.y == w2.y)
 
-function dtcollision_without_wall(p::Particle,c::Cell, w::Wall)
-    time = zeros(5)
+function dtcollision(p::Particle,c::Cell, w::Wall)
+    time = zeros(4)
     index = 1
     for walle in c.walls
         if walle == w
@@ -125,22 +124,21 @@ function dtcollision_without_wall(p::Particle,c::Cell, w::Wall)
         time[index] = dt
         index += 1
     end
-    time[end] = dtcollision(p,c.disk)
     dt,k = findmin(time)
 end
 
 
 
-function dtcollision_without_disk(p::Particle,c::Cell)
-    time = zeros(4)
-    index = 1
-    for wall in c.walls
-        dt = dtcollision(p,wall)
-        time[index] = dt
-        index += 1
-    end
-    dt,k = findmin(time)
-end
+# function dtcollision_without_disk(p::Particle,c::Cell)
+#     time = zeros(4)
+#     index = 1
+#     for wall in c.walls
+#         dt = dtcollision(p,wall)
+#         time[index] = dt
+#         index += 1
+#     end
+#     dt,k = findmin(time)
+# end
 
 
 
