@@ -53,9 +53,6 @@ function visualize(simulation_results)
     ax[:add_patch](p)
 
 
-
-
-
     walls = board.cells[1].walls
     line1 = lines.Line2D([walls[1].x,walls[1].x],[walls[1].y[1],walls[1].y[2]])
     line2 = lines.Line2D([walls[2].x[1],walls[2].x[2]],[walls[2].y,walls[2].y])
@@ -122,11 +119,11 @@ function visualize(simulation_results)
 
 
     anim = animation.FuncAnimation(fig, animate, frames=1000, interval=20, blit=false, repeat = false)
-    anim2 = animation.FuncAnimation(fig_energy, animate, frames=1000, interval=20, blit=false, repeat = false)
+
 end
 
 function localenergy(v_disk)
-    energy = massdisk*dot(v_disk,vdisk)/2
+    energy = massdisk*dot(v_disk,v_disk)/2
 end
 
 
@@ -134,7 +131,7 @@ function update_line(d_vel,k)
     x = [1:numberofcells]
     y = zeros(numberofcells)
     for i in 1:numberofcells
-        y[i] = d_vel[i][k]
+        y[i] = localenergy(d_vel[i][k])
     end
     x,y
 end
@@ -145,30 +142,28 @@ function visualize_localenergy(simulation_results)
 
     d_pos = [[disks_positions[k] for k in j:numberofcells:length(disks_positions)] for j in 1:numberofcells];
     d_vel = [[disks_velocities[k] for k in j:numberofcells:length(disks_velocities)] for j in 1:numberofcells];
-
-
-
-
     initialenergy = energy(massdisk,massparticle, [particle_velocities[1], particle_velocities[2]],
                            [d_vel[j][1] for j in 1:numberofcells])
-
     fig_energy = plt.figure()
-    ax_energy = fig_energy[:add_axes]([0.05, 0.05, 0.9, 0.9])
+    ax_energy = fig_energy[:add_axes]([0.1, 0.1, 0.8, 0.8])
+    ax_energy[:set_xlabel]("Number of cell")
+    ax_energy[:set_ylabel]("Local Energy")
 
     ax_energy[:set_xlim](0, numberofcells+1)
-    ax_energy[:set_ylim](0, initialenergy)
+    ax_energy[:set_ylim](0, initialenergy/2.)
 
-    l, = ax_energy[:plot]([], [], "r-")
+
+    #line1 = lines.Line2D([walls[1].x,walls[1].x],[walls[1].y[1],walls[1].y[2]])
+
+    l, = ax_energy[:plot]([], [], ".-")
 
     function animate(i)
-
         z = [i/10 > t for t in time]
         k = findfirst(z,false) - 1
         if k == 0
-            l[:set_data](update_line(d_vel,k))
+            l[:set_data](update_line(d_vel,1))
         else
-
-            l[:set_data](update_line(d_vel,k))
+           l[:set_data](update_line(d_vel,k))
         end
         return (l,)
     end
