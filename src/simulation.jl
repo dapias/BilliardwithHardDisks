@@ -6,37 +6,36 @@ module Simulation
 
 VERSION < v"0.4-" && using Docile
 
-cellforinitialparticle = 1
+include("./input_parameters.jl")
 
-importall Objects
-importall Rules
-importall Init
+importall Objects, Rules, Init
 import Base.isless
+importall Base.Collections
 export simulation, energy
 
-#This allow to use the PriorityQueue providing a criterion to select the priority of an Event.
+#This allows to use the PriorityQueue providing a criterion to select the priority of an Event.
 isless(e1::Event, e2::Event) = e1.time < e2.time
 
 
-@doc doc"""Calculates the initial feasible Events and push them into the PriorityQueue with label
+@doc doc"""Calculates the initial feasible Events and push them into the PriorityQueue with label (whenwaspredicted)
 equal to 0"""->
 function initialcollisions!(board::Board,particle::Particle,t_initial::Number,t_max::Number,pq)
     for cell in board.cells
         dt,k = dtcollision(cell.disk,cell)
         if t_initial + dt < t_max
-            Collections.enqueue!(pq,Event(t_initial+dt, cell.disk, cell.walls[k],0),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, cell.disk, cell.walls[k],0),t_initial+dt)
         end
     end
 
     cell = board.cells[particle.numberofcell]
     dt,k = dtcollision(particle,cell)
     if t_initial + dt < t_max
-            Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],0),t_initial+dt)
+        enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],0),t_initial+dt)
     end
 
     dt = dtcollision(particle,cell.disk)
     if t_initial + dt < t_max
-                Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.disk,0),t_initial+dt)
+        enqueue!(pq,Event(t_initial+dt, particle, cell.disk,0),t_initial+dt)
     end
 end
 
@@ -48,37 +47,37 @@ function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::N
     function future(particle::Particle, disk::Disk)
         dt,k = dtcollision(particle,cell)
         if t_initial + dt < t_max
-            Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
         end
 
         dt,k = dtcollision(disk,cell)
         if t_initial + dt < t_max
-            Collections.enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
         end
     end
 
     function future(particle::Particle, wall::Wall)
         dt,k = dtcollision(particle,cell, wall)
         if t_initial + dt < t_max
-                Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
         end
 
         dt = dtcollision(particle,cell.disk)
-         if t_initial + dt < t_max
-                Collections.enqueue!(pq,Event(t_initial+dt, particle, cell.disk,labelprediction),t_initial+dt)
+        if t_initial + dt < t_max
+            enqueue!(pq,Event(t_initial+dt, particle, cell.disk,labelprediction),t_initial+dt)
         end
     end
 
     function future(disk::Disk, wall::Wall)
         dt,k = dtcollision(disk,cell)
         if t_initial + dt < t_max
-            Collections.enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
         end
 
         if  is_particle_in_cell(particle,cell)
             dt = dtcollision(particle,disk)
             if t_initial + dt < t_max
-                Collections.enqueue!(pq,Event(t_initial+dt, particle, disk,labelprediction),t_initial+dt)
+                enqueue!(pq,Event(t_initial+dt, particle, disk,labelprediction),t_initial+dt)
             end
         end
     end
@@ -97,7 +96,7 @@ end
 
 
 
-function startingsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
+function startsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
     board = create_board(numberofcells,size_x,size_y)
     particle = create_particle(board, particle_mass, particle_velocity,size_x,size_y,cellforinitialparticle)
     disks_positions = [board.cells[i].disk.r for i in 1:numberofcells ]
@@ -107,10 +106,10 @@ function startingsimulation(numberofcells,size_x,size_y,particle_mass,particle_v
     particle_vx = [particle.v[1]]
     particle_vy = [particle.v[2]]
     #masas = [particula.mass for particula in particulas]
-    pq = Collections.PriorityQueue()
-    Collections.enqueue!(pq,Event(0.0, Particle([0.,0.],[0.,0.],1.0),Disk([0.,0.],[0.,0.],1.0), 0),0.)
+    pq = PriorityQueue()
+    enqueue!(pq,Event(0.0, Particle([0.,0.],[0.,0.],1.0),Disk([0.,0.],[0.,0.],1.0), 0),0.)
     initialcollisions!(board,particle,t_initial,t_max,pq)
-    event = Collections.dequeue!(pq)
+    event = dequeue!(pq)
     t = event.time
     time = [event.time]
     return board, particle, t, time, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, pq
@@ -118,7 +117,7 @@ end
 
 
 
-@doc """Returns true if the event was predicted after the last collision label of the Disk(s)"""->
+@doc """Returns true if the event was predicted after the last collision of the Particle and/or Disk """->
 function validatecollision(event::Event)
     validcollision = false
     function validate(d::Disk)
@@ -180,13 +179,15 @@ end
 to the collider Disk(s); and the element with the highest physical priority (lowest time) is removed
 from the Queue and ignored if it is physically meaningless. The loop goes until the last Event is removed
 from the Data Structure, which is delimited by the maximum time(t_max)."""->
+
+
 function simulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
     board, particle, t, time, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, pq =
-        startingsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
+        startsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
     label = 0
     while(!isempty(pq))
         label += 1
-        event = Collections.dequeue!(pq)
+        event = dequeue!(pq)
         validcollision = validatecollision(event)
         if validcollision
             updatelabels(event,label)
