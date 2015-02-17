@@ -28,7 +28,10 @@ function visualize(simulation_results)
 
 
     fig = plt.figure()
-    ax = fig[:add_axes]([0.05, 0.05, 0.9, 0.9])
+
+    ax = fig[:add_subplot](211)
+
+    #ax = fig[:add_axes]([0.05, 0.05, 0.9, 0.9])
     energy_text = plt.text(0.02,0.9,"",transform=ax[:transAxes])
 
     ax[:set_xlim](0, numberofcells*size_x)
@@ -87,6 +90,20 @@ function visualize(simulation_results)
     ax[:add_line](line3)
     ax[:add_line](line4)
 
+
+    initialenergy = energy(massdisk,massparticle, [particle_velocities[1], particle_velocities[2]],
+                           [d_vel[j][1] for j in 1:numberofcells])
+    #fig_energy = plt.figure()
+    ax_energy = fig[:add_subplot](212)
+    #ax_energy = fig[pl]([0.1, 0.1, 0.8, 0.8])
+    ax_energy[:set_xlabel]("Number of cell")
+    ax_energy[:set_ylabel]("Local Energy")
+
+    ax_energy[:set_xlim](0, numberofcells+1)
+    ax_energy[:set_ylim](0, initialenergy/2.)
+
+    l, = ax_energy[:plot]([], [], ".-")
+
     function animate(i)
 
         z = [i/10 > t for t in time]
@@ -97,6 +114,8 @@ function visualize(simulation_results)
                 circles[j][:center] = (d_pos[j][1][1], d_pos[j][1][2])
             end
             p[:center] = (particle_positions[1], particle_positions[2])
+
+            l[:set_data](update_line(d_vel,1))
 
         else
             #if time[k] < i/10 < time[k+1]
@@ -110,11 +129,13 @@ function visualize(simulation_results)
                             [d_vel[j][k] for j in 1:numberofcells])
             energy_text[:set_text]("Energy = $(e_text)")
 
+            l[:set_data](update_line(d_vel,k))
+
 
 
         end
 
-        return (circles, puntual,)
+        return (circles, puntual,l)
     end
 
 

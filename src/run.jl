@@ -11,5 +11,5 @@ include("./input_parameters.jl")
 
 #srand(1234)
 sim = simulation(t_i, t_max);
-#@time visualize(sim);
-visualize_localenergy(sim);
+@time visualize(sim);
+#visualize_localenergy(sim);
