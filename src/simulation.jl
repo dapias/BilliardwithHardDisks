@@ -93,7 +93,7 @@ function is_particle_in_cell(p::Particle,c::Cell)
     contain
 end
 
-function createanimationlists(particle::Particle, board::Board, numberofcells)
+function createanimationlists(particle::Particle, board::Board)
     disks_positions = [board.cells[i].disk.r for i in 1:numberofcells ]
     disks_velocities = [board.cells[i].disk.v for i in 1:numberofcells ]
     particle_positions = [particle.r]
@@ -104,9 +104,9 @@ end
 
 
 
-function startsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
+function startsimulation(t_initial, t_max)
     board = create_board(numberofcells,size_x,size_y)
-    particle = create_particle(board, particle_mass, particle_velocity,size_x,size_y,cellforinitialparticle)
+    particle = create_particle(board, mass_particle, velocity_particle,size_x,size_y,cellforinitialparticle)
     pq = PriorityQueue()
     enqueue!(pq,Event(0.0, Particle([0.,0.],[0.,0.],1.0),Disk([0.,0.],[0.,0.],1.0), 0),0.)
     initialcollisions!(board,particle,t_initial,t_max,pq)
@@ -156,7 +156,7 @@ end
 
 
 
-function move(board::Board,particle::Particle,delta_t, numberofcells)
+function move(board::Board,particle::Particle,delta_t)
     for i in 1:numberofcells
         move(board.cells[i].disk,delta_t)
     end
@@ -164,7 +164,7 @@ function move(board::Board,particle::Particle,delta_t, numberofcells)
 end
 
 
-function updateanimationlists!(board::Board,particle::Particle, disks_positions, particle_positions, disks_velocities, particle_velocities, numberofcells)
+function updateanimationlists!(board::Board,particle::Particle, disks_positions, particle_positions, disks_velocities, particle_velocities)
     for i in 1:numberofcells
         push!(disks_positions,board.cells[i].disk.r)
         push!(disks_velocities, board.cells[i].disk.v)
@@ -182,9 +182,9 @@ from the Queue and ignored if it is physically meaningless. The loop goes until 
 from the Data Structure, which is delimited by the maximum time(t_max)."""->
 
 
-function simulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
-    board, particle, t, time, pq = startsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
-    disks_positions, disks_velocities,  particle_positions, particle_velocities =  createanimationlists(particle,board, numberofcells)
+function simulation(t_initial, t_max)
+    board, particle, t, time, pq = startsimulation(t_initial, t_max)
+    disks_positions, disks_velocities,  particle_positions, particle_velocities =  createanimationlists(particle,board)
     label = 0
     while(!isempty(pq))
         label += 1
@@ -192,11 +192,11 @@ function simulation(numberofcells,size_x,size_y,particle_mass,particle_velocity,
         validcollision = validatecollision(event)
         if validcollision
             updatelabels(event,label)
-            move(board,particle,event.time-t,numberofcells)
+            move(board,particle,event.time-t)
             t = event.time
             push!(time,t)
             collision(event.referenceobject,event.diskorwall)
-            updateanimationlists!(board,particle,disks_positions, particle_positions, disks_velocities, particle_velocities, numberofcells)
+            updateanimationlists!(board,particle,disks_positions, particle_positions, disks_velocities, particle_velocities)
             futurecollisions!(event, board, t,t_max,pq, label, particle)
         end
     end

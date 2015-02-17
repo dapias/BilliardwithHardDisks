@@ -19,7 +19,7 @@ pygui(true)
 @pyimport matplotlib.animation as animation
 
 
-function visualize(simulation_results, numberofcells, size_x, size_y)
+function visualize(simulation_results)
      board, disks_positions, particle_positions, disks_velocities, particle_velocities, time = simulation_results
 
     d_pos = [[disks_positions[k] for k in j:numberofcells:length(disks_positions)] for j in 1:numberofcells];
