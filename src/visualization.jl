@@ -7,6 +7,7 @@ using PyPlot
 using PyCall
 #using Formatting
 
+include("./input_parameters.jl")
 
 export visualize
 
@@ -17,13 +18,6 @@ pygui(true)
 @pyimport matplotlib.lines as lines
 @pyimport matplotlib.animation as animation
 
-
-
-
-radius_disks = 1.
-radius_puntual_particle = 0.02
-mass_disks = 1.0
-mass_particle = 1.0
 
 function visualize(simulation_results, numberofcells, size_x, size_y)
     board, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, time = simulation_results
@@ -44,14 +38,14 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
     ax[:set_ylim](0, size_y+1.0)
     plt.gca()[:set_aspect]("equal")
 
-    c = patch.Circle(d_pos[1][1],radius_disks) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
+    c = patch.Circle(d_pos[1][1],radius_disk) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
     #segundo se refiere al evento.
     c[:set_color]((rand(),rand(),rand()))
     circles = [c]
     ax[:add_patch](c)
 
     for k in 2:numberofcells
-        c = patch.Circle(d_pos[k][1],radius_disks)
+        c = patch.Circle(d_pos[k][1],radius_disk)
         c[:set_color]((rand(),rand(),rand()))
         push!(circles,c)
         ax[:add_patch](c)
@@ -119,7 +113,7 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
 
             puntual[1][:center] = (particle_x[k] + particle_vx[k]*(i/10-time[k]), particle_y[k]+particle_vy[k]*(i/10-time[k]))
 
-            e_text = energy(mass_disks,mass_particle, [particle_vx[k], particle_vy[k]],
+            e_text = energy(mass_disk,mass_particle, [particle_vx[k], particle_vy[k]],
                                                                  [d_vel[j][k] for j in 1:numberofcells])
             #e_textt = format(e_text,precision=6)
 

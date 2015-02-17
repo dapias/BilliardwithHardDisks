@@ -71,11 +71,11 @@ end
 immutable VerticalSharedWall <: Vertical
   x :: Float64
   y :: Array{Float64,1}  #Array of a length greater than the VerticalWall
-  sharedcells::(Int,Int)
+  sharedcells::(Int,Int) #Adjacent cells that share the wall
 end
 
-@doc doc"""Type with attributes time, collider1, collider2 and label. The label makes reference to the cycle
-within the main loop in which the event was predicted (see simulacionanimada in main.jl)."""->
+@doc doc"""Type with attributes time, referenceobject, diskorwall and whenwaspredicted. The last attribute makes reference to the cycle
+within the main loop in which the event was predicted (see simulation in simulation.jl)."""->
 type Event
     time :: Number
     referenceobject::DynamicObject

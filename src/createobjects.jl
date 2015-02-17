@@ -1,3 +1,5 @@
+
+
 module Init
 
 VERSION < v"0.4-" && using Docile
@@ -6,12 +8,14 @@ using Objects
 
 export create_board, create_particle
 
-radius = 1.0
-mass = 1.0
-velocity = 0.
-Lx1 = 0
-Ly1 = 0
-hole_size = 0.5*radius
+include("./input_parameters.jl")
+
+# radius_disk = 1.0
+# mass_disk = 1.0
+# velocity_disk = 1.0
+# Lx1 = 0
+# Ly1 = 0
+# hole_size = 0.5*radius_disk
 
 @doc doc"""Creates a Disk enclosed in the cell with boundaries at Lx1, Lx2, Ly1, Ly2; and with a random velocity
 with constant norm"""->
@@ -36,7 +40,7 @@ function create_initial_cell(size_x,size_y)
     Ly2Hole = Ly1Hole + hole_size
     nofcell = 1
     sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2],(nofcell,nofcell+1))
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocity)
+    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius_disk, mass_disk, velocity_disk)
     disk.numberofcell = nofcell
     cell = Cell([wall1,wall2,wall3,sharedwall],disk,nofcell)
     cell
@@ -51,7 +55,7 @@ function create_new_right_cell(cell,size_x,size_y)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
     Ly1Hole = Ly1+(Ly2-Ly1-hole_size)*rand()
     Ly2Hole = Ly1Hole + hole_size
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocity)
+    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius_disk, mass_disk, velocity_disk)
     nofcell  = cell.numberofcell +1
     sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly1Hole,Ly2Hole,Ly2],(nofcell,nofcell+1))
     disk.numberofcell = nofcell
@@ -67,7 +71,7 @@ function create_last_right_cell(cell,size_x,size_y)
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
     wall4 = VerticalWall(Lx2,[Ly1,Ly2])
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocity)
+    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radius_disk, mass_disk, velocity_disk)
     nofcell  = cell.numberofcell +1
     disk.numberofcell = nofcell
     cell = Cell([wall1,wall2,wall3,wall4],disk,nofcell)
