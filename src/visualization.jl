@@ -20,7 +20,7 @@ pygui(true)
 
 
 function visualize(simulation_results, numberofcells, size_x, size_y)
-    board, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, time = simulation_results
+     board, disks_positions, particle_positions, disks_velocities, particle_velocities, time = simulation_results
 
     d_pos = [[disks_positions[k] for k in j:numberofcells:length(disks_positions)] for j in 1:numberofcells];
     d_vel = [[disks_velocities[k] for k in j:numberofcells:length(disks_velocities)] for j in 1:numberofcells];
@@ -51,7 +51,7 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
         ax[:add_patch](c)
     end
 
-    p = patch.Circle([particle_x[1],particle_y[1]],radius_puntual_particle)
+    p = patch.Circle([particle_positions[1],particle_positions[2]],radius_puntual_particle)
     puntual = [p]
     ax[:add_patch](p)
 
@@ -103,7 +103,7 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
             for j in 1:numberofcells
                 circles[j][:center] = (d_pos[j][1][1], d_pos[j][1][2])
             end
-            p[:center] = (particle_x[1], particle_y[1])
+            p[:center] = (particle_positions[1], particle_positions[2])
 
         else
             #if time[k] < i/10 < time[k+1]
@@ -111,9 +111,9 @@ function visualize(simulation_results, numberofcells, size_x, size_y)
                 circles[j][:center] = (d_pos[j][k][1] + d_vel[j][k][1]*(i/10-time[k]), d_pos[j][k][2] + d_vel[j][k][2]*(i/10-time[k]))
             end
 
-            puntual[1][:center] = (particle_x[k] + particle_vx[k]*(i/10-time[k]), particle_y[k]+particle_vy[k]*(i/10-time[k]))
+            puntual[1][:center] = (particle_positions[1+2*(k-1)] + particle_velocities[1+2*(k-1)]*(i/10-time[k]), particle_positions[2+2*(k-1)]+particle_velocities[2+2*(k-1)]*(i/10-time[k]))
 
-            e_text = energy(mass_disk,mass_particle, [particle_vx[k], particle_vy[k]],
+            e_text = energy(mass_disk,mass_particle, [particle_velocities[1+2*(k-1)], particle_velocities[2+2*(k-1)]],
                                                                  [d_vel[j][k] for j in 1:numberofcells])
             #e_textt = format(e_text,precision=6)
 

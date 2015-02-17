@@ -93,26 +93,27 @@ function is_particle_in_cell(p::Particle,c::Cell)
     contain
 end
 
+function createanimationlists(particle::Particle, board::Board, numberofcells)
+    disks_positions = [board.cells[i].disk.r for i in 1:numberofcells ]
+    disks_velocities = [board.cells[i].disk.v for i in 1:numberofcells ]
+    particle_positions = [particle.r]
+    particle_velocities = [particle.v]
+    disks_positions, disks_velocities,  particle_positions, particle_velocities
+end
+
 
 
 
 function startsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
     board = create_board(numberofcells,size_x,size_y)
     particle = create_particle(board, particle_mass, particle_velocity,size_x,size_y,cellforinitialparticle)
-    disks_positions = [board.cells[i].disk.r for i in 1:numberofcells ]
-    particle_x = [particle.r[1]]
-    particle_y = [particle.r[2]]
-    disks_velocities = [board.cells[i].disk.v for i in 1:numberofcells ]
-    particle_vx = [particle.v[1]]
-    particle_vy = [particle.v[2]]
-    #masas = [particula.mass for particula in particulas]
     pq = PriorityQueue()
     enqueue!(pq,Event(0.0, Particle([0.,0.],[0.,0.],1.0),Disk([0.,0.],[0.,0.],1.0), 0),0.)
     initialcollisions!(board,particle,t_initial,t_max,pq)
     event = dequeue!(pq)
     t = event.time
     time = [event.time]
-    return board, particle, t, time, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, pq
+    return board, particle, t, time, pq
 end
 
 
@@ -163,15 +164,15 @@ function move(board::Board,particle::Particle,delta_t, numberofcells)
 end
 
 
-function updateanimationlists(board::Board,particle::Particle, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, numberofcells)
+function updateanimationlists!(board::Board,particle::Particle, disks_positions, particle_positions, disks_velocities, particle_velocities, numberofcells)
     for i in 1:numberofcells
         push!(disks_positions,board.cells[i].disk.r)
         push!(disks_velocities, board.cells[i].disk.v)
     end
-    push!(particle_x, particle.r[1])
-    push!(particle_y, particle.r[2])
-    push!(particle_vx, particle.v[1])
-    push!(particle_vy, particle.v[2])
+    for i in 1:2
+        push!(particle_positions, particle.r[i])
+        push!(particle_velocities, particle.v[i])
+    end
 end
 
 
@@ -182,8 +183,8 @@ from the Data Structure, which is delimited by the maximum time(t_max)."""->
 
 
 function simulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
-    board, particle, t, time, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, pq =
-        startsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
+    board, particle, t, time, pq = startsimulation(numberofcells,size_x,size_y,particle_mass,particle_velocity, t_initial, t_max)
+    disks_positions, disks_velocities,  particle_positions, particle_velocities =  createanimationlists(particle,board, numberofcells)
     label = 0
     while(!isempty(pq))
         label += 1
@@ -195,12 +196,12 @@ function simulation(numberofcells,size_x,size_y,particle_mass,particle_velocity,
             t = event.time
             push!(time,t)
             collision(event.referenceobject,event.diskorwall)
-            updateanimationlists(board,particle,disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, numberofcells)
+            updateanimationlists!(board,particle,disks_positions, particle_positions, disks_velocities, particle_velocities, numberofcells)
             futurecollisions!(event, board, t,t_max,pq, label, particle)
         end
     end
     push!(time, t_max)
-    board, disks_positions, particle_x, particle_y, disks_velocities, particle_vx, particle_vy, time
+    board, disks_positions, particle_positions, disks_velocities, particle_velocities, time
 end
 
 function energy(mass_disks, mass_particle, v_particle, v_disks)

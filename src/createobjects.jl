@@ -1,5 +1,3 @@
-
-
 module Init
 
 VERSION < v"0.4-" && using Docile
@@ -9,13 +7,6 @@ using Objects
 export create_board, create_particle
 
 include("./input_parameters.jl")
-
-# radius_disk = 1.0
-# mass_disk = 1.0
-# velocity_disk = 1.0
-# Lx1 = 0
-# Ly1 = 0
-# hole_size = 0.5*radius_disk
 
 @doc doc"""Creates a Disk enclosed in the cell with boundaries at Lx1, Lx2, Ly1, Ly2; and with a random velocity
 with constant norm"""->
