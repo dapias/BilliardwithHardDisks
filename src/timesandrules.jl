@@ -2,7 +2,6 @@
 
 module Rules
 
-
 VERSION < v"0.4-" && using Docile
 
 importall Objects

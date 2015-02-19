@@ -6,7 +6,7 @@ using Objects
 
 export create_board, create_particle
 
-include("./input_parameters.jl")
+
 
 @doc doc"""Creates a Disk enclosed in the cell with boundaries at Lx1, Lx2, Ly1, Ly2; and with a random velocity
 with constant norm"""->
@@ -21,9 +21,9 @@ function create_disk(Lx1,Lx2,Ly1,Ly2,radius, mass, velocity)
     d
 end
 
-function create_initial_cell(size_x,size_y)
-    Lx2 = size_x
-    Ly2 = size_y
+function create_initial_cell(size_x,size_y,radiusdisk, massdisk, velocitydisk, maxholesize,  Lx1, Ly1)
+    Lx2 = size_x + Lx1
+    Ly2 = size_y + Ly1
     wall1 = VerticalWall(Lx1,[Ly1,Ly2])
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
@@ -37,11 +37,12 @@ function create_initial_cell(size_x,size_y)
     cell
 end
 
-function create_new_right_cell(cell,size_x,size_y)
+function create_new_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk, maxholesize)
     wall1 = cell.walls[end]
     Lx1 = cell.walls[end].x
+    Ly1 = cell.walls[end].y[1]
     Lx2 = Lx1 + size_x
-    Ly2 = size_y
+    Ly2 = size_y + Ly1
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
     Ly1Hole = Ly1+(Ly2-Ly1-maxholesize)*rand()
@@ -54,11 +55,12 @@ function create_new_right_cell(cell,size_x,size_y)
     cell
 end
 
-function create_last_right_cell(cell,size_x,size_y)
+function create_last_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk)
     wall1 = cell.walls[end]
     Lx1 = cell.walls[end].x
     Lx2 = Lx1 + size_x
-    Ly2 = size_y
+    Ly1 = cell.walls[end].y[1]
+    Ly2 = size_y + Ly1
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
     wall4 = VerticalWall(Lx2,[Ly1,Ly2])
@@ -69,19 +71,19 @@ function create_last_right_cell(cell,size_x,size_y)
     cell
 end
 
-function create_board(numberofcells,size_x,size_y)
-    cell = create_initial_cell(size_x,size_y)
+function create_board(numberofcells,size_x,size_y, radiusdisk, massdisk, velocitydisk, maxholesize,  Lx1, Ly1)
+    cell = create_initial_cell(size_x,size_y,radiusdisk, massdisk, velocitydisk, maxholesize,  Lx1, Ly1)
     board = [cell]
 
     if numberofcells == 2
-        cell = create_last_right_cell(cell,size_x,size_y)
+        cell = create_last_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk)
         push!(board,cell)
     elseif numberofcells > 1
         for i in 2:numberofcells-1
-            cell = create_new_right_cell(cell,size_x,size_y)
+            cell = create_new_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk, maxholesize)
             push!(board,cell)
         end
-            cell = create_last_right_cell(cell,size_x,size_y)
+            cell = create_last_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk)
             push!(board,cell)
     end
 
@@ -99,7 +101,7 @@ function overlap(p::Particle, d::Disk)
     return r < d.radius
 end
 
-function create_particle(board, mass, velocity,delta_x,delta_y, numberofcell)
+function create_particle(board, mass, velocity,delta_x,delta_y, numberofcell, Lx1, Ly1)
     cell = board.cells[numberofcell]
     disk = board.cells[numberofcell].disk
     Lx2 = Lx1 + delta_x

@@ -7,7 +7,6 @@ using PyPlot
 using PyCall
 #using Formatting
 
-include("./input_parameters.jl")
 
 export visualize, visualize_localenergy
 
@@ -19,11 +18,22 @@ pygui(true)
 @pyimport matplotlib.animation as animation
 
 
-function visualize(simulation_results)
-    board, disks_positions, particle_positions, disks_velocities, particle_velocities, time = simulation_results
+function visualize(simulation_results, radiusparticle)
+    board, particle, disks_positions, particle_positions, disks_velocities, particle_velocities, time = simulation_results
+
+    numberofcells = length(board.cells)
+    size_x = board.cells[1].walls[4].x  - board.cells[1].walls[1].x
+    size_y = board.cells[1].walls[3].y  - board.cells[1].walls[2].y
+    radiusdisk = board.cells[1].disk.radius
+    massdisk = board.cells[1].disk.mass
+    massparticle = particle.mass
+    Lx1 = board.cells[1].walls[1].x
+    Ly1 = board.cells[1].walls[2].y
 
     d_pos = [[disks_positions[k] for k in j:numberofcells:length(disks_positions)] for j in 1:numberofcells];
     d_vel = [[disks_velocities[k] for k in j:numberofcells:length(disks_velocities)] for j in 1:numberofcells];
+
+
 
 
 
@@ -32,10 +42,10 @@ function visualize(simulation_results)
     ax = fig[:add_subplot](211)
 
     #ax = fig[:add_axes]([0.05, 0.05, 0.9, 0.9])
-    energy_text = plt.text(0.02,0.9,"",transform=ax[:transAxes])
+    energy_text = ax[:text](0.02,0.9,"",transform=ax[:transAxes])
+    ax[:set_xlim](Lx1, Lx1 + numberofcells*size_x)
+    ax[:set_ylim](Ly1, Ly1 + size_y + 1.0)
 
-    ax[:set_xlim](0, numberofcells*size_x)
-    ax[:set_ylim](0, size_y+1.0)
     plt.gca()[:set_aspect]("equal")
 
     c = patch.Circle(d_pos[1][1],radiusdisk) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
@@ -115,8 +125,7 @@ function visualize(simulation_results)
             end
             p[:center] = (particle_positions[1], particle_positions[2])
 
-            l[:set_data](update_line(d_vel,1))
-
+            l[:set_data](update_line(d_vel,1, numberofcells, massdisk))
         else
             #if time[k] < i/10 < time[k+1]
             for j in 1:numberofcells
@@ -129,68 +138,64 @@ function visualize(simulation_results)
                             [d_vel[j][k] for j in 1:numberofcells])
             energy_text[:set_text]("Energy = $(e_text)")
 
-            l[:set_data](update_line(d_vel,k))
-
-
-
+            l[:set_data](update_line(d_vel,k, numberofcells, massdisk))
         end
 
         return (circles, puntual,l)
     end
 
-
     anim = animation.FuncAnimation(fig, animate, frames=1000, interval=20, blit=false, repeat = false)
 
 end
 
-function localenergy(v_disk)
+function localenergy(massdisk,v_disk)
     energy = massdisk*dot(v_disk,v_disk)/2
 end
 
 
-function update_line(d_vel,k)
+function update_line(d_vel,k, numberofcells, massdisk)
     x = [1:numberofcells]
     y = zeros(numberofcells)
     for i in 1:numberofcells
-        y[i] = localenergy(d_vel[i][k])
+        y[i] = localenergy(massdisk, d_vel[i][k])
     end
     x,y
 end
 
 
-function visualize_localenergy(simulation_results)
-    board, disks_positions, particle_positions, disks_velocities, particle_velocities, time = simulation_results
+# function visualize_localenergy(simulation_results)
+#     board, disks_positions, particle_positions, disks_velocities, particle_velocities, time = simulation_results
 
-    d_pos = [[disks_positions[k] for k in j:numberofcells:length(disks_positions)] for j in 1:numberofcells];
-    d_vel = [[disks_velocities[k] for k in j:numberofcells:length(disks_velocities)] for j in 1:numberofcells];
-    initialenergy = energy(massdisk,massparticle, [particle_velocities[1], particle_velocities[2]],
-                           [d_vel[j][1] for j in 1:numberofcells])
-    fig_energy = plt.figure()
-    ax_energy = fig_energy[:add_axes]([0.1, 0.1, 0.8, 0.8])
-    ax_energy[:set_xlabel]("Number of cell")
-    ax_energy[:set_ylabel]("Local Energy")
+#     d_pos = [[disks_positions[k] for k in j:numberofcells:length(disks_positions)] for j in 1:numberofcells];
+#     d_vel = [[disks_velocities[k] for k in j:numberofcells:length(disks_velocities)] for j in 1:numberofcells];
+#     initialenergy = energy(massdisk,massparticle, [particle_velocities[1], particle_velocities[2]],
+#                            [d_vel[j][1] for j in 1:numberofcells])
+#     fig_energy = plt.figure()
+#     ax_energy = fig_energy[:add_axes]([0.1, 0.1, 0.8, 0.8])
+#     ax_energy[:set_xlabel]("Number of cell")
+#     ax_energy[:set_ylabel]("Local Energy")
 
-    ax_energy[:set_xlim](0, numberofcells+1)
-    ax_energy[:set_ylim](0, initialenergy/2.)
+#     ax_energy[:set_xlim](0, numberofcells+1)
+#     ax_energy[:set_ylim](0, initialenergy/2.)
 
 
-    #line1 = lines.Line2D([walls[1].x,walls[1].x],[walls[1].y[1],walls[1].y[2]])
+#     #line1 = lines.Line2D([walls[1].x,walls[1].x],[walls[1].y[1],walls[1].y[2]])
 
-    l, = ax_energy[:plot]([], [], ".-")
+#     l, = ax_energy[:plot]([], [], ".-")
 
-    function animate(i)
-        z = [i/10 > t for t in time]
-        k = findfirst(z,false) - 1
-        if k == 0
-            l[:set_data](update_line(d_vel,1))
-        else
-           l[:set_data](update_line(d_vel,k))
-        end
-        return (l,)
-    end
+#     function animate(i)
+#         z = [i/10 > t for t in time]
+#         k = findfirst(z,false) - 1
+#         if k == 0
+#             l[:set_data](update_line(d_vel,1))
+#         else
+#            l[:set_data](update_line(d_vel,k))
+#         end
+#         return (l,)
+#     end
 
-    anim = animation.FuncAnimation(fig_energy, animate, frames=1000, interval=20, blit=false, repeat = false)
-end
+#     anim = animation.FuncAnimation(fig_energy, animate, frames=1000, interval=20, blit=false, repeat = false)
+# end
 
 end
 
