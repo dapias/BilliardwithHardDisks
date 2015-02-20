@@ -46,6 +46,7 @@ function dtcollision(d::Disk, HW::HorizontalWall)
     dt
 end
 
+@doc doc"""Calculates the time of collision between a Disk and the Walls of the cell"""->
 function dtcollision(d::Disk, c::Cell)
     time = zeros(4)
     index = 1
@@ -58,7 +59,7 @@ function dtcollision(d::Disk, c::Cell)
 end
 
 
-@doc doc"""Calculates the time of collision between two Disks."""->
+@doc doc"""Calculates the time of collision between a Disk and the Particle in the same cell"""->
 function dtcollision(d::Disk, p::Particle)
     deltar = p.r - d.r
     deltav = p.v - d.v
@@ -111,6 +112,7 @@ end
 
 ==(w1::Wall,w2::Wall) = (w1.x == w2.x && w1.y == w2.y)
 
+@doc doc"""This function avoids the recollision between the particle and a wall in the next event""" ->
 function dtcollision(p::Particle,c::Cell, w::Wall)
     time = zeros(4)
     index = 1
@@ -168,7 +170,7 @@ function collision(p::Particle, H::HorizontalWall )
     p.v = [p.v[1],-p.v[2]]
 end
 
-function updatelabel(p::Particle, VSW::VerticalSharedWall)
+function updateparticlelabel(p::Particle, VSW::VerticalSharedWall)
     update = false
     Ly1Hole = VSW.y[2]
     Ly2Hole = VSW.y[3]
@@ -186,7 +188,7 @@ end
 
 
 function collision(p::Particle, VSW::VerticalSharedWall )
-    if updatelabel(p,VSW)
+    if updateparticlelabel(p,VSW)
     else
         p.v = [-p.v[1], p.v[2]]
     end
