@@ -40,8 +40,6 @@ function visualize(simulation_results, radiusparticle)
     fig = plt.figure()
 
     ax = fig[:add_subplot](211)
-
-    #ax = fig[:add_axes]([0.05, 0.05, 0.9, 0.9])
     energy_text = ax[:text](0.02,0.9,"",transform=ax[:transAxes])
     ax[:set_xlim](Lx1, Lx1 + numberofcells*size_x)
     ax[:set_ylim](Ly1, Ly1 + size_y + 1.0)

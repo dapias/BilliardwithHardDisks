@@ -18,7 +18,14 @@ pygui(true)
 numberofcells = 3
 size_x = 3.
 size_y = 3.
-board = Init.create_board(numberofcells,size_x,size_y)
+radiusdisk=1.
+massdisk = 1.
+velocitydisk = 1.
+maxholesize = 0.5
+Lx1 = 0
+Ly1 = 0.
+
+board = Init.create_board(numberofcells,size_x,size_y, radiusdisk, massdisk, velocitydisk, maxholesize,  Lx1, Ly1)
 
 
 fig = plt.figure()
@@ -64,7 +71,7 @@ ax[:add_line](line2)
 ax[:add_line](line3)
 ax[:add_line](line4)
 
-particula = Init.create_particle(board, 1.0, 1.0 ,size_x,size_y,1)
+particula = Init.create_particle(board, 1.0, 1.0 ,size_x,size_y,1, Lx1, Ly1)
 ax[:plot]([particula.r[1]], [particula.r[2]], markersize = 5., "go")
 
 
