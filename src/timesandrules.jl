@@ -187,7 +187,8 @@ function updateparticlelabel(p::Particle, VSW::VerticalSharedWall)
 end
 
 
-function collision(p::Particle, VSW::VerticalSharedWall )
+
+function collision(p::Particle, VSW::VerticalSharedWall)
     if updateparticlelabel(p,VSW)
     else
         p.v = [-p.v[1], p.v[2]]

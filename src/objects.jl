@@ -2,6 +2,8 @@ module Objects
 
 VERSION < v"0.4-" && using Docile
 
+using DataStructures
+
 export Wall, Disk, Object, DynamicObject
 export VerticalWall, HorizontalWall, Event, Cell, VerticalSharedWall, Particle, Board, Vertical
 
@@ -20,8 +22,8 @@ type Particle <: DynamicObject
     lastcollision::Int
 end
 
-Particle(r,v) = Particle(r,v,1.,1,0)  #Default values: mass equal to 1; numberofcell: 1; lastcollision:0.
-Particle(r,v,mass) = Particle(r,v,mass,1,0)
+#Particle(r,v) = Particle(r,v,1.,1,0)  #Default values: mass equal to 1; numberofcell: 1; lastcollision:0.
+#Particle(r,v,mass) = Particle(r,v,mass,1,0)
 
 type Disk <: DynamicObject
   r::Array{Float64,1}
@@ -33,8 +35,8 @@ type Disk <: DynamicObject
 end
 
 
-Disk(r,v,radius) = Disk(r,v,radius,1.0,1,0) #Fixed mass of 1.0.
-Disk(r,v,radius, mass) = Disk(r,v,radius, mass , 1, 0)
+#Disk(r,v,radius) = Disk(r,v,radius,1.0,1,0) #Fixed mass of 1.0.
+#Disk(r,v,radius, mass) = Disk(r,v,radius, mass , 1, 0)
 Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
 
 
@@ -47,8 +49,9 @@ end
 
 #Cell(walls,label) = Cell(walls,label,Disk([-100.,-100.],[0.,0.],0.))
 
+@doc doc"""Type that is implemented as a Deque(Double-ended queue) of Cells. It allows to insert new cells as the particle diffuses"""->
 type Board
-    cells::Vector{Cell}
+    cells::Deque{Cell}
 end
 
 @doc doc"""Type with attributes x and y. x corresponds to its horizontal position in a Cartesian Plane
