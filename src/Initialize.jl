@@ -1,11 +1,11 @@
-module Init
+module Initialize
 
 VERSION < v"0.4-" && using Docile
 
 using Objects
 using DataStructures
 
-export create_board, create_particle
+export create_board_with_particle, create_initial_cell, create_new_left_cell, create_new_right_cell
 
 @doc doc"""Creates an random Array(Vector) of *dimension* dim with limits: liminf, limsup""" ->
 function randuniform(liminf, limsup, dim=1)
@@ -33,12 +33,12 @@ end
 
 @doc doc"""Creates a Disk enclosed in a box with boundaries Lx1, Lx2, Ly1, Ly2; and with a random velocity
 of constant norm"""->
-function create_disk(Lx1,Lx2,Ly1,Ly2,radius, mass, velocity,numberofcell)
+function create_disk(Lx1,Lx2,Ly1,Ly2,radius, mass, normvelocity,numberofcell)
     x = randuniform(Lx1 + radius, Lx2 - radius)
     y = randuniform(Ly1 + radius, Ly2 - radius)
     theta = rand()*2*pi
-    vx = cos(theta)*velocity
-    vy = sin(theta)*velocity
+    vx = cos(theta)*normvelocity
+    vy = sin(theta)*normvelocity
     v = [vx, vy]
     Disk([x,y],v,radius, mass,numberofcell)
 end
@@ -52,7 +52,7 @@ function create_window(Ly1, Ly2, windowsize)
 end
 
 
-function create_initial_cell( Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
+function create_initial_cell_with_particle( Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
                              massparticle, velocityparticle, windowsize)
     Lx2 = Lx1 + size_x
     Ly2 = Ly1 + size_y
@@ -72,7 +72,14 @@ function create_initial_cell( Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, veloc
     cell, particle
 end
 
-function create_new_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk, windowsize)
+function create_new_right_cell(cell)
+    size_x = cell.walls[4].x - cell.walls[1].x
+    size_y = cell.walls[3].y - cell.walls[2].y
+    radiusdisk = cell.disk.radius
+    massdisk = cell.disk.mass
+    velocitydisk = norm(cell.disk.v)
+    windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
+
     wall1 = cell.walls[end]
     Lx1 = cell.walls[end].x
     Ly1 = cell.walls[end].y[1]
@@ -89,7 +96,14 @@ function create_new_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocit
 end
 
 
-function create_new_left_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk, windowsize)
+function create_new_left_cell(cell)
+    size_x = cell.walls[4].x - cell.walls[1].x
+    size_y = cell.walls[3].y - cell.walls[2].y
+    radiusdisk = cell.disk.radius
+    massdisk = cell.disk.mass
+    velocitydisk = norm(cell.disk.v)
+    windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
+
     Lx2 = cell.walls[1].x
     Ly1 = cell.walls[1].y[1]
     Lx1 = Lx2 - size_x
@@ -105,28 +119,30 @@ function create_new_left_cell(cell,size_x,size_y, radiusdisk, massdisk, velocity
     cell
 end
 
-function create_last_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk)
-    wall1 = cell.walls[end]
-    Lx1 = cell.walls[end].x
-    Lx2 = Lx1 + size_x
-    Ly1 = cell.walls[end].y[1]
-    Ly2 = size_y + Ly1
-    wall2 = HorizontalWall([Lx1,Lx2],Ly1)
-    wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-    wall4 = VerticalWall(Lx2,[Ly1,Ly2])
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk)
-    nofcell  = cell.numberofcell +1
-    disk.numberofcell = nofcell
-    cell = Cell([wall1,wall2,wall3,wall4],disk,nofcell)
-    cell
-end
+# function create_last_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk)
+#     wall1 = cell.walls[end]
+#     Lx1 = cell.walls[end].x
+#     Lx2 = Lx1 + size_x
+#     Ly1 = cell.walls[end].y[1]
+#     Ly2 = size_y + Ly1
+#     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
+#     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
+#     wall4 = VerticalWall(Lx2,[Ly1,Ly2])
+#     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk)
+#     nofcell  = cell.numberofcell +1
+#     disk.numberofcell = nofcell
+#     cell = Cell([wall1,wall2,wall3,wall4],disk,nofcell)
+#     cell
+# end
 
-function create_board(size_x,size_y, radiusdisk, massdisk, velocitydisk, windowsize,  Lx1, Ly1)
-    cell, = create_initial_cell(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                             radiusparticle, massparticle, velocityparticle, windowsize)
+function create_board_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
+                                massparticle, velocityparticle, windowsize)
+    cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
+                                massparticle, velocityparticle, windowsize)
     board = Deque{Cell}()
     push!(board,cell)
     board = Board(board)
+    board, particle
 end
 
 

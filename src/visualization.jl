@@ -21,6 +21,8 @@ pygui(true)
 function visualize(simulation_results, radiusparticle)
     board, particle, disks_positions, particle_positions, disks_velocities, particle_velocities, time = simulation_results
 
+    #board, particle, particle_positions, particle_velocities, time
+
     numberofcells = length(board.cells)
     size_x = board.cells[1].walls[4].x  - board.cells[1].walls[1].x
     size_y = board.cells[1].walls[3].y  - board.cells[1].walls[2].y

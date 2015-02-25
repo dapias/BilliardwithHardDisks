@@ -4,7 +4,9 @@ module Rules
 
 VERSION < v"0.4-" && using Docile
 
-importall Objects
+using DataStructures
+using Initialize
+using Objects
 
 export move, dtcollision, collision, dtcollision_without_disk, dtcollision_without_wall
 
@@ -152,21 +154,21 @@ end
 ###############Disk##################################################
 
 @doc doc"""Update the velocity vector of a disk (Disk.v) after it collides with a VerticalWall."""->
-function collision(d::Disk, V::Vertical)
+function collision(d::Disk, V::Vertical,b::Board)
     d.v = [-d.v[1], d.v[2]]
 end
 
 @doc doc"""Update the velocity vector of a disk (Disk.v) after it collides with a HorizontallWall."""->
-function collision(d::Disk, H::HorizontalWall )
+function collision(d::Disk, H::HorizontalWall, b::Board)
     d.v = [d.v[1],-d.v[2]]
 end
 
 ###################Particle##############################################33
-function collision(p::Particle, V::VerticalWall )
+function collision(p::Particle, V::VerticalWall, b::Board )
     p.v = [-p.v[1], p.v[2]]
 end
 
-function collision(p::Particle, H::HorizontalWall )
+function collision(p::Particle, H::HorizontalWall, b::Board )
     p.v = [p.v[1],-p.v[2]]
 end
 
@@ -187,16 +189,41 @@ function updateparticlelabel(p::Particle, VSW::VerticalSharedWall)
 end
 
 
+function is_cell_in_board(b::Board,p::Particle)
+    u = false
+    if back(b.cells).numberofcell <= p.numberofcell <= front(b.cells).numberofcell
+        u = true
+    end
+    u
+end
 
-function collision(p::Particle, VSW::VerticalSharedWall)
+
+function newcell!(b::Board, p::Particle)
+    if back(b.cells).numberofcell - 1 == p.numberofcell
+        cell = create_new_left_cell(back(b.cells))
+        push!(b.cells, cell)
+    elseif front(b.cells).numberofcell + 1 == p.numberofcell
+        cell = create_new_right_cell(front(b.cells))
+        unshift!(b.cells,cell)
+    end
+end
+
+
+
+
+
+function collision(p::Particle, VSW::VerticalSharedWall, b::Board)
     if updateparticlelabel(p,VSW)
+        if !is_cell_in_board(b, p)
+            newcell!(b,p)
+        end
     else
         p.v = [-p.v[1], p.v[2]]
     end
 end
 
 
-function collision(p::Particle, d::Disk)
+function collision(p::Particle, d::Disk, b::Board)
     deltar = p.r - d.r
     deltav = p.v - d.v
     h = dot(deltar,deltav)
@@ -206,6 +233,6 @@ function collision(p::Particle, d::Disk)
     d.v += J*deltar/(sigma*d.mass)
 end
 
-collision(d::Disk, p::Particle) = collision(p::Particle, d::Disk)
+collision(d::Disk, p::Particle, b::Board) = collision(p::Particle, d::Disk, b::Board)
 
 end
