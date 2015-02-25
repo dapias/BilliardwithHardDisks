@@ -44,46 +44,46 @@ end
 
 @doc doc"""Updates the PriorityQueue pushing into it all the feasible Events that can occur after a valid collision"""->
 function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::Number,pq, labelprediction, particle :: Particle)
-    cellule = nothing
+    cell = nothing
     for c in board.cells
         if c.numberofcell == event.referenceobject.numberofcell
-            cellule = c
+            cell = c
             break
         end
     end
 
 
     function future(particle::Particle, disk::Disk)
-        dt,k = dtcollision(particle,cellule)
+        dt,k = dtcollision(particle,cell)
         if t_initial + dt < t_max
-            enqueue!(pq,Event(t_initial+dt, particle, cellule.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
         end
 
-        dt,k = dtcollision(disk,cellule)
+        dt,k = dtcollision(disk,cell)
         if t_initial + dt < t_max
-            enqueue!(pq,Event(t_initial+dt, disk, cellule.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
         end
     end
 
     function future(particle::Particle, wall::Wall)
-        dt,k = dtcollision(particle,cellule, wall)
+        dt,k = dtcollision(particle,cell, wall)
         if t_initial + dt < t_max
-            enqueue!(pq,Event(t_initial+dt, particle, cellule.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
         end
 
-        dt = dtcollision(particle,cellule.disk)
+        dt = dtcollision(particle,cell.disk)
         if t_initial + dt < t_max
-            enqueue!(pq,Event(t_initial+dt, particle, cellule.disk,labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, particle, cell.disk,labelprediction),t_initial+dt)
         end
     end
 
     function future(disk::Disk, wall::Wall)
-        dt,k = dtcollision(disk,cellule)
+        dt,k = dtcollision(disk,cell)
         if t_initial + dt < t_max
-            enqueue!(pq,Event(t_initial+dt, disk, cellule.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
         end
 
-        if  is_particle_in_cell(particle,cellule)
+        if  is_particle_in_cell(particle,cell)
             dt = dtcollision(particle,disk)
             if t_initial + dt < t_max
                 enqueue!(pq,Event(t_initial+dt, particle, disk,labelprediction),t_initial+dt)
@@ -108,6 +108,15 @@ function createanimationlists(particle::Particle)
     particle_positions = [particle.r]
     particle_velocities = [particle.v]
     particle_positions, particle_velocities
+end
+
+function createanimationlists(board::Board)
+    disk_positions =  [front(board.cells).disk.r]
+    disk_velocities = [front(board.cells).disk.v]
+#     particle_positions = [particle.r]
+#     particle_velocities = [particle.v]
+#     particle_positions, particle_velocities
+    disk_positions, disk_velocities
 end
 
 
@@ -158,11 +167,10 @@ function move(board::Board,particle::Particle,delta_t)
 end
 
 
-function updateanimationlists!(particle::Particle,particle_positions, particle_velocities)
-    #     for i in 1:numberofcells
-    #         push!(disks_positions,board.cells[i].disk.r)
-    #         push!(disks_velocities, board.cells[i].disk.v)
-    #     end
+function updateanimationlists!(particle::Particle,particle_positions, particle_velocities, initialcell::Cell)
+        push!(disk_positions,initialcell.disk.r)
+        push!(disk_velocities,initialcell.disk.v)
+#         end
     for i in 1:2
         push!(particle_positions, particle.r[i])
         push!(particle_velocities, particle.v[i])
@@ -196,6 +204,8 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
     board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                    windowsize)
     particle_positions, particle_velocities =  createanimationlists(particle)
+    disk_positions, disk_velocities = createanimationlists(board)
+    initialcell = front(board.cells)
     label = 0
     while(!isempty(pq))
         label += 1
@@ -207,20 +217,28 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
             t = event.time
             push!(time,t)
             collision(event.referenceobject,event.diskorwall, board)
-            updateanimationlists!(particle, particle_positions, particle_velocities)
+            updateanimationlists!(particle, particle_positions, particle_velocities, initialcell)
             futurecollisions!(event, board, t,t_max,pq, label, particle)
         end
     end
     push!(time, t_max)
-    board, particle, particle_positions, particle_velocities, time
+    board, particle, particle_positions, particle_velocities, time, disk_positions, disk_velocities, initialcell.disk
 end
+
+# function energy(mass_disks, mass_particle, v_particle, v_disks)
+#     e = 0
+#     e += mass_particle * dot(v_particle, v_particle)/2.
+#     for i in 1:length(v_disks)
+#         e+= mass_disks*dot(v_disks[i],v_disks[i])/2.
+#     end
+#     e
+# end
 
 function energy(mass_disks, mass_particle, v_particle, v_disks)
     e = 0
     e += mass_particle * dot(v_particle, v_particle)/2.
-    for i in 1:length(v_disks)
-        e+= mass_disks*dot(v_disks[i],v_disks[i])/2.
-    end
+    e += mass_disks*dot(v_disks,v_disks)/2.
+
     e
 end
 

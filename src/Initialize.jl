@@ -77,7 +77,7 @@ function create_new_right_cell(cell)
     size_y = cell.walls[3].y - cell.walls[2].y
     radiusdisk = cell.disk.radius
     massdisk = cell.disk.mass
-    velocitydisk = norm(cell.disk.v)
+    velocitydisk = norm(cell.disk.v)                      ######Ver la forma de mejorar esto
     windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
 
     wall1 = cell.walls[end]
@@ -101,7 +101,8 @@ function create_new_left_cell(cell)
     size_y = cell.walls[3].y - cell.walls[2].y
     radiusdisk = cell.disk.radius
     massdisk = cell.disk.mass
-    velocitydisk = norm(cell.disk.v)
+    velocitydisk = norm(cell.disk.v)                           ######Ver la forma de mejorar esto. ¿Tal vez con una
+                                                                      ##variable global?
     windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
 
     Lx2 = cell.walls[1].x
