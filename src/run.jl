@@ -1,5 +1,5 @@
-include("./simulation.jl")
-include("./visualization.jl")
+include("./Simulation.jl")
+include("./Visual.jl")
 
 using Simulation
 using Visual
@@ -11,12 +11,10 @@ parameters = Dict(:t_initial => 0,
                   :radiusdisk => 1.0,
                   :massdisk => 1.0,
                   :velocitydisk => 1.0,
-                  :Lx1 => 1,                         #x position of the first cell
-                  :Ly1 => 1,                         #y position of the first cell
-                  :maxholesize => 0.5,
-                  :cellforinitialparticle => 1,
+                  :Lx1 => 0,                         #x position of the first cell
+                  :Ly1 => 0,                         #y position of the first cell
+                  :windowsize => 0.5,
                   :massparticle => 1.0,
-                  :numberofcells => 5,
                   :size_x => 3.,                     #Size of the cell in x
                   :size_y => 3.,                     #Size of the cell in y
                   :velocityparticle => 1.0

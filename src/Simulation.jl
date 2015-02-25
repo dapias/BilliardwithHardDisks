@@ -1,8 +1,6 @@
-#include("./objects.jl")
-#include("./createobjects.jl")
-#include("./timesandrules.jl")
-
-
+include("./Objects.jl")
+include("./Initialize.jl")
+include("./Rules.jl")
 
 module Simulation
 
