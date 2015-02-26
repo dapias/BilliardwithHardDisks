@@ -213,13 +213,16 @@ end
 
 
 function collision(p::Particle, VSW::VerticalSharedWall, b::Board)
+    new = false
     if updateparticlelabel(p,VSW)
         if !is_cell_in_board(b, p)
             newcell!(b,p)
+            new = true
         end
     else
         p.v = [-p.v[1], p.v[2]]
     end
+    new
 end
 
 

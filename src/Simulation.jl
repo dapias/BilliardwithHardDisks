@@ -44,7 +44,7 @@ end
 
 
 @doc doc"""Updates the PriorityQueue pushing into it all the feasible Events that can occur after a valid collision"""->
-function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::Number,pq, labelprediction, particle :: Particle)
+function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::Number,pq, labelprediction, particle :: Particle, newcell)
     cell = nothing
     for c in board.cells
         if c.numberofcell == event.referenceobject.numberofcell
@@ -76,6 +76,14 @@ function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::N
         if t_initial + dt < t_max
             enqueue!(pq,Event(t_initial+dt, particle, cell.disk,labelprediction),t_initial+dt)
         end
+
+        if newcell == true
+             dt,k = dtcollision(cell.disk,cell)
+            if t_initial + dt < t_max
+                enqueue!(pq,Event(t_initial+dt, cell.disk, cell.walls[k],labelprediction),t_initial+dt)
+            end
+        end
+
     end
 
     function future(disk::Disk, wall::Wall)
@@ -112,12 +120,15 @@ function createanimationlists(particle::Particle)
 end
 
 function createanimationlists(board::Board)
-    disk_positions =  [front(board.cells).disk.r]
-    disk_velocities = [front(board.cells).disk.v]
+    disk_positions_front =  [front(board.cells).disk.r]
+    disk_velocities_front = [front(board.cells).disk.v]
+    disk_positions_back =  [back(board.cells).disk.r]
+    disk_velocities_back = [back(board.cells).disk.v]
+
 #     particle_positions = [particle.r]
 #     particle_velocities = [particle.v]
 #     particle_positions, particle_velocities
-    disk_positions, disk_velocities
+    disk_positions_front, disk_velocities_front, disk_positions_back, disk_velocities_back
 end
 
 
@@ -175,10 +186,10 @@ function updateanimationlists!(particle_positions, particle_velocities,particle:
     end
 end
 
-function updateanimationlists!(disk_positions, disk_velocities,initialcell::Cell)
+function updateanimationlists!(disk_positions, disk_velocities,cell::Cell)
     for i in 1:2
-        push!(disk_positions,initialcell.disk.r[i])
-        push!(disk_velocities,initialcell.disk.v[i])
+        push!(disk_positions,cell.disk.r[i])
+        push!(disk_velocities,cell.disk.v[i])
     end
 end
 
@@ -209,26 +220,28 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
     board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                    windowsize)
     particle_positions, particle_velocities =  createanimationlists(particle)
-    disk_positions, disk_velocities = createanimationlists(board)
+    disk_positions_front, disk_velocities_front, disk_positions_back, disk_velocities_back = createanimationlists(board)
     initialcell = front(board.cells)
     label = 0
     while(!isempty(pq))
         label += 1
         event = dequeue!(pq)
         validcollision = validatecollision(event)
+        ##si se crea una nueva celda cambio el estatus de las variables
         if validcollision
             updatelabels(event,label)
             move(board,particle,event.time-t)
             t = event.time
             push!(time,t)
-            collision(event.referenceobject,event.diskorwall, board)
+            new = collision(event.referenceobject,event.diskorwall, board)
             updateanimationlists!(particle_positions, particle_velocities,particle)
-            updateanimationlists!(disk_positions, disk_velocities,initialcell)
-            futurecollisions!(event, board, t,t_max,pq, label, particle)
+            updateanimationlists!(disk_positions_front, disk_velocities_front,front(board.cells))
+            updateanimationlists!(disk_positions_back,disk_velocities_back,back(board.cells))
+            futurecollisions!(event, board, t,t_max,pq, label, particle, new)
         end
     end
     push!(time, t_max)
-    board, particle, particle_positions, particle_velocities, time, disk_positions, disk_velocities, initialcell.disk
+    board, particle, particle_positions, particle_velocities, time, disk_positions_front, disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back
 end
 
 # function energy(mass_disks, mass_particle, v_particle, v_disks)
