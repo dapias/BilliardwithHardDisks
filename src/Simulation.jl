@@ -9,6 +9,7 @@ VERSION < v"0.4-" && using Docile
 using Objects
 #using Rules
 using Initialize
+using DataStructures
 
 importall Rules
 import Base.isless
@@ -167,13 +168,17 @@ function move(board::Board,particle::Particle,delta_t)
 end
 
 
-function updateanimationlists!(particle::Particle,particle_positions, particle_velocities, initialcell::Cell)
-        push!(disk_positions,initialcell.disk.r)
-        push!(disk_velocities,initialcell.disk.v)
-#         end
+function updateanimationlists!(particle_positions, particle_velocities,particle::Particle)
     for i in 1:2
         push!(particle_positions, particle.r[i])
         push!(particle_velocities, particle.v[i])
+    end
+end
+
+function updateanimationlists!(disk_positions, disk_velocities,initialcell::Cell)
+    for i in 1:2
+        push!(disk_positions,initialcell.disk.r[i])
+        push!(disk_velocities,initialcell.disk.v[i])
     end
 end
 
@@ -217,7 +222,8 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
             t = event.time
             push!(time,t)
             collision(event.referenceobject,event.diskorwall, board)
-            updateanimationlists!(particle, particle_positions, particle_velocities, initialcell)
+            updateanimationlists!(particle_positions, particle_velocities,particle)
+            updateanimationlists!(disk_positions, disk_velocities,initialcell)
             futurecollisions!(event, board, t,t_max,pq, label, particle)
         end
     end

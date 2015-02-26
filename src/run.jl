@@ -1,11 +1,14 @@
 include("./Simulation.jl")
 include("./Visual.jl")
 
+
 using Simulation
 using Visual
 
+
 #In this file the main functions of the project are called, i.e. *simulation* from main.jl and *visualizate* from visualization.jl.
 
+radiustovisualizeparticle = 0.02
 parameters = Dict(:t_initial => 0,
                   :t_max => 100,
                   :radiusdisk => 1.0,
@@ -20,9 +23,17 @@ parameters = Dict(:t_initial => 0,
                   :velocityparticle => 1.0
                   )
 
-radiustovisualizeparticle = 0.02
+
 
 sim = simulation(;parameters...);
 @time visualize(sim, radiustovisualizeparticle);
+
+# if (ARGS)[1] != 0
+#     if ARGS[1] == "true"
+#         include("./Visual.jl")
+#         using Visual
+#         @time visualize(sim, radiustovisualizeparticle);
+#     end
+# end
 
 #visualize_localenergy(sim);

@@ -28,6 +28,7 @@ function visualize(simulation_results, radiusparticle)
 
     board, particle, particle_positions, particle_velocities, time, disk_positions, disk_velocities, disk = simulation_results
 
+    radiusdisk = disk.radius
     #numberofcells = length(board.cells)
     #size_x = board.cells[1].walls[4].x  - board.cells[1].walls[1].x
     #size_y = board.cells[1].walls[3].y  - board.cells[1].walls[2].y
@@ -59,11 +60,11 @@ function visualize(simulation_results, radiusparticle)
 
 
 
-        c = patch.Circle([disk_positions[1],disk_positions[2]],radiusdisk) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
+    c = patch.Circle([disk_positions[1],disk_positions[2]],radiusdisk) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
         #segundo se refiere al evento.
-        c[:set_color]((rand(),rand(),rand()))
-        circles = [c]
-        ax[:add_patch](c)
+    c[:set_color]((rand(),rand(),rand()))
+    circles = [c]
+    ax[:add_patch](c)
 
     #     for k in 2:numberofcells
     #         c = patch.Circle(d_pos[k][1],radiusdisk)
@@ -76,6 +77,7 @@ function visualize(simulation_results, radiusparticle)
     puntual = [p]
     ax[:add_patch](p)
     plt.gca()[:set_aspect]("equal")
+
     drawwalls(board, ax)
 
     #     initialenergy = energy(massdisk,massparticle, [particle_velocities[1], particle_velocities[2]],
@@ -97,6 +99,8 @@ function visualize(simulation_results, radiusparticle)
         k = findfirst(z,false) - 1
 
         if k == 0
+            c[:center] = (disk_positions[1],disk_positions[2])
+
             #             for j in 1:numberofcells
             #                 circles[j][:center] = (d_pos[j][1][1], d_pos[j][1][2])
             #             end
@@ -108,7 +112,7 @@ function visualize(simulation_results, radiusparticle)
             #             for j in 1:numberofcells
             #                 circles[j][:center] = (d_pos[j][k][1] + d_vel[j][k][1]*(i/10-time[k]), d_pos[j][k][2] + d_vel[j][k][2]*(i/10-time[k]))
             #             end
-
+            circles[1][:center] = (disk_positions[1+2*(k-1)] + disk_velocities[1+2*(k-1)]*(i/10-time[k]), disk_positions[2+2*(k-1)]+disk_velocities[2+2*(k-1)]*(i/10-time[k]))
             puntual[1][:center] = (particle_positions[1+2*(k-1)] + particle_velocities[1+2*(k-1)]*(i/10-time[k]), particle_positions[2+2*(k-1)]+particle_velocities[2+2*(k-1)]*(i/10-time[k]))
 
             #             e_text = energy(massdisk,massparticle, [particle_velocities[1+2*(k-1)], particle_velocities[2+2*(k-1)]],
@@ -118,7 +122,7 @@ function visualize(simulation_results, radiusparticle)
             #             l[:set_data](update_line(d_vel,k, numberofcells, massdisk))
         end
 
-        return (puntual,)
+        return (puntual, circles, )
 
         #         return (circles, puntual,l)
     end
