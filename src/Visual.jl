@@ -155,17 +155,17 @@ function drawwalls(board::Board, ax)
     #     velocitydisk = norm(cell.disk.v)
     #     windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
 
-
+    ##Notation for lines: from x1,y1, to x2, y2, Line2D([x1,x2],[y1,y2])
     walls = cell.walls
     line1 = lines.Line2D([walls[1].x,walls[1].x],[walls[1].y[1],walls[1].y[2]])
-    #line2 = lines.Line2D([walls[2].x[1],walls[2].x[2]],[walls[2].y,walls[2].y])
-    #line3 = lines.Line2D([walls[3].x[1],walls[3].x[2]],[walls[3].y,walls[3].y])
+    line2 = lines.Line2D([walls[2].x[1],walls[2].x[2]],[walls[2].y,walls[2].y])
+    line3 = lines.Line2D([walls[3].x[1],walls[3].x[2]],[walls[3].y,walls[3].y])
     line4 = lines.Line2D([walls[4].x,walls[4].x],[walls[4].y[1],walls[4].y[2]])
     line5 = lines.Line2D([walls[4].x,walls[4].x],[walls[4].y[3],walls[4].y[4]])
     line6 = lines.Line2D([walls[1].x,walls[1].x],[walls[1].y[3],walls[1].y[4]])
     ax[:add_line](line1)
-    #ax[:add_line](line2)
-    #ax[:add_line](line3)
+    ax[:add_line](line2)
+    ax[:add_line](line3)
     ax[:add_line](line4)
     ax[:add_line](line5)
     ax[:add_line](line6)
@@ -174,14 +174,20 @@ function drawwalls(board::Board, ax)
     ymin = walls[2].y
     ymax = walls[3].y
 
-
-
     numberofcells = abs(label2 - label1)
-    xmax = walls[4].x + (numberofcells)*size_x
+
+    if label1 == 0 || label2 == 0
+        numberofcells = abs(label2 - label1) + 1
+    end
+
+    xmax = walls[4].x + (numberofcells-1)*size_x
+
+
+
 
     if numberofcells >= 2
-        line2 = lines.Line2D([walls[2].x[1],walls[2].x[2] + (numberofcells)*size_x],[walls[2].y,walls[2].y])
-        line3 = lines.Line2D([walls[3].x[1],walls[3].x[2]+ (numberofcells)*size_x],[walls[3].y,walls[3].y])
+        line2 = lines.Line2D([walls[2].x[1],walls[2].x[2] + (numberofcells-1)*size_x],[walls[2].y,walls[2].y])
+        line3 = lines.Line2D([walls[3].x[1],walls[3].x[2]+ (numberofcells-1)*size_x],[walls[3].y,walls[3].y])
         ax[:add_line](line2)
         ax[:add_line](line3)
         for i in 1:numberofcells
@@ -190,7 +196,9 @@ function drawwalls(board::Board, ax)
             ax[:add_line](line4)
             ax[:add_line](line5)
         end
+
     end
+
     ax[:set_xlim](xmin,xmax)
     ax[:set_ylim](ymin,ymax+1.)
 end

@@ -5,56 +5,68 @@ using Lexicon
 using Objects
 using DataStructures
 
-export create_board_with_particle, create_initial_cell, create_new_left_cell, create_new_right_cell
+export create_board_with_particle, create_new_left_cell, create_new_right_cell
 
-@doc doc"""Creates an random Array(Vector) of *dimension* dim with limits: liminf, limsup""" ->
+@doc """#randuniform(liminf, limsup, dim=1)
+Creates an random Array(Vector) of *dimension* dim with limits: liminf, limsup""" ->
 function randuniform(liminf, limsup, dim=1)
     liminf + rand(dim)*(limsup - liminf)
 end
 
-
+@doc """#overlap(::Particle,::Disk)
+Check if a Particle and a Disk overlap. Return a Boolean"""->
 function overlap(p::Particle, d::Disk)
     deltar = d.r - p.r
     r = norm(deltar)
     return r < d.radius
 end
 
-@doc doc"""Creates a Particle enclosed in a box with boundaries at Lx1, Lx2, Ly1, Ly2; and with a random velocity
-of constant norm"""->
-function create_particle(Lx1,Lx2,Ly1,Ly2, mass, velocity, numberofcell)
+@doc doc"""#create_particle(Lx1,Lx2,Ly1,Ly2, mass, velocitynorm, numberofcell::Int)
+Creates a Particle with Cartesian coordinates between the boundaries Lx1, Lx2, Ly1, Ly2; and a random velocity
+of constant norm. It is worth noting that the passed parameters define corners with Cartesian coordinates:
+> (Lx1,Ly1),(Lx1, y2), (Lx2,Ly1), (Lx2,Ly2).
+"""->
+function create_particle(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real, mass::Real, velocitynorm::Real, numberofcell::Int)
     x = randuniform(Lx1, Lx2)
     y = randuniform(Ly1, Ly2)
     theta = rand()*2*pi
-    vx = cos(theta)*velocity
-    vy = sin(theta)*velocity
+    vx = cos(theta)*velocitynorm
+    vy = sin(theta)*velocitynorm
     v = [vx, vy]
     Particle([x,y],v, mass, numberofcell,0)
 end
 
-@doc doc"""Creates a Disk enclosed in a box with boundaries Lx1, Lx2, Ly1, Ly2; and with a random velocity
-of constant norm"""->
-function create_disk(Lx1,Lx2,Ly1,Ly2,radius, mass, normvelocity,numberofcell)
+@doc doc"""#create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocitynorm, numberofcell::Int)
+Creates a Disk enclosed in a box with boundaries Lx1, Lx2, Ly1, Ly2; and a random velocity
+of constant norm. It is worth noting that the passed parameters define  corners with Cartesian coordinates:
+> (Lx1,Ly1),(Lx1, y2), (Lx2,Ly1), (Lx2,Ly2). """->
+function create_disk(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real,radius::Real, mass::Real, velocitynorm::Real, numberofcell::Int)
     x = randuniform(Lx1 + radius, Lx2 - radius)
     y = randuniform(Ly1 + radius, Ly2 - radius)
     theta = rand()*2*pi
-    vx = cos(theta)*normvelocity
-    vy = sin(theta)*normvelocity
+    vx = cos(theta)*velocitynorm
+    vy = sin(theta)*velocitynorm
     v = [vx, vy]
     Disk([x,y],v,radius, mass,numberofcell)
 end
 
-@doc """Gives the y-coordinates for the window at the sharedwalls exactly at half of the height of
-the cell"""->
-function create_window(Ly1, Ly2, windowsize)
+@doc """#create_window(Ly1, Ly2, windowsize)
+Returns the extrema y-coordinates for a window with size windowsize centered between Ly1 and Ly2 (regardless of
+the x-coordinate).
+"""->
+function create_window(Ly1::Real, Ly2::Real, windowsize::Real)
     Ly3 = Ly1 + (Ly2 - Ly1)/2. - windowsize/2.
     Ly4 = Ly3 + windowsize
     Ly3, Ly4
 end
 
-@doc """Creates the initial cell with the size and initial coordinates for s and y specified. Inside of this
-it creates a particle with a uniform sampling"""->
-function create_initial_cell_with_particle( Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
+@doc """#create_initial_cell_with_particle( Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
                                            massparticle, velocityparticle, windowsize)
+Creates an instance of Cell. Size of its sides and initial coordinates for the left down corner are passed (Lx1,Ly1)
+together with the needed data to create the embedded disk and a particle inside the cell."""->
+function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk,
+                                           massdisk::Real, velocitydisk::Real,
+                                           massparticle::Real, velocityparticle::Real, windowsize::Real)
     Lx2 = Lx1 + size_x
     Ly2 = Ly1 + size_y
     Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
@@ -73,7 +85,8 @@ function create_initial_cell_with_particle( Lx1, Ly1,size_x,size_y,radiusdisk, m
     cell, particle
 end
 
-@doc """Extract the general data associated to the initial cell"""->
+@doc """#parameters_to_create_a_new_cell(::Cell)
+Extract the general data associated to a previous created cell"""->
 function parameters_to_create_a_new_cell(cell::Cell)
     size_x = cell.walls[4].x - cell.walls[1].x
     size_y = cell.walls[3].y - cell.walls[2].y
@@ -85,6 +98,10 @@ function parameters_to_create_a_new_cell(cell::Cell)
 end
 
 
+@doc """#create_new_right_cell(::Cell,::Particle)
+Creates a new cell that shares the rightmost verticalwall of the passed cell. A Particle is passed
+to avoid overlap with the embedded Disk.
+"""->
 function create_new_right_cell(cell::Cell, particle::Particle)
     size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
 
@@ -107,6 +124,10 @@ function create_new_right_cell(cell::Cell, particle::Particle)
 end
 
 
+@doc """#create_new_left_cell(::Cell,::Particle)
+Creates a new cell that shares the leftmost verticalwall of the passed cell. A Particle is passed
+to avoid overlap with the embedded Disk.
+"""->
 function create_new_left_cell(cell::Cell, particle::Particle)
     size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
 
@@ -128,9 +149,13 @@ function create_new_left_cell(cell::Cell, particle::Particle)
     cell
 end
 
-@doc """Returns a Board instance with one cell and the particle located inside it"""->
-function create_board_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
+@doc """#create_board_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
                                     massparticle, velocityparticle, windowsize)
+Returns a Board instance with one cell and a particle inside it (that is also returned). Size of its sides and initial coordinates for the left down corner are passed (Lx1,Ly1)
+together with the needed data to create the embedded disk and a particle inside the cell. """->
+function create_board_with_particle(Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk,
+                                    massdisk::Real, velocitydisk::Real,
+                                    massparticle::Real, velocityparticle::Real, windowsize::Real)
     cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
                                                        massparticle, velocityparticle, windowsize)
     board = Deque{Cell}()

@@ -53,12 +53,12 @@ type Board
     cells::Deque{Cell}
 end
 
-@doc doc"""Type with attributes x and y. x corresponds to its horizontal position in a Cartesian Plane
-(just a number) and y represents its initial and final height in the Plane (Array of length equal to 2)."""  ->
-immutable VerticalWall <: Vertical
-  x :: Float64
-  y :: Array{Float64,1}
-end
+# @doc doc"""Type with attributes x and y. x corresponds to its horizontal position in a Cartesian Plane
+# (just a number) and y represents its initial and final height in the Plane (Array of length equal to 2)."""  ->
+# immutable VerticalWall <: Vertical
+#   x :: Float64
+#   y :: Array{Float64,1}
+# end
 
 @doc doc"""Type with attributes x and y. x corresponds to its horizontal extension in a Cartesian plane
 (initial and final position -Array of length equal to 2- and y corresponds to its vertical position
