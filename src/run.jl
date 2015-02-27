@@ -27,6 +27,10 @@ parameters = Dict(:t_initial => 0,
 
 sim = simulation(;parameters...);
 @time visualize(sim, radiustovisualizeparticle);
+delta_e_max, = findmax(sim[end])
+delta_e_min, = findmin(sim[end])
+
+println("Delta_E_max y Delta_E_min = $(delta_e_max),$(delta_e_min)")
 
 # if (ARGS)[1] != 0
 #     if ARGS[1] == "true"

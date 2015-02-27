@@ -223,6 +223,7 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
     disk_positions_front, disk_velocities_front, disk_positions_back, disk_velocities_back = createanimationlists(board)
     initialcell = front(board.cells)
     label = 0
+    delta_e = [0.]
     while(!isempty(pq))
         label += 1
         event = dequeue!(pq)
@@ -233,7 +234,10 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
             move(board,particle,event.time-t)
             t = event.time
             push!(time,t)
+            e1 = energy(event.referenceobject,event.diskorwall)
             new = collision(event.referenceobject,event.diskorwall, board)
+            e2 = energy(event.referenceobject,event.diskorwall)
+            push!(delta_e, e2 - e1)
             updateanimationlists!(particle_positions, particle_velocities,particle)
             updateanimationlists!(disk_positions_front, disk_velocities_front,front(board.cells))
             updateanimationlists!(disk_positions_back,disk_velocities_back,back(board.cells))
@@ -241,7 +245,7 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
         end
     end
     push!(time, t_max)
-    board, particle, particle_positions, particle_velocities, time, disk_positions_front, disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back
+    board, particle, particle_positions, particle_velocities, time, disk_positions_front, disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back, delta_e
 end
 
 # function energy(mass_disks, mass_particle, v_particle, v_disks)
@@ -260,6 +264,22 @@ function energy(mass_disks, mass_particle, v_particle, v_disks)
 
     e
 end
+
+function energy(particle::Particle,wall::Wall)
+    particle.mass*dot(particle.v,particle.v)/2.
+end
+
+function energy(disk::Disk,wall::Wall)
+    disk.mass*dot(disk.v,disk.v)/2.
+end
+
+function energy(particle::Particle,disk::Disk)
+    disk.mass*dot(disk.v,disk.v)/2. + particle.mass*dot(particle.v,particle.v)/2.
+end
+
+#energy(disk::Disk, particle::Particle) = energy(particle::Particle,disk::Disk)
+
+
 
 #Fin del módulo
 end

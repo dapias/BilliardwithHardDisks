@@ -27,7 +27,7 @@ function visualize(simulation_results, radiusparticle)
     #board, particle, disks_positions, particle_positions, disks_velocities, particle_velocities, time = simulation_results
 
 board, particle, particle_positions, particle_velocities, time, disk_positions_front,
-    disk_velocities_front, disk, disk_positions_back,disk_velocities_back = simulation_results
+    disk_velocities_front, disk, disk_positions_back,disk_velocities_back, delta_e = simulation_results
 
     radiusdisk = disk.radius
     #numberofcells = length(board.cells)
@@ -50,12 +50,13 @@ board, particle, particle_positions, particle_velocities, time, disk_positions_f
     xmin, = findmin(px)
     ymin, = findmin(py)
 
+    #fig = plt.figure()
+    #ax = fig[:add_axes]([0.05, 0.05, 0.8, 0.8])
 
     fig = plt.figure()
-
     ax = fig[:add_subplot](111)
-
-    #energy_text = ax[:text](0.02,0.9,"",transform=ax[:transAxes])
+    energy_text = ax[:text](0.02,0.88,"",transform=ax[:transAxes])
+    time_text = ax[:text](0.70,0.88,"",transform=ax[:transAxes])
     #ax[:set_xlim](Lx1, Lx1 + numberofcells*size_x)
     #ax[:set_ylim](Ly1, Ly1 + size_y + 1.0)
 
@@ -123,9 +124,10 @@ board, particle, particle_positions, particle_velocities, time, disk_positions_f
             circles[1][:center] = (disk_positions_front[1+2*(k-1)] + disk_velocities_front[1+2*(k-1)]*(i/10-time[k]), disk_positions_front[2+2*(k-1)]+disk_velocities_front[2+2*(k-1)]*(i/10-time[k]))
             puntual[1][:center] = (particle_positions[1+2*(k-1)] + particle_velocities[1+2*(k-1)]*(i/10-time[k]), particle_positions[2+2*(k-1)]+particle_velocities[2+2*(k-1)]*(i/10-time[k]))
              circles[2][:center] = (disk_positions_back[1+2*(k-1)] + disk_velocities_back[1+2*(k-1)]*(i/10-time[k]), disk_positions_back[2+2*(k-1)]+disk_velocities_back[2+2*(k-1)]*(i/10-time[k]))
-            #             e_text = energy(massdisk,massparticle, [particle_velocities[1+2*(k-1)], particle_velocities[2+2*(k-1)]],
-            #                             [d_vel[j][k] for j in 1:numberofcells])
-            #             energy_text[:set_text]("Energy = $(e_text)")
+            e_text = delta_e[k]
+            t_text = time[k]
+            energy_text[:set_text]("Delta_E = $(e_text)")
+            time_text[:set_text]("Time = $(t_text)")
 
             #             l[:set_data](update_line(d_vel,k, numberofcells, massdisk))
         end
@@ -135,7 +137,7 @@ board, particle, particle_positions, particle_velocities, time, disk_positions_f
         #         return (circles, puntual,l)
     end
 
-    anim = animation.FuncAnimation(fig, animate, frames=1000, interval=20, blit=false, repeat = false)
+    anim = animation.FuncAnimation(fig, animate, frames=int(time[end]*10), interval=20, blit=false, repeat = false)
 
 end
 
@@ -190,7 +192,7 @@ function drawwalls(board::Board, ax)
         end
     end
     ax[:set_xlim](xmin,xmax)
-    ax[:set_ylim](ymin,ymax)
+    ax[:set_ylim](ymin,ymax+1.)
 end
 
 
