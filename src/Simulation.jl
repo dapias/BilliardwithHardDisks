@@ -1,17 +1,12 @@
 include("./Objects.jl")
-include("./Initialize.jl")
-include("./Rules.jl")
+
 
 module Simulation
 
 VERSION < v"0.4-" && using Docile
 
-using Objects
-#using Rules
-using Initialize
+importall Objects
 using DataStructures
-
-importall Rules
 import Base.isless
 importall Base.Collections
 export simulation

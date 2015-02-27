@@ -56,7 +56,7 @@ board, particle, particle_positions, particle_velocities, time, disk_positions_f
     fig = plt.figure()
     ax = fig[:add_subplot](111)
     energy_text = ax[:text](0.02,0.88,"",transform=ax[:transAxes])
-    time_text = ax[:text](0.70,0.88,"",transform=ax[:transAxes])
+    time_text = ax[:text](0.60,0.88,"",transform=ax[:transAxes])
     #ax[:set_xlim](Lx1, Lx1 + numberofcells*size_x)
     #ax[:set_ylim](Ly1, Ly1 + size_y + 1.0)
 
