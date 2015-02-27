@@ -1,7 +1,7 @@
 module Initialize
 
 VERSION < v"0.4-" && using Docile
-
+using Lexicon
 using Objects
 using DataStructures
 
@@ -51,59 +51,64 @@ function create_window(Ly1, Ly2, windowsize)
     Ly3, Ly4
 end
 
-
+@doc """Creates the initial cell with the size and initial coordinates for s and y specified. Inside of this
+it creates a particle with a uniform sampling"""->
 function create_initial_cell_with_particle( Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                             massparticle, velocityparticle, windowsize)
+                                           massparticle, velocityparticle, windowsize)
     Lx2 = Lx1 + size_x
     Ly2 = Ly1 + size_y
     Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
     nofcell = 0
-    wall1 = VerticalSharedWall(Lx1,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell-1))
+    leftsharedwall = VerticalSharedWall(Lx1,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell-1))
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-    sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
+    rightsharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
     particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
     while overlap(particle,disk)
         disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
         particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
     end
-    cell = Cell([wall1,wall2,wall3,sharedwall],disk,nofcell)
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell)
     cell, particle
 end
 
-function create_new_right_cell(cell)
+@doc """Extract the general data associated to the initial cell"""->
+function parameters_to_create_a_new_cell(cell::Cell)
     size_x = cell.walls[4].x - cell.walls[1].x
     size_y = cell.walls[3].y - cell.walls[2].y
     radiusdisk = cell.disk.radius
     massdisk = cell.disk.mass
     velocitydisk = norm(cell.disk.v)                      ######Ver la forma de mejorar esto
     windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
+    size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize
+end
 
-    wall1 = cell.walls[end]
+
+function create_new_right_cell(cell::Cell, particle::Particle)
+    size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
+
+    leftsharedwall = cell.walls[end]
     Lx1 = cell.walls[end].x
     Ly1 = cell.walls[end].y[1]
     Lx2 = Lx1 + size_x
-    Ly2 = size_y + Ly1
+    Ly2 = Ly1 + size_y
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
     Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
     nofcell  = cell.numberofcell +1
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
-    sharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
-    cell = Cell([wall1,wall2,wall3,sharedwall],disk,nofcell)
+    while overlap(particle,disk)
+        disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
+    end
+    rightsharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell)
     cell
 end
 
 
-function create_new_left_cell(cell)
-    size_x = cell.walls[4].x - cell.walls[1].x
-    size_y = cell.walls[3].y - cell.walls[2].y
-    radiusdisk = cell.disk.radius
-    massdisk = cell.disk.mass
-    velocitydisk = norm(cell.disk.v)                           ######Ver la forma de mejorar esto. ¿Tal vez con una
-                                                                      ##variable global?
-    windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
+function create_new_left_cell(cell::Cell, particle::Particle)
+    size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
 
     Lx2 = cell.walls[1].x
     Ly1 = cell.walls[1].y[1]
@@ -111,42 +116,28 @@ function create_new_left_cell(cell)
     Ly2 = Ly1 + size_y
     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-    wall4 = cell.walls[1]
+    rightsharedwall = cell.walls[1]
     Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
     nofcell  = cell.numberofcell - 1
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk,nofcell)
-    sharedwall = VerticalSharedWall(Lx1,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell-1))
-    cell = Cell([sharedwall,wall2,wall3,wall4],disk,nofcell)
+    while overlap(particle,disk)
+        disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
+    end
+    leftsharedwall = VerticalSharedWall(Lx1,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell-1))
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell)
     cell
 end
 
-# function create_last_right_cell(cell,size_x,size_y, radiusdisk, massdisk, velocitydisk)
-#     wall1 = cell.walls[end]
-#     Lx1 = cell.walls[end].x
-#     Lx2 = Lx1 + size_x
-#     Ly1 = cell.walls[end].y[1]
-#     Ly2 = size_y + Ly1
-#     wall2 = HorizontalWall([Lx1,Lx2],Ly1)
-#     wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-#     wall4 = VerticalWall(Lx2,[Ly1,Ly2])
-#     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk)
-#     nofcell  = cell.numberofcell +1
-#     disk.numberofcell = nofcell
-#     cell = Cell([wall1,wall2,wall3,wall4],disk,nofcell)
-#     cell
-# end
-
+@doc """Returns a Board instance with one cell and the particle located inside it"""->
 function create_board_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                massparticle, velocityparticle, windowsize)
+                                    massparticle, velocityparticle, windowsize)
     cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                massparticle, velocityparticle, windowsize)
+                                                       massparticle, velocityparticle, windowsize)
     board = Deque{Cell}()
     push!(board,cell)
     board = Board(board)
     board, particle
 end
-
-
 
 end
 

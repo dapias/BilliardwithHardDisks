@@ -1,11 +1,11 @@
 module Objects
 
 VERSION < v"0.4-" && using Docile
-
+using Lexicon
 using DataStructures
 
-export Wall, Disk, Object, DynamicObject
-export VerticalWall, HorizontalWall, Event, Cell, VerticalSharedWall, Particle, Board, Vertical
+export Wall, Disk, DynamicObject
+export HorizontalWall, Event, Cell, VerticalSharedWall, Particle, Board, Vertical
 
 abstract Object
 abstract DynamicObject <: Object
@@ -22,8 +22,6 @@ type Particle <: DynamicObject
     lastcollision::Int
 end
 
-#Particle(r,v) = Particle(r,v,1.,1,0)  #Default values: mass equal to 1; numberofcell: 1; lastcollision:0.
-#Particle(r,v,mass) = Particle(r,v,mass,1,0)
 Particle(r,v, mass, numberofcell) = Particle(r,v,mass , numberofcell, 0)
 
 @doc """Type with attributes position(r), velocity(v), radiusm mass, numberofcell and lastcollision. This last label has to be
@@ -37,9 +35,6 @@ type Disk <: DynamicObject
   lastcollision ::Int
 end
 
-
-#Disk(r,v,radius) = Disk(r,v,radius,1.0,1,0) #Fixed mass of 1.0.
-#Disk(r,v,radius, mass) = Disk(r,v,radius, mass , 1, 0)
 Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
 
 
@@ -71,7 +66,6 @@ end
 immutable HorizontalWall <:Wall
   x :: Array{Float64,1}
   y :: Float64
-
 end
 
 
@@ -85,7 +79,7 @@ end
 within the main loop in which the event was predicted (see simulation in simulation.jl)."""->
 type Event
     time :: Number
-    referenceobject::DynamicObject   #Revisar en el diseño si conviene más tener un sólo objeto
+    referenceobject::DynamicObject           #Revisar en el diseño si conviene más tener un sólo objeto
     diskorwall ::Object                      ##tal como cell asociado a un evento y la partícula dentro de cell.
     whenwaspredicted:: Int
 end

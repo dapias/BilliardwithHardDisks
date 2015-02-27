@@ -3,7 +3,7 @@
 module Rules
 
 VERSION < v"0.4-" && using Docile
-
+using Lexicon
 using DataStructures
 using Initialize
 using Objects
@@ -153,7 +153,7 @@ end
 
 ###############Disk##################################################
 
-@doc doc"""Update the velocity vector of a disk (Disk.v) after it collides with a VerticalWall."""->
+@doc doc"""Update the velocity vector of a disk (Disk.v) after it collides with a Vertical(Wall)."""->
 function collision(d::Disk, V::Vertical,b::Board)
     d.v = [-d.v[1], d.v[2]]
 end
@@ -164,9 +164,9 @@ function collision(d::Disk, H::HorizontalWall, b::Board)
 end
 
 ###################Particle##############################################33
-function collision(p::Particle, V::VerticalWall, b::Board )
-    p.v = [-p.v[1], p.v[2]]
-end
+# function collision(p::Particle, V::VerticalWall, b::Board )
+#     p.v = [-p.v[1], p.v[2]]
+# end
 
 function collision(p::Particle, H::HorizontalWall, b::Board )
     p.v = [p.v[1],-p.v[2]]
@@ -200,10 +200,10 @@ end
 
 function newcell!(b::Board, p::Particle)
     if back(b.cells).numberofcell - 1 == p.numberofcell
-        cell = create_new_left_cell(back(b.cells))
+        cell = create_new_left_cell(back(b.cells),p)
         push!(b.cells, cell)
     elseif front(b.cells).numberofcell + 1 == p.numberofcell
-        cell = create_new_right_cell(front(b.cells))
+        cell = create_new_right_cell(front(b.cells),p)
         unshift!(b.cells,cell)
     end
 end

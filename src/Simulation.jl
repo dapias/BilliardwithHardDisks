@@ -14,7 +14,7 @@ using DataStructures
 importall Rules
 import Base.isless
 importall Base.Collections
-export simulation, energy
+export simulation
 
 #This allows to use the PriorityQueue providing a criterion to select the priority of an Event.
 isless(e1::Event, e2::Event) = e1.time < e2.time
