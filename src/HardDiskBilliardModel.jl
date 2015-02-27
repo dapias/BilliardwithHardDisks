@@ -1,4 +1,10 @@
-module Objects
+module HardDiskBilliardModel
+
+#######################################
+#This module contains the needed Types and methods to implement a Simulation of a Billiard
+#consisted of a particle that travels along a horizontal board that consists of cells with a
+#circumscribed disk that can exchange energy with the particle.
+#######################################
 
 VERSION < v"0.4-" && using Docile
 using Lexicon

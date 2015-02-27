@@ -3,7 +3,7 @@ module Visual
 VERSION < v"0.4-" && using Docile
 
 using Simulation
-using Objects
+using HardDiskBilliardModel
 using PyPlot
 using PyCall
 using DataStructures

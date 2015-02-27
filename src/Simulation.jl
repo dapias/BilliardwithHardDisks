@@ -1,11 +1,11 @@
-include("./Objects.jl")
+include("./HardDiskBilliardModel.jl")
 
 
 module Simulation
 
 VERSION < v"0.4-" && using Docile
 
-importall Objects
+importall HardDiskBilliardModel
 using DataStructures
 import Base.isless
 importall Base.Collections

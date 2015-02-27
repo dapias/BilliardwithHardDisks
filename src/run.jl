@@ -12,7 +12,7 @@ using Compat  ## To handle versions less than 0.4
 
 # To change a parameter, type: parameters[:nameofsymbol] = valueyouwanttoset
 parameters = @ compat Dict(:t_initial => 0,
-                  :t_max => 50,
+                  :t_max => 100,
                   :radiusdisk => 1.0,
                   :massdisk => 1.0,
                   :velocitydisk => 1.0,
@@ -25,6 +25,7 @@ parameters = @ compat Dict(:t_initial => 0,
                   :velocityparticle => 1.0
                   )
 
+parameters[:t_max] = 50
 radiustovisualizeparticle = 0.02
 sim = simulation(;parameters...);
 @time visualize(sim, radiustovisualizeparticle);
