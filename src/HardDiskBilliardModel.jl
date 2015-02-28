@@ -10,7 +10,7 @@ VERSION < v"0.4-" && using Docile
 using Lexicon
 using DataStructures
 
-export Wall, Disk, Event, Cell, Particle, Board
+export Wall, Disk, Event, Cell, Particle, Board, Object, DynamicObject
 export create_board_with_particle
 export move, dtcollision, collision
 
@@ -20,7 +20,10 @@ abstract Wall <: Object
 abstract Vertical <: Wall
 
 @doc """Type with attributes position(r), velocity(v), mass, numberofcell and lastcollision. This last label has to be
-with the main loop of the simulation (see *simulation.jl*)"""->
+with the main loop of the simulation (see *simulation* in **Simulation.jl**).
+##Example
+particle = Particle([0.,0.],[1.,1.],1.0,0,0)
+"""->
 type Particle <: DynamicObject
     r::Array{Float64,1}
     v::Array{Float64,1}
@@ -31,8 +34,10 @@ end
 
 Particle(r,v, mass, numberofcell) = Particle(r,v,mass , numberofcell, 0)
 
-@doc """Type with attributes position(r), velocity(v), radiusm mass, numberofcell and lastcollision. This last label has to be
-with the main loop of the simulation (see *simulation.jl*)"""->
+@doc """Type with attributes position(r), velocity(v), radius, mass, numberofcell and lastcollision. This last label has to be
+with the main loop of the simulation (see *simulation* in **Simulation.jl**)
+##Example
+disk = Disk([0.,0.],[1.,1.],1.0,0,0)"""->
 type Disk <: DynamicObject
   r::Array{Float64,1}
   v::Array{Float64,1}
@@ -45,7 +50,10 @@ end
 Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
 
 
-@doc """Type that *contains* walls, a disk and a label called numberofcell"""->
+@doc """Type that *contains* walls (array of Wall), a disk and a label called numberofcell
+##Example
+cell = Cell([wall1,wall2,wall3,wall4],disk,0)
+"""->
 type Cell
     walls::Vector{Wall}
     disk::Disk
@@ -55,7 +63,10 @@ end
 #Cell(walls,label) = Cell(walls,label,Disk([-100.,-100.],[0.,0.],0.))
 
 @doc doc"""Type that is implemented as a Deque(Double-ended queue) of Cells. It allows to insert
-new cells as the particle diffuses"""->
+new cells as the particle diffuses
+##Example
+board = board = Deque{Cell}(cell)
+"""->
 type Board
     cells::Deque{Cell}
 end
@@ -68,25 +79,41 @@ end
 # end
 
 @doc doc"""Type with attributes x and y. x corresponds to its horizontal extension in a Cartesian plane
-(initial and final position -Array of length equal to 2- and y corresponds to its vertical position
-(a number).""" ->
+(initial and final position) and y corresponds to its vertical position.
+##Example
+HW = HorizontalWall([x1, x2],y)
+""" ->
 immutable HorizontalWall <:Wall
   x :: Array{Float64,1}
   y :: Float64
 end
 
-
+@doc doc"""Type with attributes x, y and sharedcells. x corresponds to the horizontal position, y is an array that
+contains the information of the initial and the final vertical position of the wall and of a window located in the wall.
+It is given in the form `[y1wall,y1window,y2window,y2wall]`.
+The attribute sharedcells is a tuple that contains the label associated to the cells that share the wall.
+##Example
+VW = VerticalSharedWall(0.,[1.,2.,3.,4.],(0,1))
+"""->
 immutable VerticalSharedWall <: Vertical
   x :: Float64
   y :: Array{Float64,1}  #Array of a length greater than the VerticalWall
   sharedcells::(Int,Int) #Adjacent cells that share the wall
 end
 
-@doc doc"""Type with attributes time, referenceobject, diskorwall and whenwaspredicted. The last attribute makes reference to the cycle
-within the main loop in which the event was predicted (see simulation in simulation.jl)."""->
+@doc doc"""Type with attributes time, dynamicobject, diskorwall and whenwaspredicted. It is the basic unit of information
+for the implementation of a simulation, since it stores the basic information about a collision (what time, with whom and
+when was predicted). The last attributte makes reference to the cycle within the main loop in which the event was predicted
+(see *simulation* in **Simulation.jl**).
+##Example
+`event = Event(10.,particle,horizontalwall,2)`
+
+It says that in the cycle 2 of the main loop an event (aka collision) is predicted between a particle and a horizontalwall.
+It would occur at time 10.0.
+"""->
 type Event
-    time :: Number
-    referenceobject::DynamicObject           #Revisar en el diseño si conviene más tener un sólo objeto
+    time :: Real
+    dynamicobject::DynamicObject           #Revisar en el diseño si conviene más tener un sólo objeto
     diskorwall ::Object                      ##tal como cell asociado a un evento y la partícula dentro de cell.
     whenwaspredicted:: Int
 end
@@ -489,7 +516,7 @@ end
 
 @doc """#newcell!(::Board, ::Particle)
 Introduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
-It may pushes the cell at the left or right side of the board to mantain the order in the **Dequeue** structure of the
+It may pushes the cell at the left or right side of the board to mantain the order in the **Deque** structure of the
 board: at the back the leftmost cell, at front the rightmost cell."""->
 function newcell!(b::Board, p::Particle)
     if back(b.cells).numberofcell - 1 == p.numberofcell

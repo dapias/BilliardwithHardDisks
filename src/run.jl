@@ -1,17 +1,20 @@
 ##################
 #In this file the main functions of the project are called,
-#i.e. *simulation* from main.jl and *visualizate* from visualization.jl.
+#i.e. *simulation* or *animatedsimulation* from HardDiskBilliardSimulation.jl and *visualize* from
+#Visual.jl.
 ###########################
 
-include("./Simulation.jl")
-include("./Visual.jl")
-using Simulation
+#include("./HardDiskBilliardSimulation.jl")
+#include("./Visual.jl")
+
+push!(LOAD_PATH,"./")
+using HardDiskBilliardSimulation
 using Visual
 using Compat  ## To handle versions less than 0.4
 
-
+visual = false
 # To change a parameter, type: parameters[:nameofsymbol] = valueyouwanttoset
-parameters = @ compat Dict(:t_initial => 0,
+parameters = @compat Dict(:t_initial => 0,
                   :t_max => 100,
                   :radiusdisk => 1.0,
                   :massdisk => 1.0,
@@ -24,15 +27,20 @@ parameters = @ compat Dict(:t_initial => 0,
                   :size_y => 3.,                     #Size of the cell in y
                   :velocityparticle => 1.0
                   )
+parameters[:t_max] = 1000000
 
-parameters[:t_max] = 50
-radiustovisualizeparticle = 0.02
-sim = simulation(;parameters...);
-@time visualize(sim, radiustovisualizeparticle);
-delta_e_max, = findmax(sim[end])
-delta_e_min, = findmin(sim[end])
+if visual
+    radiustovisualizeparticle = 0.02
+    sim = animatedsimulation(;parameters...);
+    @time visualize(sim, radiustovisualizeparticle);
+    delta_e_max, = findmax(sim[end])
+    delta_e_min, = findmin(sim[end])
+    println("Delta_E_max, Delta_E_min = $(delta_e_max),$(delta_e_min)")
+else
+    @time sim = simulation(;parameters...);
+end
 
-println("Delta_E_max y Delta_E_min = $(delta_e_max),$(delta_e_min)")
+
 
 # if (ARGS)[1] != 0
 #     if ARGS[1] == "true"
