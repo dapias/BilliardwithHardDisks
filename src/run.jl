@@ -27,7 +27,7 @@ parameters = @compat Dict(:t_initial => 0,
                   :size_y => 3.,                     #Size of the cell in y
                   :velocityparticle => 1.0
                   )
-parameters[:t_max] = 1000000
+parameters[:t_max] = 100
 
 if visual
     radiustovisualizeparticle = 0.02
