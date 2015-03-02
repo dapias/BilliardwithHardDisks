@@ -25,11 +25,11 @@ with the main loop of the simulation (see *simulation* in **Simulation.jl**).
 particle = Particle([0.,0.],[1.,1.],1.0,0,0)
 """->
 type Particle <: DynamicObject
-    r::Array{Float64,1}
-    v::Array{Float64,1}
-    mass::Float64
-    numberofcell::Int
-    lastcollision::Int
+    r::Array{Real,1}
+    v::Array{Real,1}
+    mass::Real
+    numberofcell::Integer
+    lastcollision::Integer
 end
 
 Particle(r,v, mass, numberofcell) = Particle(r,v,mass , numberofcell, 0)
@@ -39,12 +39,12 @@ with the main loop of the simulation (see *simulation* in **Simulation.jl**)
 ##Example
 disk = Disk([0.,0.],[1.,1.],1.0,0,0)"""->
 type Disk <: DynamicObject
-  r::Array{Float64,1}
-  v::Array{Float64,1}
-  radius::Float64
-  mass::Float64
-  numberofcell::Int
-  lastcollision ::Int
+  r::Array{Real,1}
+  v::Array{Real,1}
+  radius::Real
+  mass::Real
+  numberofcell::Integer
+  lastcollision ::Integer
 end
 
 Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
@@ -57,7 +57,7 @@ cell = Cell([wall1,wall2,wall3,wall4],disk,0)
 type Cell
     walls::Vector{Wall}
     disk::Disk
-    numberofcell::Int
+    numberofcell::Integer
 end
 
 #Cell(walls,label) = Cell(walls,label,Disk([-100.,-100.],[0.,0.],0.))
@@ -74,8 +74,8 @@ end
 # @doc doc"""Type with attributes x and y. x corresponds to its horizontal position in a Cartesian Plane
 # (just a number) and y represents its initial and final height in the Plane (Array of length equal to 2)."""  ->
 # immutable VerticalWall <: Vertical
-#   x :: Float64
-#   y :: Array{Float64,1}
+#   x :: Real
+#   y :: Array{Real,1}
 # end
 
 @doc doc"""Type with attributes x and y. x corresponds to its horizontal extension in a Cartesian plane
@@ -84,8 +84,8 @@ end
 HW = HorizontalWall([x1, x2],y)
 """ ->
 immutable HorizontalWall <:Wall
-  x :: Array{Float64,1}
-  y :: Float64
+  x :: Array{Real,1}
+  y :: Real
 end
 
 @doc doc"""Type with attributes x, y and sharedcells. x corresponds to the horizontal position, y is an array that
@@ -96,9 +96,9 @@ The attribute sharedcells is a tuple that contains the label associated to the c
 VW = VerticalSharedWall(0.,[1.,2.,3.,4.],(0,1))
 """->
 immutable VerticalSharedWall <: Vertical
-  x :: Float64
-  y :: Array{Float64,1}  #Array of a length greater than the VerticalWall
-  sharedcells::(Int,Int) #Adjacent cells that share the wall
+  x :: Real
+  y :: Array{Real,1}  #Array of a length greater than the VerticalWall
+  sharedcells::(Integer,Integer) #Adjacent cells that share the wall
 end
 
 @doc doc"""Type with attributes time, dynamicobject, diskorwall and whenwaspredicted. It is the basic unit of information
@@ -115,7 +115,7 @@ type Event
     time :: Real
     dynamicobject::DynamicObject           #Revisar en el diseño si conviene más tener un sólo objeto
     diskorwall ::Object                      ##tal como cell asociado a un evento y la partícula dentro de cell.
-    whenwaspredicted:: Int
+    whenwaspredicted:: Integer
 end
 
 @doc """#randuniform(liminf, limsup, dim=1)
@@ -132,12 +132,12 @@ function overlap(p::Particle, d::Disk)
     return r < d.radius
 end
 
-@doc doc"""#create_particle(Lx1,Lx2,Ly1,Ly2, mass, velocitynorm, numberofcell::Int)
+@doc doc"""#create_particle(Lx1,Lx2,Ly1,Ly2, mass, velocitynorm, numberofcell::Integer)
 Creates a Particle with Cartesian coordinates between the boundaries Lx1, Lx2, Ly1, Ly2; and a random velocity
 of constant norm. It is worth noting that the passed parameters define corners with Cartesian coordinates:
 > (Lx1,Ly1),(Lx1, y2), (Lx2,Ly1), (Lx2,Ly2).
 """->
-function create_particle(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real, mass::Real, velocitynorm::Real, numberofcell::Int)
+function create_particle(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real, mass::Real, velocitynorm::Real, numberofcell::Integer)
     x = randuniform(Lx1, Lx2)
     y = randuniform(Ly1, Ly2)
     theta = rand()*2*pi
@@ -147,11 +147,11 @@ function create_particle(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real, mass::Real, ve
     Particle([x,y],v, mass, numberofcell,0)
 end
 
-@doc doc"""#create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocitynorm, numberofcell::Int)
+@doc doc"""#create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocitynorm, numberofcell::Integer)
 Creates a Disk enclosed in a box with boundaries Lx1, Lx2, Ly1, Ly2; and a random velocity
 of constant norm. It is worth noting that the passed parameters define  corners with Cartesian coordinates:
 > (Lx1,Ly1),(Lx1, y2), (Lx2,Ly1), (Lx2,Ly2). """->
-function create_disk(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real,radius::Real, mass::Real, velocitynorm::Real, numberofcell::Int)
+function create_disk(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real,radius::Real, mass::Real, velocitynorm::Real, numberofcell::Integer)
     x = randuniform(Lx1 + radius, Lx2 - radius)
     y = randuniform(Ly1 + radius, Ly2 - radius)
     theta = rand()*2*pi
@@ -515,7 +515,7 @@ function is_cell_in_board(b::Board,p::Particle)
 end
 
 @doc """#newcell!(::Board, ::Particle)
-Introduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
+Integerroduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
 It may pushes the cell at the left or right side of the board to mantain the order in the **Deque** structure of the
 board: at the back the leftmost cell, at front the rightmost cell."""->
 function newcell!(b::Board, p::Particle)
