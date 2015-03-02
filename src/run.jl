@@ -11,6 +11,7 @@ push!(LOAD_PATH,"./")
 using HardDiskBilliardSimulation
 using Visual
 using Compat  ## To handle versions less than 0.4
+using DataStructures
 
 visual = false
 # To change a parameter, type: parameters[:nameofsymbol] = valueyouwanttoset
@@ -27,7 +28,7 @@ parameters = @compat Dict(:t_initial => 0,
                   :size_y => 3.,                     #Size of the cell in y
                   :velocityparticle => 1.0
                   )
-parameters[:t_max] = 100
+
 
 if visual
     radiustovisualizeparticle = 0.02
@@ -37,7 +38,14 @@ if visual
     delta_e_min, = findmin(sim[end])
     println("Delta_E_max, Delta_E_min = $(delta_e_max),$(delta_e_min)")
 else
+    parameters[:t_max] = 5000
     @time sim = simulation(;parameters...);
+    board = sim[1]
+    left = back(board.cells).numberofcell
+    right = front(board.cells).numberofcell
+    println("Left-cell, Right-cell: $left,$right")
+    numberofcells = right + abs(left) + 1
+    println("# of cells: $numberofcells")
 end
 
 
