@@ -249,13 +249,13 @@ function animatedsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, mass
             t = event.time
             push!(time,t)
             e1 = energy(event.dynamicobject,event.diskorwall)
-            new = collision(event.dynamicobject,event.diskorwall, board)
+            new_cell = collision(event.dynamicobject,event.diskorwall, board)  #Sólo es un booleno (= true) en el caso de que se cree una nueva celda
             e2 = energy(event.dynamicobject,event.diskorwall)
             push!(delta_e, e2 - e1)
             updateparticlelists!(particle_positions, particle_velocities,particle)
             updatediskslists!(disk_positions_front, disk_velocities_front,front(board.cells))
             updatediskslists!(disk_positions_back,disk_velocities_back,back(board.cells))
-            futurecollisions!(event, board, t,t_max,pq, label, particle, new)
+            futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
         end
     end
     push!(time, t_max)
