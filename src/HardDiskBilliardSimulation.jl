@@ -15,53 +15,50 @@ isless(e1::Event, e2::Event) = e1.time < e2.time
 
 
 @doc """#initialcollisions!(board::Board,particle::Particle,t_initial::Real,t_max::Real,pq)
-Calculates the initial feasible Events and push them into the PriorityQueue with label (`whenwaspredicted`)
+Calculates the initial feasible Events and push them into the PriorityQueue with label `whenwaspredicted`
 equal to 0."""->
 function initialcollisions!(board::Board,particle::Particle,t_initial::Real,t_max::Real,pq::PriorityQueue)
-    labelprediction = 0
+    whenwaspredicted = 0
     for cell in board.cells
-        enqueuecollisions!(pq, cell.disk,cell, t_initial, labelprediction, t_max)
-        enqueuecollisions!(pq, particle, cell, t_initial, labelprediction, t_max)
-        enqueuecollisions!(pq, particle, cell.disk, t_initial, labelprediction, t_max)
+        enqueuecollisions!(pq, cell.disk,cell, t_initial, whenwaspredicted, t_max)
+        enqueuecollisions!(pq, particle, cell, t_initial, whenwaspredicted, t_max)
+        enqueuecollisions!(pq, particle, cell.disk, t_initial, whenwaspredicted, t_max)
     end
 end
 
-@doc """#enqueuecollisions!(pq::PriorityQueue,disk::Disk,cell::Cell, t_initial::Real, labelprediction::Int, t_max::Real)
-Calculates the feasible events that might occur in a time less than t_max involving a disk and a cell, and push them into the PriorityQueue. The labelprediction
-argument is passed to the type Event as attribute "whenwaspredicted" """->
-function enqueuecollisions!(pq::PriorityQueue,disk::Disk,cell::Cell, t_initial::Real, labelprediction::Int, t_max::Real)
+@doc """#enqueuecollisions!(pq::PriorityQueue,disk::Disk,cell::Cell, t_initial::Real, whenwaspredicted::Int, t_max::Real)
+Calculates the feasible events that might occur in a time less than t_max involving a disk and a cell, and push them into the PriorityQueue. """->
+function enqueuecollisions!(pq::PriorityQueue,disk::Disk,cell::Cell, t_initial::Real, whenwaspredicted::Int, t_max::Real)
         dt,k = dtcollision(disk,cell)
         if t_initial + dt < t_max
-            enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],whenwaspredicted),t_initial+dt)
         end
 end
 
-@doc """#enqueuecollisions!(pq::PriorityQueue,particle::Particle,cell::Cell, t_initial::Real, labelprediction::Int, t_max::Real)
-Calculates the feasible events that might occur in a time less than t_max involving a particle and a cell, and push them into the PriorityQueue. The labelprediction
-argument is passed to the type Event as attribute "whenwaspredicted" """->
-function enqueuecollisions!(pq::PriorityQueue,particle::Particle,cell::Cell, t_initial::Real, labelprediction::Int, t_max::Real)
+@doc """#enqueuecollisions!(pq::PriorityQueue,particle::Particle,cell::Cell, t_initial::Real, whenwaspredicted::Int, t_max::Real)
+Calculates the feasible events that might occur in a time less than t_max involving a particle and a cell, and push them into the PriorityQueue. """->
+function enqueuecollisions!(pq::PriorityQueue,particle::Particle,cell::Cell, t_initial::Real, whenwaspredicted::Int, t_max::Real)
         dt,k = dtcollision(particle,cell)
         if t_initial + dt < t_max
-            enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],whenwaspredicted),t_initial+dt)
         end
 end
 
-@doc """#enqueuecollisions!(pq::PriorityQueue,particle::Particle,disk::Disk, t_initial::Real, labelprediction::Int, t_max::Real)
-Calculates the feasible events that might occur in a time less than t_max involving a particle and a disk, and push them into the PriorityQueue. The labelprediction
-argument is passed to the type Event as attribute "whenwaspredicted" """->
-function enqueuecollisions!(pq::PriorityQueue,particle::Particle,disk::Disk, t_initial::Real, labelprediction::Int, t_max::Real)
+@doc """#enqueuecollisions!(pq::PriorityQueue,particle::Particle,disk::Disk, t_initial::Real, whenwaspredicted::Int, t_max::Real)
+Calculates the feasible events that might occur in a time less than t_max involving a particle and a disk, and push them into the PriorityQueue. """->
+function enqueuecollisions!(pq::PriorityQueue,particle::Particle,disk::Disk, t_initial::Real, whenwaspredicted::Int, t_max::Real)
         dt = dtcollision(particle,disk)
         if t_initial + dt < t_max
-            enqueue!(pq,Event(t_initial+dt, particle, disk,labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, particle, disk,whenwaspredicted),t_initial+dt)
         end
 end
 
 
 @doc """#futurecollisions!(::Event,::Board, t_initial::Real,t_max::Real,::PriorityQueue,
-labelprediction::Int,:: Particle, isanewcell)
+whenwaspredicted::Int,:: Particle, isanewcell)
 Updates the PriorityQueue pushing into it all the feasible Events that can occur after a valid collision"""->
 function futurecollisions!(event::Event,board::Board, t_initial::Real,t_max::Real,pq::PriorityQueue,
-                           labelprediction::Int,particle::Particle, isanewcell)
+                           whenwaspredicted::Int,particle::Particle, isanewcell)
     ##This loop allows to analyze the cell in which the particle is located.
     cell = nothing
     for c in board.cells
@@ -73,8 +70,8 @@ function futurecollisions!(event::Event,board::Board, t_initial::Real,t_max::Rea
 
     #This function updates the PriorityQueue taking account that the current event was between a particle and a disk
     function future(particle::Particle, disk::Disk)
-        enqueuecollisions!(pq, particle, cell, t_initial, labelprediction, t_max)
-        enqueuecollisions!(pq, disk,cell, t_initial, labelprediction, t_max)
+        enqueuecollisions!(pq, particle, cell, t_initial, whenwaspredicted, t_max)
+        enqueuecollisions!(pq, disk,cell, t_initial, whenwaspredicted, t_max)
 
     end
 
@@ -82,21 +79,21 @@ function futurecollisions!(event::Event,board::Board, t_initial::Real,t_max::Rea
     function future(particle::Particle, wall::Wall)
         dt,k = dtcollision(particle,cell, wall)
         if t_initial + dt < t_max
-            enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],labelprediction),t_initial+dt)
+            enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],whenwaspredicted),t_initial+dt)
         end
-        enqueuecollisions!(pq, particle, cell.disk, t_initial, labelprediction, t_max)
+        enqueuecollisions!(pq, particle, cell.disk, t_initial, whenwaspredicted, t_max)
 
         #If the wall was a VerticalSharedWall that implied to create a new cell, this is invoked
         if isanewcell == true
-            enqueuecollisions!(pq, cell.disk,cell, t_initial, labelprediction, t_max)
+            enqueuecollisions!(pq, cell.disk,cell, t_initial, whenwaspredicted, t_max)
         end
     end
 
     #This function updates the PriorityQueue taking account that the current event was between a disk and a wall
     function future(disk::Disk, wall::Wall)
-        enqueuecollisions!(pq, disk,cell, t_initial, labelprediction, t_max)
+        enqueuecollisions!(pq, disk,cell, t_initial, whenwaspredicted, t_max)
         if  is_particle_in_cell(particle,cell)
-            enqueuecollisions!(pq, particle, disk, t_initial, labelprediction, t_max)
+            enqueuecollisions!(pq, particle, disk, t_initial, whenwaspredicted, t_max)
         end
     end
 
@@ -104,8 +101,6 @@ function futurecollisions!(event::Event,board::Board, t_initial::Real,t_max::Rea
     future(event.dynamicobject,event.diskorwall)
 end
 
-@doc """#is_particle_in_cell(::Particle,::Cell)
-Returns a boolean value. `True` if the numberofcell for a Particle and a Cell coincide."""->
 function is_particle_in_cell(p::Particle,c::Cell)
     contain = false
     if c.numberofcell == p.numberofcell
@@ -116,7 +111,7 @@ end
 
 
 @doc """#validatecollision(event::Event)
-Returns true if the event was predicted after the last collision of the Particle and/or the Disk """->
+Returns true if the event was predicted after the last collision of the Particle and/or of the Disk took place"""->
 function validatecollision(event::Event)
     validcollision = false
     function validate(d::Disk)
@@ -212,10 +207,10 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
             move(board,particle,event.time-t)
             t = event.time
             push!(time,t)
-            new = collision(event.dynamicobject,event.diskorwall, board)
+            new_cell = collision(event.dynamicobject,event.diskorwall, board) #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
             e2 = energy(event.dynamicobject,event.diskorwall)
             updateparticlelists!(particle_positions, particle_velocities,particle)
-            futurecollisions!(event, board, t,t_max,pq, label, particle, new)
+            futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
         end
     end
     push!(time, t_max)
@@ -249,7 +244,7 @@ function animatedsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, mass
             t = event.time
             push!(time,t)
             e1 = energy(event.dynamicobject,event.diskorwall)
-            new_cell = collision(event.dynamicobject,event.diskorwall, board)  #Sólo es un booleno (= true) en el caso de que se cree una nueva celda
+            new_cell = collision(event.dynamicobject,event.diskorwall, board)  #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
             e2 = energy(event.dynamicobject,event.diskorwall)
             push!(delta_e, e2 - e1)
             updateparticlelists!(particle_positions, particle_velocities,particle)
