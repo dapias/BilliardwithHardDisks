@@ -214,9 +214,8 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
         end
     end
     push!(time, t_max)
-    board, particle, particle_positions, particle_velocities, time
+    board, particle_positions, time
 end
-
 
 @doc doc"""#animatedsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
 Implements the simulation main loop but adds the storing of the back and front disk positions and velocities, together
