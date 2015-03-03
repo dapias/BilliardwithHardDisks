@@ -38,7 +38,7 @@ if visual
     delta_e_min, = findmin(sim[end])
     println("Delta_E_max, Delta_E_min = $(delta_e_max),$(delta_e_min)")
 else
-    parameters[:t_max] = 5000
+    parameters[:t_max] = 100
     @time sim = simulation(;parameters...);
     board = sim[1]
     left = back(board.cells).numberofcell
