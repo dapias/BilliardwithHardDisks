@@ -37,8 +37,11 @@ if visual
     delta_e_max, = findmax(sim[end])
     delta_e_min, = findmin(sim[end])
     println("Delta_E_max, Delta_E_min = $(delta_e_max),$(delta_e_min)")
+    time = sim[5]
+    nofevents = length(time)
+    println("# of events: $nofevents")
 else
-    parameters[:t_max] = 100
+    parameters[:t_max] = 1000
     @time sim = simulation(;parameters...);
     board = sim[1]
     left = back(board.cells).numberofcell
@@ -46,6 +49,9 @@ else
     println("Left-cell, Right-cell: $left,$right")
     numberofcells = right + abs(left) + 1
     println("# of cells: $numberofcells")
+    time = sim[5]
+    nofevents = length(time)
+    println("# of events: $nofevents")
 end
 
 
