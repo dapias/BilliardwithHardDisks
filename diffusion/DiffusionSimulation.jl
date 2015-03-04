@@ -8,7 +8,7 @@ export nofruns, timearray
 
 parameters = include("parameters.jl")
 datafile = h5open("diffusiondata.hdf5", "w")
-noftimes = 2
+noftimes = 2  ###Usar un mejor nombre
 nofruns = 10
 timearray = ones(noftimes)
 
