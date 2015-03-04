@@ -197,6 +197,9 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
     board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                    windowsize)
     particle_positions, particle_velocities =  createparticlelists(particle)
+    #Solo voy a trabajar con la posición en x para analizar la difusión
+    particle_xpositions = [particle_positions[1]]
+    #####################
     label = 0
     while(!isempty(pq))
         label += 1
@@ -209,12 +212,13 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
             push!(time,t)
             new_cell = collision(event.dynamicobject,event.diskorwall, board) #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
             e2 = energy(event.dynamicobject,event.diskorwall)
-            updateparticlelists!(particle_positions, particle_velocities,particle)
+            #updateparticlelists!(particle_positions, particle_velocities,particle)
+            updateparticlexlist!(particle_xpositions, particle)
             futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
         end
     end
-    push!(time, t_max)
-    board, particle_positions, time
+    #push!(time, t_max)
+    board, particle_xpositions, time
 end
 
 @doc doc"""#animatedsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
@@ -254,6 +258,10 @@ function animatedsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, mass
     end
     push!(time, t_max)
     board, particle, particle_positions, particle_velocities, time, disk_positions_front, disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back, delta_e
+end
+
+function updateparticlexlist!(particle_xpositions,particle::Particle)
+        push!(particle_xpositions, particle.r[1])
 end
 
 
