@@ -8,11 +8,11 @@ export nofruns, timearray
 
 parameters = include("parameters.jl")
 datafile = h5open("diffusiondata.hdf5", "w")
-noftimes = 2  ###Usar un mejor nombre
+nofmaxtimes = 2  ###Usar un mejor nombre
 nofruns = 10
-timearray = ones(noftimes)
+timearray = ones(nofmaxtimes)
 
-for i in 1:noftimes
+for i in 1:nofmaxtimes
     parameters[:t_max] *= i
     time = Float64(parameters[:t_max])
     timearray[i] = time
