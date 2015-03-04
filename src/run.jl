@@ -16,7 +16,7 @@ parameters = Dict(:t_initial => 0,
                   :maxholesize => 0.5,
                   :cellforinitialparticle => 1,
                   :massparticle => 1.0,
-                  :numberofcells => 5,
+                  :numberofcells => 3,
                   :size_x => 3.,                     #Size of the cell in x
                   :size_y => 3.,                     #Size of the cell in y
                   :velocityparticle => 1.0
@@ -24,7 +24,8 @@ parameters = Dict(:t_initial => 0,
 
 radiustovisualizeparticle = 0.02
 
-sim = simulation(;parameters...);
-@time visualize(sim, radiustovisualizeparticle);
+@time sim = simulation(;parameters...);
+println(length(sim[end]))
+#@time visualize(sim, radiustovisualizeparticle);
 
 #visualize_localenergy(sim);
