@@ -7,30 +7,37 @@ using HardDiskBilliardSimulation
 export nofruns, timearray
 
 parameters = include("parameters.jl")
-datafile = h5open("diffusiondata.hdf5", "w")
-nofmaxtimes = 2  ###Usar un mejor nombre
-nofruns = 10
+nofmaxtimes = 1  ###Usar un mejor nombre
+nofruns = 100
 timearray = ones(nofmaxtimes)
+
 
 for i in 1:nofmaxtimes
     parameters[:t_max] *= i
     time = Float64(parameters[:t_max])
     timearray[i] = time
-    for i in 1:nofruns
-        sim = simulation(;parameters...)
-        datafile["/t_max$time/particle_x-$i"] = sim[2]
-        datafile["/t_max$time/time-$i"] = sim[3]
-        attrs(datafile["/t_max$time/particle_x-$i"])["Numberofrun"] = i
-        attrs(datafile["/t_max$time/time-$i"])["Numberofrun"] = i
-    end
+    datafile = h5open("diffusiondata$time.hdf5", "w")
     for (key,value) in parameters
-        attrs(datafile["/t_max$time"])[string(key)] = value
+        attrs(datafile)[string(key)] = value
     end
+    close(datafile)
+    for i in 1:nofruns
+        datafile = h5open("diffusiondata$time.hdf5", "r+")
+        sim = simulation(;parameters...)
+        datafile["/particle_x-$i"] = sim[2]
+        datafile["/time-$i"] = sim[3]
+        attrs(datafile["/particle_x-$i"])["Numberofrun"] = i
+        attrs(datafile["/time-$i"])["Numberofrun"] = i
+        close(datafile)
+    end
+
 end
 
 
 
-close(datafile)
+
+
+
 
 
 end
