@@ -1,25 +1,29 @@
 push!(LOAD_PATH,"./")
 using PyPlot
 using HDF5
-import DiffusionSimulation.timearray, DiffusionSimulation.nofruns
+using DiffusionSimulation
 
-dataset = h5open("diffusiondata.hdf5","r")
+#parameters = include("parameters.jl")
+datafile = h5open("diffusiont_max$time.hdf5", "r")
 
-for t in timearray
-    fig = plt.figure()
-    ax = fig[:add_subplot](111)
-    ax[:set_xlabel]("time")
-    ax[:set_ylabel]("x")
-    firstgroup = dataset["t_max$t"]
-    A = read(firstgroup,"particle_x-1")
-    B = read(firstgroup,"time-1")
-    ax[:plot](B,A,".-")
-    for run in 2:nofruns
-        A = read(firstgroup,"particle_x-$run")
-        B = read(firstgroup,"time-$run")
-        ax[:plot](B,A,".-")
-    end
-    fig[:savefig]("./images/t_max$t.png")
+deltat = attrs(datafile)["Δt"]
+Δt = read(deltat)
+
+t = [0.0:Δt:time]
+
+fig = plt.figure()
+ax = fig[:add_subplot](111)
+ax[:set_xlabel]("time")
+ax[:set_ylabel]("x")
+firstdata = datafile["particle-1"]
+x = read(firstdata,"x")
+ax[:plot](t,x,".")
+for run in 2:nofruns
+    xdata = datafile["particle-$run"]
+    x = read(xdata,"x")
+    ax[:plot](t,x,".")
 end
 
-close(dataset)
+fig[:savefig]("./images/t_max$time-$nofruns\-runs.pdf")
+
+close(datafile)
