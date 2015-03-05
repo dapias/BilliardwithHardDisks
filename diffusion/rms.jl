@@ -3,7 +3,32 @@ push!(LOAD_PATH,"../src/")
 using HDF5
 using DiffusionSimulation
 
-parameters = include("parameters.jl")
+datafile = h5open("diffusiont_max$time.hdf5", "r+")
+particle1data = datafile["particle-1"]
+x = read(particle1data,"x")
+Δx = x - x[1]
+datafile["/particle-1/Δx"] =  Δx
+close(datafile)
+
+
+if nofruns > 1
+    for run in 2:nofruns
+        datafile = h5open("diffusiont_max$time.hdf5", "r+")
+        particledata = datafile["particle-$run"]
+        x = read(particledata,"x")
+        Δx = x - x[1]
+        datafile["/particle-$run/Δx"] =  Δx
+        close(datafile)
+    end
+end
+
+datafile = h5open("diffusiont_max$time.hdf5", "r+")
+datafile["root mean square"]
+close(datafile)
+
+
+
+
 # time = parameters[:t_max]
 # t = linspace(0.0, tmin, nofsamples)
 
@@ -22,32 +47,6 @@ parameters = include("parameters.jl")
 
 
 
-using HardDiskBilliardSimulation
-
-
-
-
-function xtoregulartimes(simulation_results)
-board, particle_xpositions, particle_xvelocities, time = simulation_results
-
-    xposition = [particle_xpositions[1]]
-    t = [0.0]
-    nofsteps = int(time[end] * 10)
-    for i in 1:nofsteps
-        dt = i/10
-        comparetimes = [dt > t for t in time]
-        k = findfirst(comparetimes,false) - 1
-        if k != 0
-            push!(xposition, particle_xpositions[1+(k-1)] + particle_xvelocities[1+(k-1)]*(dt-time[k]))
-            push!(t, dt)
-        end
-    end
-
-xposition, t
-end
-
-sim = simulation(;parameters...)
-x, t = xtoregulartimes(sim)
 
 
 
