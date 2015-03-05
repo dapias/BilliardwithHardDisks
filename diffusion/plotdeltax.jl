@@ -14,18 +14,18 @@ t = [0.0:Δt:time]
 fig = plt.figure()
 ax = fig[:add_subplot](111)
 ax[:set_xlabel]("time")
-ax[:set_ylabel]("x")
+ax[:set_ylabel](L"$\Delta x$")
 firstdata = datafile["particle-1"]
-x = read(firstdata,"x")
+x = read(firstdata,"Δx")
 ax[:plot](t,x,".")
 if nofruns > 1
     for run in 2:nofruns
         xdata = datafile["particle-$run"]
-        x = read(xdata,"x")
+        x = read(xdata,"Δx")
         ax[:plot](t,x,".")
     end
 end
 
-fig[:savefig]("./images/t_max$time-$nofruns\-runs.pdf")
+fig[:savefig]("./images/Delta x/t_max$time-$nofruns\-runs.pdf")
 
 close(datafile)
