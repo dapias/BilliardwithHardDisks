@@ -63,7 +63,7 @@ board, particle, particle_positions, particle_velocities, time, disk_positions_f
         else
             circles[1][:center] = (disk_positions_front[1+2*(k-1)] + disk_velocities_front[1+2*(k-1)]*(i/10-time[k]), disk_positions_front[2+2*(k-1)]+disk_velocities_front[2+2*(k-1)]*(i/10-time[k]))
             puntual[1][:center] = (particle_positions[1+2*(k-1)] + particle_velocities[1+2*(k-1)]*(i/10-time[k]), particle_positions[2+2*(k-1)]+particle_velocities[2+2*(k-1)]*(i/10-time[k]))
-             circles[2][:center] = (disk_positions_back[1+2*(k-1)] + disk_velocities_back[1+2*(k-1)]*(i/10-time[k]), disk_positions_back[2+2*(k-1)]+disk_velocities_back[2+2*(k-1)]*(i/10-time[k]))
+            circles[2][:center] = (disk_positions_back[1+2*(k-1)] + disk_velocities_back[1+2*(k-1)]*(i/10-time[k]), disk_positions_back[2+2*(k-1)]+disk_velocities_back[2+2*(k-1)]*(i/10-time[k]))
             e_text = delta_e[k]
             t_text = time[k]
             energy_text[:set_text]("Delta_E = $(e_text)")
@@ -76,6 +76,9 @@ board, particle, particle_positions, particle_velocities, time, disk_positions_f
     anim = animation.FuncAnimation(fig, animate, frames=int(time[end]*10), interval=20, blit=false, repeat = false)
 
 end
+
+
+
 
 function drawwalls(board::Board, ax)
     cell = front(board.cells)

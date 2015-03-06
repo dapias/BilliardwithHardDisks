@@ -184,6 +184,10 @@ function startsimulation(t_initial::Real, t_max::Real, radiusdisk::Real, massdis
 end
 
 
+
+
+
+
 @doc """#simulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
 Contains the main loop of the project. The PriorityQueue is filled at each step with Events associated
 to a DynamicObject; and the element with the highest physical priority (lowest time) is removed
@@ -194,12 +198,20 @@ from the Data Structure, which is delimited by the maximum time(t_max). Just to 
 Returns `board, particle, particle_positions, particle_velocities, time`"""->
 function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
                     Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
+
+
     board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                    windowsize)
+
+
     particle_positions, particle_velocities =  createparticlelists(particle)
+
+
     #Solo voy a trabajar con la posición en x para analizar la difusión
     particle_xpositions = [particle_positions[1]]
-    #####################
+    particle_xvelocities = [particle_velocities[1]]
+    #
+
     label = 0
     while(!isempty(pq))
         label += 1
@@ -213,13 +225,23 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
             new_cell = collision(event.dynamicobject,event.diskorwall, board) #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
             e2 = energy(event.dynamicobject,event.diskorwall)
             #updateparticlelists!(particle_positions, particle_velocities,particle)
-            updateparticlexlist!(particle_xpositions, particle)
+            updateparticlexlist!(particle_xpositions, particle_xvelocities, particle)
             futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
         end
     end
-    #push!(time, t_max)
-    board, particle_xpositions, time
+
+    push!(time, t_max)
+    board, particle_xpositions, particle_xvelocities, time
 end
+
+
+
+
+
+
+
+
+
 
 @doc doc"""#animatedsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
 Implements the simulation main loop but adds the storing of the back and front disk positions and velocities, together
@@ -260,8 +282,9 @@ function animatedsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, mass
     board, particle, particle_positions, particle_velocities, time, disk_positions_front, disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back, delta_e
 end
 
-function updateparticlexlist!(particle_xpositions,particle::Particle)
+function updateparticlexlist!(particle_xpositions,particle_xvelocities, particle::Particle)
         push!(particle_xpositions, particle.r[1])
+        push!(particle_xvelocities, particle.v[1])
 end
 
 

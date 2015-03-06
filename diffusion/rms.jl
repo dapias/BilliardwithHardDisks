@@ -3,6 +3,7 @@ push!(LOAD_PATH,"../src/")
 using HDF5
 using DiffusionSimulation
 
+
 datafile = h5open("diffusiont_max$time.hdf5", "r+")
 particle1data = datafile["particle-1"]
 x = read(particle1data,"x")
@@ -23,7 +24,29 @@ if nofruns > 1
 end
 
 datafile = h5open("diffusiont_max$time.hdf5", "r+")
-datafile["root mean square"]
+
+deltax = zeros(length(x))
+deltaxsquare = zeros(length(x))
+
+for i in 1:length(x)
+    Δx = 0.0
+    Δxsquare = 0.0
+    for obj in datafile
+           particle = read(obj)
+           Δx += particle["Δx"][i]
+           Δxsquare += particle["Δx"][i]*particle["Δx"][i]
+    end
+    deltax[i] = Δx
+    deltaxsquare[i] = Δxsquare
+end
+
+deltaxpromedio = deltax/nofruns
+deltaxsquarepromedio = deltaxsquare/nofruns
+
+#datafile["rms/Δxpromedio"] = deltaxpromedio
+#datafile["rms/Δxsquarepromedio"] = deltaxsquarepromedio
+datafile["rms/rms"] = deltaxsquarepromedio - deltaxpromedio
+#datafile["root mean square"]
 close(datafile)
 
 
