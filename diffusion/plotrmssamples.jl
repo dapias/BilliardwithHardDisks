@@ -29,9 +29,9 @@ fig[:savefig]("./images/Variance/t_max$time-samples$nofsamples-runs$nofruns.pdf"
 
 file = h5open("diffusiont_max$time.hdf5","r+")
 file["/images/"] = "./images/Variance/t_max$time-samples$nofsamples-runs$nofruns.pdf"
-# attrs(file["/images/fit"])["slope"] = slope
-# attrs(file["/images/fit"])["intercept"] = intercept
-# attrs(file["/images/fit"])["Rsquare"] = Rsquare
+attrs(file["/images/"])["slope"] = slope
+attrs(file["/images/"])["intercept"] = intercept
+attrs(file["/images/"])["Rsquare"] = Rsquare
 close(file)
 
 
