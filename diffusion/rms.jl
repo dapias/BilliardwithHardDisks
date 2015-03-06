@@ -24,7 +24,6 @@ if nofruns > 1
 end
 
 datafile = h5open("diffusiont_max$time.hdf5", "r+")
-
 deltax = zeros(length(x))
 deltaxsquare = zeros(length(x))
 
@@ -42,11 +41,9 @@ end
 
 deltaxpromedio = deltax/nofruns
 deltaxsquarepromedio = deltaxsquare/nofruns
-
-#datafile["rms/Δxpromedio"] = deltaxpromedio
-#datafile["rms/Δxsquarepromedio"] = deltaxsquarepromedio
 datafile["rms/rms"] = deltaxsquarepromedio - deltaxpromedio
-#datafile["root mean square"]
+datafile["root mean square"]
+
 close(datafile)
 
 

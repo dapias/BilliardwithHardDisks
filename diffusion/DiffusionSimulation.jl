@@ -9,7 +9,7 @@ export time, lenofarray, nofruns
 
 parameters = include("parameters.jl")
 nofmaxtimes = 1  ###Usar un mejor nombre
-nofruns = 10000
+nofruns = 100
 time = parameters[:t_max]
 
 datafile = h5open("diffusiont_max$time.hdf5", "w")
