@@ -2,7 +2,7 @@ using LinearLeastSquares
 using HDF5
 using PyPlot
 
-file = h5open("diffusiont_max100.0.hdf5","r")
+file = h5open("HDF5/diffusiont_max100.0.hdf5","r")
 deltat = attrs(file)["Δt"]
 Δt = read(deltat)
 t = [0.0:Δt:100.0]
@@ -41,26 +41,43 @@ println("slope = $slope")
 println("intercept = $intercept")
 fig[:savefig]("./images/Variance/t_max100.0-10000-runsajuste.pdf")
 
-file = h5open("diffusiont_max100.0.hdf5","r+")
-file["/images/fit"] = "./images/Variance/t_max100.0-10000-runsajuste.pdf"
-attrs(file["/images/fit"])["slope"] = slope
-attrs(file["/images/fit"])["intercept"] = intercept
-attrs(file["/images/fit"])["Rsquare"] = Rsquare
-close(file)
+# file = h5open("HDF5/diffusiont_max100.0.hdf5","r+")
+# file["/images/fit"] = "./images/Variance/t_max100.0-10000-runsajuste.pdf"
+# attrs(file["/images/fit"])["slope"] = slope
+# attrs(file["/images/fit"])["intercept"] = intercept
+# attrs(file["/images/fit"])["Rsquare"] = Rsquare
+# close(file)
 
 
-# fig = plt.figure()
-# ax = fig[:add_subplot](111)
-# ax[:set_xlabel]("time")
-# ax[:set_ylabel](L"$log(<\sigma ^2>)$")
+fig = plt.figure()
+ax = fig[:add_subplot](111)
+ax[:set_xlabel]("time")
+ax[:set_ylabel](L"$log(<\sigma ^2>)$")
 
-# ax[:plot](t,log(variance),"." )
-# fig[:savefig]("./images/Variance/t_max100.0-10000-runssemilog.pdf")
+ax[:plot](t,log(variance),"." )
+fig[:savefig]("./images/Variance/t_max100.0-10000-runssemilog.pdf")
 
-# fig = plt.figure()
-# ax = fig[:add_subplot](111)
-# ax[:set_xlabel](L"log(time)")
-# ax[:set_ylabel](L"$log(<\sigma ^2>)$")
+fig = plt.figure()
+ax = fig[:add_subplot](111)
+ax[:set_xlabel](L"log(time)")
+ax[:set_ylabel](L"$log(<\sigma ^2>)$")
 
-# ax[:plot](log(t),log(variance),"." )
-# fig[:savefig]("./images/Variance/t_max100.0-10000-runsloglog.pdf")
+ax[:plot](log(t),log(variance),"." )
+fig[:savefig]("./images/Variance/t_max100.0-10000-runsloglog.pdf")
+
+fig = plt.figure()
+ax = fig[:add_subplot](111)
+ax[:set_xlabel](L"time \cdot log(time)")
+ax[:set_ylabel](L"$<\sigma ^2>$")
+
+ax[:plot](t .* log(t),variance,"." )
+fig[:savefig]("./images/Variance/t_max100.0-10000-runslinearithmic.pdf")
+
+
+fig = plt.figure()
+ax = fig[:add_subplot](111)
+ax[:set_xlabel](L"time")
+ax[:set_ylabel](L"$\frac{<\sigma ^2>}{t}$")
+
+ax[:plot](t,variance ./ t,"." )
+fig[:savefig]("./images/Variance/t_max100.0-10000-runsvarianceovert.pdf")
