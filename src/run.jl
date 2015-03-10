@@ -30,6 +30,8 @@ parameters = @compat Dict(:t_initial => 0,
                   )
 
 
+#parameters[:t_max] = 1000
+
 if visual
     radiustovisualizeparticle = 0.02
     sim = animatedsimulation(;parameters...);
