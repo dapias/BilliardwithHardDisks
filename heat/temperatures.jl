@@ -18,7 +18,8 @@ end
 celda = int(celda)
 t_final = float64(t_final)
 
+index = sortperm(celda)
 
-plot(celda,t_final,"*")
+plot(celda[index],t_final[index],"*--")
 
 

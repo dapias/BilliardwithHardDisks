@@ -231,14 +231,18 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
                 dict["disk$(event.dynamicobject.numberofcell)"] = [0.0]
             end
 
-           for k in board.cells
-               push!(dict["disk$(k.disk.numberofcell)"],energy(k.disk))
-           end
+#            for k in board.cells
+#                push!(dict["disk$(k.disk.numberofcell)"],energy(k.disk))
+#            end
 
             #updateparticlelists!(particle_positions, particle_velocities,particle)
             updateparticlexlist!(particle_xpositions, particle_xvelocities, particle)
             futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
         end
+    end
+
+    for k in board.cells
+        dict["disk$(k.disk.numberofcell)"][1] = energy(k.disk)
     end
 
     push!(time, t_max)
