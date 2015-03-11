@@ -206,6 +206,10 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
 
     particle_positions, particle_velocities =  createparticlelists(particle)
 
+    disk0_energy = [energy(front(board.cells).disk)]
+
+    dict = Dict("disk0" => disk0_energy)
+
 
     #Solo voy a trabajar con la posición en x para analizar la difusión
     particle_xpositions = [particle_positions[1]]
@@ -223,7 +227,14 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
             t = event.time
             push!(time,t)
             new_cell = collision(event.dynamicobject,event.diskorwall, board) #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
-            e2 = energy(event.dynamicobject,event.diskorwall)
+            if new_cell == true
+                dict["disk$(event.dynamicobject.numberofcell)"] = [0.0]
+            end
+
+           for k in board.cells
+               push!(dict["disk$(k.disk.numberofcell)"],energy(k.disk))
+           end
+
             #updateparticlelists!(particle_positions, particle_velocities,particle)
             updateparticlexlist!(particle_xpositions, particle_xvelocities, particle)
             futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
@@ -231,7 +242,7 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
     end
 
     push!(time, t_max)
-    board, particle_xpositions, particle_xvelocities, time
+    board, particle_xpositions, particle_xvelocities, time, dict
 end
 
 
@@ -308,6 +319,12 @@ function createparticlelists(particle::Particle)
     particle_positions, particle_velocities
 end
 
+function createdisklists(i)
+    disk_velocities = [0.0,0.0]
+    disk_velocities
+end
+
+
 function creatediskslists(board::Board)
     disk_positions_front =  [front(board.cells).disk.r]
     disk_velocities_front = [front(board.cells).disk.v]
@@ -325,6 +342,12 @@ end
 @doc """#energy(::Disk,::Wall)
 Returns the kinetic energy of a Disk"""->
 function energy(disk::Disk,wall::Wall)
+    disk.mass*dot(disk.v,disk.v)/2.
+end
+
+@doc """#energy(::Disk,::Wall)
+Returns the kinetic energy of a Disk"""->
+function energy(disk::Disk)
     disk.mass*dot(disk.v,disk.v)/2.
 end
 

@@ -261,8 +261,7 @@ function create_new_left_cell(cell::Cell, particle::Particle)
     cell
 end
 
-@doc """#create_board_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                    massparticle, velocityparticle, windowsize)
+@doc """#create_board_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, windowsize)
 Returns a Board instance with one cell and a particle inside it (that is also returned). Size of its sides and initial coordinates for the left down corner are passed (Lx1,Ly1)
 together with the needed data to create the embedded disk and a particle inside the cell. """->
 function create_board_with_particle(Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk::Real,

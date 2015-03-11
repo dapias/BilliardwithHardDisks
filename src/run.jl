@@ -9,7 +9,7 @@
 
 push!(LOAD_PATH,"./")
 using HardDiskBilliardSimulation
-using Visual
+#using Visual
 using Compat  ## To handle versions less than 0.4
 using DataStructures
 
@@ -43,7 +43,7 @@ if visual
     nofevents = length(time)
     println("# of events: $nofevents")
 else
-    parameters[:t_max] = 100
+    parameters[:t_max] = 1000
     @time sim = simulation(;parameters...);
     board = sim[1]
     left = back(board.cells).numberofcell
