@@ -7,7 +7,6 @@ export xtoregulartimes
 
 function xtoregulartimes(simulation_results)
 board, particle_xpositions, particle_xvelocities, time = simulation_results
-
     xposition = [particle_xpositions[1]]
     dtstep = 1/4.
     nofsteps = int(time[end] * 1/dtstep)
