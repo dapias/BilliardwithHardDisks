@@ -2,13 +2,16 @@ module RegularTimes
 
 push!(LOAD_PATH,"../src/")
 using HardDiskBilliardSimulation
+using Docile
 
 export xtoregulartimes
 
-function xtoregulartimes(simulation_results)
+@doc """#xtoregulartimes(simulation_results)
+From the simulation results calculate the position of the particle in a time fixed by dtstep
+""" ->
+function xtoregulartimes(simulation_results, dtstep = 1/4.)
 board, particle_xpositions, particle_xvelocities, time = simulation_results
     xposition = [particle_xpositions[1]]
-    dtstep = 1/4.
     nofsteps = int(time[end] * 1/dtstep)
     for i in 1:nofsteps
         dt = dtstep*i
