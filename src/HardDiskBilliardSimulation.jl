@@ -206,10 +206,6 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
 
     particle_positions, particle_velocities =  createparticlelists(particle)
 
-    disk0_energy = [energy(front(board.cells).disk)]
-
-    dict = Dict("disk0" => disk0_energy)
-
 
     #Solo voy a trabajar con la posición en x para analizar la difusión
     particle_xpositions = [particle_positions[1]]
@@ -227,35 +223,16 @@ function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1
             t = event.time
             push!(time,t)
             new_cell = collision(event.dynamicobject,event.diskorwall, board) #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
-            if new_cell == true
-                dict["disk$(event.dynamicobject.numberofcell)"] = [0.0]
-            end
-
-#            for k in board.cells
-#                push!(dict["disk$(k.disk.numberofcell)"],energy(k.disk))
-#            end
-
+            e2 = energy(event.dynamicobject,event.diskorwall)
             #updateparticlelists!(particle_positions, particle_velocities,particle)
             updateparticlexlist!(particle_xpositions, particle_xvelocities, particle)
             futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
         end
     end
 
-    for k in board.cells
-        dict["disk$(k.disk.numberofcell)"][1] = energy(k.disk)
-    end
-
     push!(time, t_max)
-    board, particle_xpositions, particle_xvelocities, time, dict
+    board, particle_xpositions, particle_xvelocities, time
 end
-
-
-
-
-
-
-
-
 
 
 @doc doc"""#animatedsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
