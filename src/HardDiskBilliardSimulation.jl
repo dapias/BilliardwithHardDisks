@@ -361,4 +361,66 @@ function energy(particle::Particle,disk::Disk)
     disk.mass*dot(disk.v,disk.v)/2. + particle.mass*dot(particle.v,particle.v)/2.
 end
 
+@doc """#simulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
+Contains the main loop of the project. The PriorityQueue is filled at each step with Events associated
+to a DynamicObject; and the element with the highest physical priority (lowest time) is removed
+from the Queue and ignored if it is physically meaningless. The loop goes until the last Event is removed
+from the Data Structure, which is delimited by the maximum time(t_max). Just to clarify Lx1 and Ly1 are the coordiantes
+(Lx1,Ly1) of the left bottom corner of the initial cell.
+
+Returns `board, particle, particle_positions, particle_velocities, time`"""->
+function heatsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
+                    Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
+
+
+    board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
+                                                   windowsize)
+
+
+    particle_positions, particle_velocities =  createparticlelists(particle)
+
+    disk0_energy = [energy(front(board.cells).disk)]
+
+    dict = Dict("disk0" => disk0_energy)
+
+
+    #Solo voy a trabajar con la posición en x para analizar la difusión
+    particle_xpositions = [particle_positions[1]]
+    particle_xvelocities = [particle_velocities[1]]
+    #
+
+    label = 0
+    while(!isempty(pq))
+        label += 1
+        event = dequeue!(pq)
+        validcollision = validatecollision(event)
+        if validcollision
+            updatelabels(event,label)
+            move(board,particle,event.time-t)
+            t = event.time
+            push!(time,t)
+            new_cell = collision(event.dynamicobject,event.diskorwall, board) #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
+            if new_cell == true
+                dict["disk$(event.dynamicobject.numberofcell)"] = [0.0]
+            end
+
+#            for k in board.cells
+#                push!(dict["disk$(k.disk.numberofcell)"],energy(k.disk))
+#            end
+
+            #updateparticlelists!(particle_positions, particle_velocities,particle)
+            updateparticlexlist!(particle_xpositions, particle_xvelocities, particle)
+            futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
+        end
+    end
+
+    for k in board.cells
+        dict["disk$(k.disk.numberofcell)"][1] = energy(k.disk)
+    end
+
+    push!(time, t_max)
+    board, particle_xpositions, particle_xvelocities, time, dict
+end
+
+
 end
