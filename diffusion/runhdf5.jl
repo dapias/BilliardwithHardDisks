@@ -2,9 +2,11 @@ include("makehdf5.jl")
 
 parameters = include("parameters.jl")
 time = parameters[:t_max]
-nofrealizations = 10
-nofensembles = 5
-nameoffile = "test3"
+
+##This parameters have to be given if the file is executed directly
+# nofrealizations = 10
+# nofensembles = 5
+# nameoffile = "test3"
 
 createhdf5(nameoffile, parameters, nofensembles, nofrealizations)
 initializefile!(nameoffile, parameters, nofensembles)

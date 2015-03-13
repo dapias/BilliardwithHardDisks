@@ -2,7 +2,9 @@ include("plotfunctions.jl")
 
 pygui(false) #if you want see the plots set it true
 
-nameoffile = "test3"
+#This parameter have to be given if the file is executed directly.
+#nameoffile = "test3"
+
 a = plotmsdperensemble(nameoffile)
 b = plotdeltaxperensemble(nameoffile)
 c = fitmsdwithlinearsquares(nameoffile)
