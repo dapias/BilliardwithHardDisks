@@ -11,5 +11,5 @@ using Compat
              :massparticle => 1.0,
              :size_x => 3.,                     #Size of the cell in x
              :size_y => 3.,                     #Size of the cell in y
-             :velocityparticle => 1.0
+             :velocityparticle => 0.0
              )

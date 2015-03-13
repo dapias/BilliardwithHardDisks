@@ -8,7 +8,7 @@ importall HardDiskBilliardModel
 using DataStructures
 import Base.isless
 importall Base.Collections
-export simulation, animatedsimulation
+export simulation, animatedsimulation, heatsimulation
 
 #This allows to use the PriorityQueue providing a criterion to select the priority of an Event.
 isless(e1::Event, e2::Event) = e1.time < e2.time
@@ -338,17 +338,8 @@ function energy(particle::Particle,disk::Disk)
     disk.mass*dot(disk.v,disk.v)/2. + particle.mass*dot(particle.v,particle.v)/2.
 end
 
-@doc """#simulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
-Contains the main loop of the project. The PriorityQueue is filled at each step with Events associated
-to a DynamicObject; and the element with the highest physical priority (lowest time) is removed
-from the Queue and ignored if it is physically meaningless. The loop goes until the last Event is removed
-from the Data Structure, which is delimited by the maximum time(t_max). Just to clarify Lx1 and Ly1 are the coordiantes
-(Lx1,Ly1) of the left bottom corner of the initial cell.
-
-Returns `board, particle, particle_positions, particle_velocities, time`"""->
 function heatsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
                     Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
-
 
     board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                    windowsize)
@@ -356,7 +347,7 @@ function heatsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk
 
     particle_positions, particle_velocities =  createparticlelists(particle)
 
-    disk0_energy = [energy(front(board.cells).disk)]
+    disk0_energy = float64([energy(front(board.cells).disk)])
 
     dict = Dict("disk0" => disk0_energy)
 
@@ -378,7 +369,7 @@ function heatsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk
             push!(time,t)
             new_cell = collision(event.dynamicobject,event.diskorwall, board) #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
             if new_cell == true
-                dict["disk$(event.dynamicobject.numberofcell)"] = [0.0]
+                dict["disk$(event.dynamicobject.numberofcell)"] = float64([0.0])
             end
 
 #            for k in board.cells
@@ -395,8 +386,9 @@ function heatsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk
         dict["disk$(k.disk.numberofcell)"][1] = energy(k.disk)
     end
 
-    push!(time, t_max)
-    board, particle_xpositions, particle_xvelocities, time, dict
+    push!(time, t_max)  #Note that the positions of the disks don't correspond exactly with the position
+    # at time t_max, but the difference is not important for what we want
+    dict
 end
 
 
