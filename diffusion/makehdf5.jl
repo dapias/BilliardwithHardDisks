@@ -2,15 +2,14 @@ push!(LOAD_PATH,"../src/")
 
 using HDF5
 using HardDiskBilliardSimulation
-using RegularTimes
 using Docile
 
+include("regulartimes.jl")
 
-
-
-function createhdf5(nameoffile, parameters, nofensembles)
+function createhdf5(nameoffile, parameters, nofensembles, nofrealizations)
     h5open("./HDF5/$nameoffile.hdf5", "w") do file
         attrs(file)["Nofensembles"] = nofensembles
+        attrs(file)["Nofrealizations"] = nofrealizations
         for (key,value) in parameters
             attrs(file)[string(key)] = value
         end
@@ -119,6 +118,6 @@ function msd!(nameoffile, nofensemble,nofrealizations)
 
     deltaxpromedio = deltax/nofrealizations
     deltaxsquarepromedio = deltaxsquare/nofrealizations
-    file["ensemble-$nofensemble/msd/<(Δx)^2>"] = deltaxsquarepromedio
+    file["ensemble-$nofensemble/meansquaredisplacement/<(Δx)^2>"] = deltaxsquarepromedio
     close(file)
 end

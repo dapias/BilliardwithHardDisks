@@ -1,10 +1,4 @@
-module RegularTimes
-
-push!(LOAD_PATH,"../src/")
-using HardDiskBilliardSimulation
 using Docile
-
-export xtoregulartimes
 
 @doc """#xtoregulartimes(simulation_results)
 From the simulation results calculate the position of the particle in a time fixed by dtstep
@@ -27,5 +21,5 @@ end
 # sim = simulation(;parameters...)
 # x, t = xtoregulartimes(sim)
 
-end
+
 
