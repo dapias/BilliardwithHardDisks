@@ -76,6 +76,8 @@ facts("Disk update tests") do
   disk = HardDiskBilliardModel.Disk([6.5,6.5],[1.,1.],radiusdisk,massdisk,0)
   delta_t = 10.0
   update_position_disk!(disk,Lx1,Ly1,size_x,size_y,delta_t)
+  #Be careful with the equality of Floating Points. The disk.r is Array{Real,1} and I compare
+  # with Array{Float64, 1}
   @fact disk.r => [6.5,6.5]
   disk = HardDiskBilliardModel.Disk([6.5,6.5],[-1.,-1.],radiusdisk,massdisk,0)
   delta_t = 10.0
