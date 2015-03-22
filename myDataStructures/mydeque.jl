@@ -37,6 +37,7 @@ function reset!{T}(blk::DequeBlock{T}, front::Int)
     blk.prev = blk
     blk.next = blk
 end
+
 function show(io::IO, blk::DequeBlock) # avoids recursion into prev and next
     x = blk.data[blk.front:blk.back]
     print(io, "$(typeof(blk))(capa = $(blk.capa), front = $(blk.front), back = $(blk.back)): $x")
@@ -47,6 +48,7 @@ end
 #
 #######################################
 const DEFAULT_DEQUEUE_BLOCKSIZE = 1024
+
 type Deque{T}
     nblocks::Int
     blksize::Int
@@ -59,27 +61,33 @@ type Deque{T}
     end
     Deque() = Deque{T}(DEFAULT_DEQUEUE_BLOCKSIZE)
 end
+
 deque{T}(::Type{T}) = Deque{T}()
 isempty(q::Deque) = q.len == 0
 length(q::Deque) = q.len
 num_blocks(q::Deque) = q.nblocks
+
 function front(q::Deque)
     isempty(q) && error("Attempted to front at an empty deque.")
     blk = q.head
     blk.data[blk.front]
 end
+
 function back(q::Deque)
     isempty(q) && error("Attempted to back at an empty deque.")
     blk = q.rear
     blk.data[blk.back]
 end
+
 # Iteration
 immutable DequeIterator{T}
     is_done::Bool
     cblock::DequeBlock{T} # current block
     i::Int
 end
+
 start{T}(q::Deque{T}) = DequeIterator{T}(isempty(q), q.head, q.head.front)
+
 function next{T}(q::Deque{T}, s::DequeIterator{T})
     cb = s.cblock
     i::Int = s.i
@@ -97,7 +105,9 @@ function next{T}(q::Deque{T}, s::DequeIterator{T})
     end
     (x, DequeIterator{T}(is_done, cb, i))
 end
+
 done{T}(q::Deque{T}, s::DequeIterator{T}) = s.is_done
+
 function Base.collect{T}(q::Deque{T})
     r = T[]
     for x::T in q
@@ -105,10 +115,12 @@ function Base.collect{T}(q::Deque{T})
     end
     return r
 end
+
 # Showing
 function show(io::IO, q::Deque)
     print(io, "Deque [$(collect(q))]")
 end
+
 function dump(io::IO, q::Deque)
     println(io, "Deque (length = $(q.len), nblocks = $(q.nblocks))")
     cb::DequeBlock = q.head
@@ -129,6 +141,9 @@ function dump(io::IO, q::Deque)
         end
     end
 end
+
+
+
 # Manipulation
 function empty!{T}(q::Deque{T})
     # release all blocks except the head
@@ -147,6 +162,7 @@ function empty!{T}(q::Deque{T})
     q.rear = q.head
     q
 end
+
 function push!{T}(q::Deque{T}, x) # push back
     rear = q.rear
     if isempty(rear)
@@ -154,7 +170,7 @@ function push!{T}(q::Deque{T}, x) # push back
         rear.back = 0
     end
     if rear.back < rear.capa
-        @inbounds rear.data[rear.back += 1] = convert(T, x)
+        @inbounds rear.data[rear.back += 1] = convert(T, x)  #Aquí mete el nuevo elemento si el arreglo es menor a 1024
     else
         new_rear = rear_deque_block(T, q.blksize)
         new_rear.back = 1
@@ -166,6 +182,7 @@ function push!{T}(q::Deque{T}, x) # push back
     q.len += 1
     q
 end
+
 function unshift!{T}(q::Deque{T}, x) # push front
     head = q.head
     if isempty(head)
@@ -187,6 +204,7 @@ function unshift!{T}(q::Deque{T}, x) # push front
     q.len += 1
     q
 end
+
 function pop!{T}(q::Deque{T}) # pop back
     isempty(q) && error("Attempted to pop from an empty deque.")
     rear = q.rear
@@ -205,6 +223,7 @@ function pop!{T}(q::Deque{T}) # pop back
     q.len -= 1
     x
 end
+
 function shift!{T}(q::Deque{T}) # pop front
     isempty(q) && error("Attempted to pop from an empty deque.")
     head = q.head
