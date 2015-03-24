@@ -11,7 +11,7 @@ using Lexicon
 using DataStructures
 
 export Wall, Disk, Event, Cell, Particle, Board, Object, DynamicObject
-export create_board_with_particle
+export create_board_with_particle, is_cell_in_board, newcell!
 export move, dtcollision, collision
 
 abstract Object
@@ -159,7 +159,7 @@ function create_disk(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real,radius::Real, mass:
     vx = cos(theta)*velocitynorm
     vy = sin(theta)*velocitynorm
     v = [vx, vy]
-    Disk([x,y],v,radius, mass,numberofcell)
+    Disk([x;y],v,radius, mass,numberofcell)
 end
 
 @doc """#create_window(Ly1, Ly2, windowsize)
@@ -501,7 +501,7 @@ end
 Ask for the existence of a Cell with the label associated to the Particle (Particle.numberofcell)"""->
 function is_cell_in_board(b::Board,p::Particle)
     iscell = false
-    if back(b.cells).numberofcell <= p.numberofcell <= front(b.cells).numberofcell
+    if front(b.cells).numberofcell <= p.numberofcell <= back(b.cells).numberofcell
         iscell = true
     end
     iscell
@@ -511,14 +511,19 @@ end
 Integerroduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
 It may pushes the cell at the left or right side of the board to mantain the order in the **Deque** structure of the
 board: at the back the leftmost cell, at front the rightmost cell."""->
-function newcell!(b::Board, p::Particle)
-    if back(b.cells).numberofcell - 1 == p.numberofcell
-        cell = create_new_left_cell(back(b.cells),p)
-        push!(b.cells, cell)
-    elseif front(b.cells).numberofcell + 1 == p.numberofcell
-        cell = create_new_right_cell(front(b.cells),p)
+function newcell!(b::Board, p::Particle, t)
+    cell = nothing                #Para inicializarlo
+    println("En esta celda no hay nada")
+    if front(b.cells).numberofcell - 1 == p.numberofcell
+        println("Celda izquierda")
+        cell = create_new_left_cell(front(b.cells),p, t)
         unshift!(b.cells,cell)
+    elseif back(b.cells).numberofcell + 1 == p.numberofcell
+        println("Celda derecha")
+        cell = create_new_right_cell(back(b.cells),p, t)
+        push!(b.cells,cell)
     end
+  cell
 end
 
 @doc """#collision(::Particle, ::Disk)
