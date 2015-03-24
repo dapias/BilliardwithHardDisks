@@ -9,7 +9,7 @@
 
 push!(LOAD_PATH,"./")
 using HardDiskBilliardSimulation
-#using Visual
+using Visual
 using Compat  ## To handle versions less than 0.4
 using DataStructures
 
