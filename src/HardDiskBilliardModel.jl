@@ -58,6 +58,7 @@ type Cell
     walls::Vector{Wall}
     disk::Disk
     numberofcell::Integer
+    last_t::Real
 end
 
 #Cell(walls,label) = Cell(walls,label,Disk([-100.,-100.],[0.,0.],0.))
@@ -192,7 +193,7 @@ function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,si
         disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
         particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
     end
-    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell)
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, 0.)
     cell, particle
 end
 
@@ -214,7 +215,7 @@ end
 Creates a new cell that shares the rightmost verticalwall of the passed cell. A Particle is passed
 to avoid overlap with the embedded Disk.
 """->
-function create_new_right_cell(cell::Cell, particle::Particle)
+function create_new_right_cell(cell::Cell, particle::Particle, t::Real)
     size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
 
     leftsharedwall = cell.walls[end]
@@ -231,7 +232,7 @@ function create_new_right_cell(cell::Cell, particle::Particle)
         disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
     end
     rightsharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
-    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell)
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t)
     cell
 end
 
@@ -240,7 +241,7 @@ end
 Creates a new cell that shares the leftmost verticalwall of the passed cell. A Particle is passed
 to avoid overlap with the embedded Disk.
 """->
-function create_new_left_cell(cell::Cell, particle::Particle)
+function create_new_left_cell(cell::Cell, particle::Particle, t::Real)
     size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
 
     Lx2 = cell.walls[1].x
@@ -257,7 +258,7 @@ function create_new_left_cell(cell::Cell, particle::Particle)
         disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
     end
     leftsharedwall = VerticalSharedWall(Lx1,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell-1))
-    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell)
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t)
     cell
 end
 
@@ -473,22 +474,16 @@ through the window, the label of the particle is updated to the label of the new
 done before. Else if the collision is through the rigid part of the wall, it updates the particle velocity according to a
 specular collision"""->
 function collision(p::Particle, VSW::VerticalSharedWall, b::Board)
-    new = false
-    if updateparticlelabel(p,VSW)
-        if !is_cell_in_board(b, p)
-            newcell!(b,p)
-            new = true
-        end
-    else
-        collision(p,VSW)
-    end
-    new
-end
+    updateparticlelabel(p,VSW)
+    collision(p,VSW)
+  end
+
+
+
 
 @doc """#updateparticlelabel(::Particle, ::VerticalSharedWall)
 Update the label of the particle when it passes through the window of the VerticalSharedWall."""->
 function updateparticlelabel(p::Particle, VSW::VerticalSharedWall)
-    update = false
     Ly1window = VSW.y[2]
     Ly2window= VSW.y[3]
     if Ly1window < p.r[2] < Ly2window
@@ -498,9 +493,7 @@ function updateparticlelabel(p::Particle, VSW::VerticalSharedWall)
                 p.numberofcell = nofcell
             end
         end
-        update = true
-    end
-    update
+     end
 end
 
 
