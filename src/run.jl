@@ -9,11 +9,11 @@
 
 push!(LOAD_PATH,"./")
 using HardDiskBilliardSimulation
-#using Visual
+using Visual
 using Compat  ## To handle versions less than 0.4
 using DataStructures
 
-visual = false
+visual = true
 # To change a parameter, type: parameters[:nameofsymbol] = valueyouwanttoset
 parameters = @compat Dict(:t_initial => 0,
                   :t_max => 100,
@@ -34,14 +34,14 @@ parameters = @compat Dict(:t_initial => 0,
 
 if visual
     radiustovisualizeparticle = 0.02
-    sim = animatedsimulation(;parameters...);
+    sim = simplifiedsimulation(;parameters...);
     @time visualize(sim, radiustovisualizeparticle);
-    delta_e_max, = findmax(sim[end])
-    delta_e_min, = findmin(sim[end])
-    println("Delta_E_max, Delta_E_min = $(delta_e_max),$(delta_e_min)")
-    time = sim[5]
-    nofevents = length(time)
-    println("# of events: $nofevents")
+#     delta_e_max, = findmax(sim[end])
+#     delta_e_min, = findmin(sim[end])
+#     println("Delta_E_max, Delta_E_min = $(delta_e_max),$(delta_e_min)")
+#     time = sim[5]
+#     nofevents = length(time)
+#     println("# of events: $nofevents")
 else
     parameters[:t_max] = 1000
     @time sim = simulation(;parameters...);

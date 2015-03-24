@@ -1,14 +1,14 @@
 include("./HardDiskBilliardModel.jl")
 
-# module HardDiskBilliardSimulation
+module HardDiskBilliardSimulation
 
-#VERSION < v"0.4-" && using Docile
+VERSION < v"0.4-" && using Docile
 
 importall HardDiskBilliardModel
 using DataStructures
 import Base.isless
 importall Base.Collections
-#export simulation, animatedsimulation, heatsimulation
+export simulation, animatedsimulation, heatsimulation, simplifiedsimulation
 
 #This allows to use the PriorityQueue providing a criterion to select the priority of an Event.
 isless(e1::Event, e2::Event) = e1.time < e2.time
@@ -457,7 +457,7 @@ function validatecoll(event::Event, particle::Particle)
     validate(event.diskorwall)
   end
 
-  if event.dynamicobject.numberofcell !== particle.numberofcell
+  if event.dynamicobject.numberofcell != particle.numberofcell
     validcollision = false
   end
 
@@ -542,10 +542,13 @@ function simplifiedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, m
                               Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
   board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                  windowsize)
+
+
   particle_positions, particle_velocities =  createparticlelists(particle)
   disk_positions, disk_velocities = createdisklists(board)
+  initialcell = front(board.cells)
   label = 0
-  #delta_e = [0.]
+  delta_e = [0.]
   while(!isempty(pq))
     label += 1
     event = dequeue!(pq)
@@ -557,16 +560,12 @@ function simplifiedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, m
       cell = get_cell(board.cells, particle.numberofcell)
       move(cell,particle,event.time-t)
       t = event.time
+      cell.last_t = t
       push!(time,t)
-      #e1 = energy(event.dynamicobject,event.diskorwall)
+      e1 = energy(event.dynamicobject,event.diskorwall)
       collision(event.dynamicobject,event.diskorwall, board)
-
-
-
-      if particle.numberofcell == cell.numberofcell
-        continue
-      else
-        is_old_cell = is_cell_in_board(board, particle)
+      is_old_cell = is_cell_in_board(board, particle)
+      if particle.numberofcell != cell.numberofcell
         if !is_old_cell
           cell = newcell!(board, particle, t)
         else
@@ -575,19 +574,19 @@ function simplifiedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, m
         end
       end
 
-      #e2 = energy(event.dynamicobject,event.diskorwall)
-      #push!(delta_e, e2 - e1)
+      e2 = energy(event.dynamicobject,event.diskorwall)
+      push!(delta_e, e2 - e1)
       updateparticlelists!(particle_positions, particle_velocities,particle)
       updatediskslists!(disk_positions, disk_velocities, cell)
       futurecollisions!(event, cell, particle, t,t_max,pq, label, is_old_cell)
     end
   end
   push!(time, t_max)
-  board, particle, particle_positions, particle_velocities, time, disk_positions, disk_velocities
+  board, particle, particle_positions, particle_velocities, time, disk_positions, disk_velocities, delta_e, initialcell.disk
 end
 
 
 
 
 
-#end
+end
