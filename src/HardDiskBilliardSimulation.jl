@@ -392,18 +392,20 @@ function createdisklists(board::Board)
   disk_positions, disk_velocities
 end
 
-function move(cell::Cell,particle::Particle,delta_t::Real)
-  move(cell.disk,delta_t)
-  move(particle,delta_t)
-end
+# function move(cell::Cell,particle::Particle,delta_t::Real)
+#   delta_t
+#   move(cell.disk,delta_t)
+# end
 
 function futurecollisions!(event::Event,cell::Cell, particle::Particle, t_initial::Real,t_max::Real,pq::PriorityQueue,
-                           whenwaspredicted::Int, is_old_cell)
+                           whenwaspredicted::Int, is_new_cell)
+
+
 
   #This function updates the PriorityQueue taking account that the current event was between a particle and a disk
   function future(particle::Particle, disk::Disk)
     enqueuecollisions!(pq, particle, cell, t_initial, whenwaspredicted, t_max)
-    enqueuecollisions!(pq, disk,cell, t_initial, whenwaspredicted, t_max)
+    enqueuecollisions!(pq, disk, cell, t_initial, whenwaspredicted, t_max)
   end
 
   #This function updates the PriorityQueue taking account that the current event was between a particle and a wall
@@ -413,34 +415,23 @@ function futurecollisions!(event::Event,cell::Cell, particle::Particle, t_initia
       enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],whenwaspredicted),t_initial+dt)
     end
     enqueuecollisions!(pq, particle, cell.disk, t_initial, whenwaspredicted, t_max)
-
-    #If the wall was a VerticalSharedWall that implied to create a new cell, this is invoked
-    if !is_old_cell
-      enqueuecollisions!(pq, cell.disk,cell, t_initial, whenwaspredicted, t_max)
-    end
   end
 
   #This function updates the PriorityQueue taking account that the current event was between a disk and a wall
   function future(disk::Disk, wall::Wall)
     enqueuecollisions!(pq, disk,cell, t_initial, whenwaspredicted, t_max)
-    if  is_particle_in_cell(particle,cell)
-      enqueuecollisions!(pq, particle, disk, t_initial, whenwaspredicted, t_max)
-    end
+    enqueuecollisions!(pq, particle, disk, t_initial, whenwaspredicted, t_max)
   end
 
-  #Here, the function future is invoked
-  cell.last_t = t_initial
-  future(event.dynamicobject,event.diskorwall)
-end
-
-function is_particle_in_cell(p::Particle,c::Cell)
-  contain = false
-  if c.numberofcell == p.numberofcell
-    contain = true
+  if is_new_cell
+    enqueuecollisions!(pq, cell.disk,cell, t_initial, whenwaspredicted, t_max)
+    enqueuecollisions!(pq, particle, cell.disk, t_initial, whenwaspredicted, t_max)
+    enqueuecollisions!(pq, particle, cell, t_initial, whenwaspredicted, t_max)
+  else
+    future(event.dynamicobject,event.diskorwall)
   end
-  contain
-end
 
+end
 
 function validatecoll(event::Event, particle::Particle)
   validcollision = false
@@ -453,14 +444,15 @@ function validatecoll(event::Event, particle::Particle)
     validcollision  = true
   end
 
-  if event.whenwaspredicted >= event.dynamicobject.lastcollision
-    validate(event.diskorwall)
-  end
 
-  if event.dynamicobject.numberofcell != particle.numberofcell
-    validcollision = false
-  end
 
+#   if event.dynamicobject.numberofcell != particle.numberofcell
+#     validcollision = false
+#   else
+    if event.whenwaspredicted >= event.dynamicobject.lastcollision
+      validate(event.diskorwall)
+    end
+#   end
   validcollision
 end
 
@@ -519,12 +511,12 @@ end
 function update_position_disk(cell, t)
   delta_t = t - cell.last_t
   move(cell.disk,delta_t)
-  Lx1 = cell.walls[1].x
-  Lx2 = cell.walls[4].x
+  Lx1 = cell.walls[2].x[1]
+  Lx2 = cell.walls[2].x[2]
   Ly1 = cell.walls[2].y
   Ly2 = cell.walls[3].y
-  size_y = Ly2 - Ly1
-  size_x = Lx2 - Lx1
+  size_y = abs(Ly2 - Ly1)
+  size_x = abs(Lx2 - Lx1)
   update_y_disk(cell.disk,Ly1,size_y)
   update_x_disk(cell.disk,Lx1,size_x)
 end
@@ -558,15 +550,18 @@ function simplifiedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, m
     if validcollision
       updatelabels(event,label)
       cell = get_cell(board.cells, particle.numberofcell)
-      move(cell,particle,event.time-t)
+      move(particle,event.time -t)
+      update_position_disk(cell,event.time)
       t = event.time
       cell.last_t = t
       push!(time,t)
       e1 = energy(event.dynamicobject,event.diskorwall)
       collision(event.dynamicobject,event.diskorwall, board)
-      is_old_cell = is_cell_in_board(board, particle)
-      if particle.numberofcell != cell.numberofcell
-        if !is_old_cell
+
+
+      is_new_cell = !is_cell_in_board(board, particle)
+      if particle.numberofcell != cell.numberofcell ###Si la partícula cambió de celda
+        if is_new_cell
           cell = newcell!(board, particle, t)
         else
           cell = get_cell(board.cells,particle.numberofcell)
@@ -575,10 +570,13 @@ function simplifiedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, m
       end
 
       e2 = energy(event.dynamicobject,event.diskorwall)
+
       push!(delta_e, e2 - e1)
+
       updateparticlelists!(particle_positions, particle_velocities,particle)
       updatediskslists!(disk_positions, disk_velocities, cell)
-      futurecollisions!(event, cell, particle, t,t_max,pq, label, is_old_cell)
+
+      futurecollisions!(event, cell, particle, t,t_max,pq, label, is_new_cell)
     end
   end
   push!(time, t_max)

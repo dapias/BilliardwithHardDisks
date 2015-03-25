@@ -474,19 +474,27 @@ through the window, the label of the particle is updated to the label of the new
 done before. Else if the collision is through the rigid part of the wall, it updates the particle velocity according to a
 specular collision"""->
 function collision(p::Particle, VSW::VerticalSharedWall, b::Board)
-    updateparticlelabel(p,VSW)
-    collision(p,VSW)
+  update = updateparticlenumberofcell(p,VSW)
+  if !update
+        collision(p,VSW)
   end
+end
+
+
+
 
 
 
 
 @doc """#updateparticlelabel(::Particle, ::VerticalSharedWall)
 Update the label of the particle when it passes through the window of the VerticalSharedWall."""->
-function updateparticlelabel(p::Particle, VSW::VerticalSharedWall)
+function updateparticlenumberofcell(p::Particle, VSW::VerticalSharedWall)
+    update = false
     Ly1window = VSW.y[2]
     Ly2window= VSW.y[3]
     if Ly1window < p.r[2] < Ly2window
+        println(VSW.sharedcells)
+        update = true
         pcell = p.numberofcell
         for nofcell in VSW.sharedcells
             if pcell != nofcell
@@ -494,6 +502,7 @@ function updateparticlelabel(p::Particle, VSW::VerticalSharedWall)
             end
         end
      end
+  update
 end
 
 
@@ -512,13 +521,11 @@ Integerroduces a new cell on the board according to the value of the attribute *
 It may pushes the cell at the left or right side of the board to mantain the order in the **Deque** structure of the
 board: at the back the leftmost cell, at front the rightmost cell."""->
 function newcell!(b::Board, p::Particle, t)
-    cell = nothing                #Para inicializarlo
-    println("En esta celda no hay nada")
-    if front(b.cells).numberofcell - 1 == p.numberofcell
+    if front(b.cells).numberofcell > p.numberofcell
         println("Celda izquierda")
         cell = create_new_left_cell(front(b.cells),p, t)
         unshift!(b.cells,cell)
-    elseif back(b.cells).numberofcell + 1 == p.numberofcell
+    elseif back(b.cells).numberofcell < p.numberofcell
         println("Celda derecha")
         cell = create_new_right_cell(back(b.cells),p, t)
         push!(b.cells,cell)

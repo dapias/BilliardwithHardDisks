@@ -31,7 +31,7 @@ function visualize(simulation_results, radiusparticle)
   fig = plt.figure()
   ax = fig[:add_subplot](111)
   energy_text = ax[:text](0.02,0.88,"",transform=ax[:transAxes])
-  time_text = ax[:text](0.60,0.88,"",transform=ax[:transAxes])
+#   time_text = ax[:text](0.60,0.88,"",transform=ax[:transAxes])
 
   c = patch.Circle([disk_positions[1],disk_positions[2]],radiusdisk)
   c[:set_color]((rand(),rand(),rand()))
@@ -58,21 +58,22 @@ function visualize(simulation_results, radiusparticle)
      k = findfirst(z,false) - 1
 
      if k == 0
-       circles[1][:center] = (disk_positions,disk_positions)
+       circles[1][:center] = (disk_positions[1],disk_positions[2])
 #       #             circles[2][:center] = (disk_positions_back[1],disk_positions_back[2])
-       p[:center] = (particle_positions[1], particle_positions[2])
+       puntual[1][:center] = (particle_positions[1], particle_positions[2])
 
      else
-#       circles[1][:center] = (disk_positions[1+2*(k-1)] + disk_velocities[1+2*(k-1)]*(i/10-time[k]), disk_positions[2+2*(k-1)]+disk_velocities[2+2*(k-1)]*(i/10-time[k]))
+     #  circles[1][:center] = (disk_positions[1+2*(k-1)] + disk_velocities[1+2*(k-1)]*(i/10-time[k]), disk_positions[2+2*(k-1)]+disk_velocities[2+2*(k-1)]*(i/10-time[k]))
        puntual[1][:center] = (particle_positions[1+2*(k-1)] + particle_velocities[1+2*(k-1)]*(i/10-time[k]), particle_positions[2+2*(k-1)]+particle_velocities[2+2*(k-1)]*(i/10-time[k]))
-#       #circles[2][:center] = (disk_positions_back[1+2*(k-1)] + disk_velocities_back[1+2*(k-1)]*(i/10-time[k]), disk_positions_back[2+2*(k-1)]+disk_velocities_back[2+2*(k-1)]*(i/10-time[k]))
-#       e_text = delta_e[k]
+       circles[1][:center] = (disk_positions[1+2*(k-1)] + disk_velocities[1+2*(k-1)]*(i/10-time[k]), disk_positions[2+2*(k-1)]+disk_velocities[2+2*(k-1)]*(i/10-time[k]))
+       e_text = delta_e[k]
 #       t_text = time[k]
-#       energy_text[:set_text]("Delta_E = $(e_text)")
+       energy_text[:set_text]("Delta_E = $(e_text)")
 #       time_text[:set_text]("Time = $(t_text)")
      end
 
      return (puntual, circles, )
+#        return (puntual, )
    end
 
    anim = animation.FuncAnimation(fig, animate, frames=int(time[end]*10), interval=20, blit=false, repeat = false)

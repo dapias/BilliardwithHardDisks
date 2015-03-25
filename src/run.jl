@@ -43,17 +43,17 @@ if visual
 #     nofevents = length(time)
 #     println("# of events: $nofevents")
 else
-    parameters[:t_max] = 1000
-    @time sim = simulation(;parameters...);
-    board = sim[1]
-    left = back(board.cells).numberofcell
-    right = front(board.cells).numberofcell
-    println("Left-cell, Right-cell: $left,$right")
-    numberofcells = right + abs(left) + 1
-    println("# of cells: $numberofcells")
-    time = sim[3]
-    nofevents = length(time)
-    println("# of events: $nofevents")
+    parameters[:t_max] = 100
+    @time sim = simplifiedsimulation(;parameters...);
+#     board = sim[1]
+#     left = back(board.cells).numberofcell
+#     right = front(board.cells).numberofcell
+#     println("Left-cell, Right-cell: $left,$right")
+#     numberofcells = right + abs(left) + 1
+#     println("# of cells: $numberofcells")
+#     time = sim[3]
+#     nofevents = length(time)
+#     println("# of events: $nofevents")
 end
 
 
