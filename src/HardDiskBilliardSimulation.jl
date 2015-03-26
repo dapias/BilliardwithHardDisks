@@ -398,7 +398,7 @@ end
 # end
 
 function futurecollisions!(event::Event,cell::Cell, particle::Particle, t_initial::Real,t_max::Real,pq::PriorityQueue,
-                           whenwaspredicted::Int, is_new_cell)
+                           whenwaspredicted::Int, change_cell)
 
 
 
@@ -406,6 +406,7 @@ function futurecollisions!(event::Event,cell::Cell, particle::Particle, t_initia
   function future(particle::Particle, disk::Disk)
     enqueuecollisions!(pq, particle, cell, t_initial, whenwaspredicted, t_max)
     enqueuecollisions!(pq, disk, cell, t_initial, whenwaspredicted, t_max)
+    enqueuecollisions!(pq, particle, disk, t_initial, whenwaspredicted, t_max)
   end
 
   #This function updates the PriorityQueue taking account that the current event was between a particle and a wall
@@ -415,6 +416,10 @@ function futurecollisions!(event::Event,cell::Cell, particle::Particle, t_initia
       enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],whenwaspredicted),t_initial+dt)
     end
     enqueuecollisions!(pq, particle, cell.disk, t_initial, whenwaspredicted, t_max)
+    if change_cell
+      enqueuecollisions!(pq, cell.disk, cell, t_initial, whenwaspredicted, t_max)
+    end
+
   end
 
   #This function updates the PriorityQueue taking account that the current event was between a disk and a wall
@@ -423,13 +428,16 @@ function futurecollisions!(event::Event,cell::Cell, particle::Particle, t_initia
     enqueuecollisions!(pq, particle, disk, t_initial, whenwaspredicted, t_max)
   end
 
-  if is_new_cell
-    enqueuecollisions!(pq, cell.disk,cell, t_initial, whenwaspredicted, t_max)
-    enqueuecollisions!(pq, particle, cell.disk, t_initial, whenwaspredicted, t_max)
-    enqueuecollisions!(pq, particle, cell, t_initial, whenwaspredicted, t_max)
-  else
-    future(event.dynamicobject,event.diskorwall)
-  end
+
+  #     enqueuecollisions!(pq, particle, cell.disk, t_initial, whenwaspredicted, t_max)
+
+  #   else
+  future(event.dynamicobject,event.diskorwall)
+
+
+
+
+
 
 end
 
@@ -446,13 +454,13 @@ function validatecoll(event::Event, particle::Particle)
 
 
 
-#   if event.dynamicobject.numberofcell != particle.numberofcell
-#     validcollision = false
-#   else
-    if event.whenwaspredicted >= event.dynamicobject.lastcollision
-      validate(event.diskorwall)
-    end
-#   end
+  #   if event.dynamicobject.numberofcell != particle.numberofcell
+  #     validcollision = false
+  #   else
+  if event.whenwaspredicted >= event.dynamicobject.lastcollision
+    validate(event.diskorwall)
+  end
+  #   end
   validcollision
 end
 
@@ -558,14 +566,16 @@ function simplifiedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, m
       e1 = energy(event.dynamicobject,event.diskorwall)
       collision(event.dynamicobject,event.diskorwall, board)
 
-
+      change_cell = false
       is_new_cell = !is_cell_in_board(board, particle)
       if particle.numberofcell != cell.numberofcell ###Si la partícula cambió de celda
+        change_cell = true
         if is_new_cell
           cell = newcell!(board, particle, t)
         else
           cell = get_cell(board.cells,particle.numberofcell)
           update_position_disk(cell, t)
+          cell.last_t = t
         end
       end
 
@@ -576,7 +586,7 @@ function simplifiedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, m
       updateparticlelists!(particle_positions, particle_velocities,particle)
       updatediskslists!(disk_positions, disk_velocities, cell)
 
-      futurecollisions!(event, cell, particle, t,t_max,pq, label, is_new_cell)
+      futurecollisions!(event, cell, particle, t,t_max,pq, label, change_cell)
     end
   end
   push!(time, t_max)

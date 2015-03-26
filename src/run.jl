@@ -13,6 +13,7 @@ using Visual
 using Compat  ## To handle versions less than 0.4
 using DataStructures
 
+#srand(1234)
 visual = true
 # To change a parameter, type: parameters[:nameofsymbol] = valueyouwanttoset
 parameters = @compat Dict(:t_initial => 0,
