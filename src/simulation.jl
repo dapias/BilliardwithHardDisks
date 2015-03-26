@@ -53,6 +53,13 @@ function futurecollisions!(event::Event,board::Board, t_initial::Number,t_max::N
         if t_initial + dt < t_max
             enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],labelprediction),t_initial+dt)
         end
+
+        dt = dtcollision(particle,cell.disk)
+        if t_initial + dt < t_max
+            enqueue!(pq,Event(t_initial+dt, particle, cell.disk,labelprediction),t_initial+dt)
+        end
+
+
     end
 
     function future(particle::Particle, wall::Wall)
