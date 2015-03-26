@@ -72,7 +72,7 @@ function futurecollisions!(event::Event,board::Board, t_initial::Real,t_max::Rea
     function future(particle::Particle, disk::Disk)
         enqueuecollisions!(pq, particle, cell, t_initial, whenwaspredicted, t_max)
         enqueuecollisions!(pq, disk,cell, t_initial, whenwaspredicted, t_max)
-
+        enqueuecollisions!(pq, particle, cell.disk, t_initial, whenwaspredicted, t_max)  #Can collide again
     end
 
     #This function updates the PriorityQueue taking account that the current event was between a particle and a wall
