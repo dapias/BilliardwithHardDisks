@@ -13,6 +13,7 @@ using DataStructures
 export visualize
 
 pygui(true)
+#pygui(false)
 
 @pyimport matplotlib.path as mpath
 @pyimport matplotlib.patches as patch
@@ -50,8 +51,6 @@ function visualize(simulation_results, radiusparticle)
 
   drawwalls(board, ax)
 
-#   ax[:set_xlim](-6,6)
-#   ax[:set_ylim](0,4)
 
   function animate(i)
     z = [i/10 > t for t in time]
@@ -76,9 +75,9 @@ function visualize(simulation_results, radiusparticle)
     #        return (puntual, )
   end
 
-  anim = animation.FuncAnimation(fig, animate, frames=int(time[end]*10), interval=20, blit=false, repeat = false)
+  anim = animation.FuncAnimation(fig, animate, frames=int(time[end]*10), interval=20, blit=false, repeat = false) #In interval 10 is faster than 20. 200 is pretty slow
 #   mywriter = animation.MencoderWriter()
-#   anim[:save]("/home/maquinadt/Documentos/NewBilliard/src/gas2.mp4", writer = mywriter, fps = 300)
+#   anim[:save]("/home/maquinadt/Documentos/NewBilliard/src/gas.avi", writer = mywriter)
 
 end
 
