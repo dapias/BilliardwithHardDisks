@@ -3,10 +3,11 @@ include("./visualization.jl")
 
 using Simulation
 using Visual
+using Compat
 
 #In this file the main functions of the project are called, i.e. *simulation* from main.jl and *visualizate* from visualization.jl.
 
-parameters = Dict(:t_initial => 0,
+parameters = @compat Dict(:t_initial => 0,
                   :t_max => 100,
                   :radiusdisk => 1.0,
                   :massdisk => 1.0,
@@ -26,6 +27,6 @@ radiustovisualizeparticle = 0.02
 
 @time sim = simulation(;parameters...);
 println(length(sim[end]))
-#@time visualize(sim, radiustovisualizeparticle);
+@time visualize(sim, radiustovisualizeparticle);
 
 #visualize_localenergy(sim);
