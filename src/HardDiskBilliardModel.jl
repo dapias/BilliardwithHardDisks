@@ -102,7 +102,7 @@ immutable VerticalSharedWall <: Vertical
   sharedcells::(Integer,Integer) #Adjacent cells that share the wall
 end
 
-@doc doc"""Type with attributes time, dynamicobject, diskorwall and whenwaspredicted. It is the basic unit of information
+@doc doc"""Type with attributes time, dynamicobject, diskorwall and prediction. It is the basic unit of information
 for the implementation of a simulation, since it stores the basic information about a collision (what time, with whom and
 when was predicted). The last attributte makes reference to the cycle within the main loop in which the event was predicted
 (see *simulation* in **Simulation.jl**).
@@ -116,7 +116,7 @@ type Event
     time :: Real
     dynamicobject::DynamicObject           #Revisar en el diseño si conviene más tener un sólo objeto
     diskorwall ::Object                      ##tal como cell asociado a un evento y la partícula dentro de cell.
-    whenwaspredicted:: Integer
+    prediction:: Integer
 end
 
 @doc """#randuniform(liminf, limsup, dim=1)
@@ -173,12 +173,12 @@ function create_window(Ly1::Real, Ly2::Real, windowsize::Real)
 end
 
 @doc """#create_initial_cell_with_particle( Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                           massparticle, velocityparticle, windowsize)
+                                           massparticle, velocityparticle, windowsize, t_initial)
 Creates an instance of Cell. Size of its sides and initial coordinates for the left down corner are passed (Lx1,Ly1)
 together with the needed data to create the embedded disk and a particle inside the cell."""->
 function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk,
                                            massdisk::Real, velocitydisk::Real,
-                                           massparticle::Real, velocityparticle::Real, windowsize::Real)
+                                           massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
     Lx2 = Lx1 + size_x
     Ly2 = Ly1 + size_y
     Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
@@ -193,7 +193,7 @@ function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,si
         disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
         particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
     end
-    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, 0.)
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t_initial)
     cell, particle
 end
 
@@ -267,9 +267,9 @@ Returns a Board instance with one cell and a particle inside it (that is also re
 together with the needed data to create the embedded disk and a particle inside the cell. """->
 function create_board_with_particle(Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk::Real,
                                     massdisk::Real, velocitydisk::Real,
-                                    massparticle::Real, velocityparticle::Real, windowsize::Real)
+                                    massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
     cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                                       massparticle, velocityparticle, windowsize)
+                                                       massparticle, velocityparticle, windowsize, t_initial::Real)
     board = Deque{Cell}()
     push!(board,cell)
     board = Board(board)
@@ -337,7 +337,7 @@ function dtcollision(d::Disk, c::Cell)
 end
 
 @doc """#dtcollision(::Disk,::Particle)
-Calculates the time of collision between a Disk and the Particle in the same cell.If they don't collide it retuns ∞"""->
+Calculates the time of collision between a Disk and the Particle.If they don't collide it retuns ∞"""->
 function dtcollision(d::Disk, p::Particle)
     deltar = p.r - d.r
     deltav = p.v - d.v
@@ -421,7 +421,7 @@ end
 ##########################################################################################
 #Rules
 ###############Disk##################################################
-@doc doc"""#collision(::Disk, ::Vertical, ::Board)
+@doc doc"""#collision(::Disk, ::Vertical)
 Update the velocity vector of a Disk (Disk.v) after it collides with a Vertical(Wall)."""->
 function collision(d::Disk, V::Vertical)
     d.v = [-d.v[1], d.v[2]]
@@ -434,7 +434,7 @@ function collision(d::Disk, V::Vertical,b::Board)
     collision(d,V)
 end
 
-@doc doc"""#collision(::Disk, ::HorizontalWall, ::Board)
+@doc doc"""#collision(::Disk, ::HorizontalWall)
 Update the velocity vector of a Disk (Disk.v) after it collides with a HorizontallWall."""->
 function collision(d::Disk, H::HorizontalWall)
     d.v = [d.v[1],-d.v[2]]
@@ -493,7 +493,6 @@ function updateparticlenumberofcell(p::Particle, VSW::VerticalSharedWall)
     Ly1window = VSW.y[2]
     Ly2window= VSW.y[3]
     if Ly1window < p.r[2] < Ly2window
-        println(VSW.sharedcells)
         update = true
         pcell = p.numberofcell
         for nofcell in VSW.sharedcells
@@ -517,16 +516,14 @@ function is_cell_in_board(b::Board,p::Particle)
 end
 
 @doc """#newcell!(::Board, ::Particle)
-Integerroduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
+Introduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
 It may pushes the cell at the left or right side of the board to mantain the order in the **Deque** structure of the
-board: at the back the leftmost cell, at front the rightmost cell."""->
+board: at the back the rightmost cell, at front the leftmost cell."""->
 function newcell!(b::Board, p::Particle, t)
     if front(b.cells).numberofcell > p.numberofcell
-        println("Celda izquierda")
         cell = create_new_left_cell(front(b.cells),p, t)
         unshift!(b.cells,cell)
     elseif back(b.cells).numberofcell < p.numberofcell
-        println("Celda derecha")
         cell = create_new_right_cell(back(b.cells),p, t)
         push!(b.cells,cell)
     end
