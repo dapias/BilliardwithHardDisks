@@ -35,7 +35,7 @@ parameters = @compat Dict(:t_initial => 0,
 
 if visual
     radiustovisualizeparticle = 0.02
-    sim = simplifiedsimulation(;parameters...);
+    sim = animatedsimulation(;parameters...);
     @time visualize(sim, radiustovisualizeparticle);
 #     delta_e_max, = findmax(sim[end])
 #     delta_e_min, = findmin(sim[end])
@@ -45,7 +45,7 @@ if visual
 #     println("# of events: $nofevents")
 else
     parameters[:t_max] = 100
-    @time sim = simplifiedsimulation(;parameters...);
+    @time sim = animatedsimulation(;parameters...);
 #     board = sim[1]
 #     left = back(board.cells).numberofcell
 #     right = front(board.cells).numberofcell

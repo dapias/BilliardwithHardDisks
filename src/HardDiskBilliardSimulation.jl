@@ -20,9 +20,9 @@ equal to 0."""->
 function initialcollisions!(board::Board,particle::Particle,t_initial::Real,t_max::Real,pq::PriorityQueue)
   prediction = 0
   cell = get_cell(board, 0)
-    enqueuecollisions!(pq, cell.disk,cell, t_initial, prediction, t_max)
-    enqueuecollisions!(pq, particle, cell, t_initial, prediction, t_max)
-    enqueuecollisions!(pq, particle, cell.disk, t_initial, prediction, t_max)
+  enqueuecollisions!(pq, cell.disk,cell, t_initial, prediction, t_max)
+  enqueuecollisions!(pq, particle, cell, t_initial, prediction, t_max)
+  enqueuecollisions!(pq, particle, cell.disk, t_initial, prediction, t_max)
 end
 
 @doc """#enqueuecollisions!(pq::PriorityQueue,disk::Disk,cell::Cell, t_initial::Real, prediction::Int, t_max::Real)
@@ -102,96 +102,10 @@ end
 
 
 
-@doc """#simulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
-Contains the main loop of the project. The PriorityQueue is filled at each step with Events associated
-to a DynamicObject; and the element with the highest physical priority (lowest time) is removed
-from the Queue and ignored if it is physically meaningless. The loop goes until the last Event is removed
-from the Data Structure, which is delimited by the maximum time(t_max). Just to clarify Lx1 and Ly1 are the coordiantes
-(Lx1,Ly1) of the left bottom corner of the initial cell.
-
-Returns `board, particle, particle_positions, particle_velocities, time`"""->
-function simulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
-                    Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
-
-
-  board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
-                                                 windowsize)
-
-
-  particle_positions, particle_velocities =  createparticlelists(particle)
-
-
-  #Solo voy a trabajar con la posición en x para analizar la difusión
-  particle_xpositions = [particle_positions[1]]
-  particle_xvelocities = [particle_velocities[1]]
-  #
-
-  label = 0
-  while(!isempty(pq))
-    label += 1
-    event = dequeue!(pq)
-    validcollision = validatecollision(event)
-    if validcollision
-      updatelabels(event,label)
-      move(board,particle,event.time-t)
-      t = event.time
-      push!(time,t)
-      new_cell = collision(event.dynamicobject,event.diskorwall, board) #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
-      e2 = energy(event.dynamicobject,event.diskorwall)
-      #updateparticlelists!(particle_positions, particle_velocities,particle)
-      updateparticlexlist!(particle_xpositions, particle_xvelocities, particle)
-      futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
-    end
-  end
-
-  push!(time, t_max)
-  board, particle_xpositions, particle_xvelocities, time
+function updateparticlexlist!(particle_xpositions,particle_xvelocities, particle::Particle)
+  push!(particle_xpositions, particle.r[1])
+  push!(particle_xvelocities, particle.v[1])
 end
-
-
-@doc doc"""#animatedsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
-Implements the simulation main loop but adds the storing of the back and front disk positions and velocities, together
-with a delta of energy for each collision.
-
-Returns `board, particle, particle_positions, particle_velocities, time, disk_positions_front,
-disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back, delta_e`"""->
-function animatedsimulation(; t_initial = 0, t_max = 100, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
-                            Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
-  board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
-                                                 windowsize)
-  particle_positions, particle_velocities =  createparticlelists(particle)
-  disk_positions_front, disk_velocities_front, disk_positions_back, disk_velocities_back = creatediskslists(board)
-  initialcell = front(board.cells)
-  label = 0
-  delta_e = [0.]
-  while(!isempty(pq))
-    label += 1
-    event = dequeue!(pq)
-    validcollision = validatecollision(event)
-    ##si se crea una nueva celda cambio el estatus de las variables
-    if validcollision
-      updatelabels(event,label)
-      move(board,particle,event.time-t)
-      t = event.time
-      push!(time,t)
-      e1 = energy(event.dynamicobject,event.diskorwall)
-      new_cell = collision(event.dynamicobject,event.diskorwall, board)  #Sólo es un booleano (= true) en el caso de que se cree una nueva celda
-      e2 = energy(event.dynamicobject,event.diskorwall)
-      push!(delta_e, e2 - e1)
-      updateparticlelists!(particle_positions, particle_velocities,particle)
-      updatedisklists!(disk_positions_front, disk_velocities_front,front(board.cells))
-      updatedisklists!(disk_positions_back,disk_velocities_back,back(board.cells))
-      futurecollisions!(event, board, t,t_max,pq, label, particle, new_cell)
-    end
-  end
-  push!(time, t_max)
-  board, particle, particle_positions, particle_velocities, time, disk_positions_front, disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back, delta_e
-end
-
-# function updateparticlexlist!(particle_xpositions,particle_xvelocities, particle::Particle)
-#   push!(particle_xpositions, particle.r[1])
-#   push!(particle_xvelocities, particle.v[1])
-# end
 
 
 function updateparticlelists!(particle_positions, particle_velocities,particle::Particle)
@@ -213,14 +127,6 @@ function createparticlelists(particle::Particle)
   particle_velocities = [particle.v]
   particle_positions, particle_velocities
 end
-
-# function creatediskslists(board::Board)
-#   disk_positions_front =  [front(board.cells).disk.r]
-#   disk_velocities_front = [front(board.cells).disk.v]
-#   disk_positions_back =  [back(board.cells).disk.r]
-#   disk_velocities_back = [back(board.cells).disk.v]
-#   disk_positions_front, disk_velocities_front, disk_positions_back, disk_velocities_back
-# end
 
 @doc """#energy(::Particle,::Wall)
 Returns the kinetic energy of a Particle"""->
@@ -349,15 +255,10 @@ function validatecollision(event::Event, particle::Particle)
     validcollision  = true
   end
 
-
-
-  #   if event.dynamicobject.numberofcell != particle.numberofcell
-  #     validcollision = false
-  #   else
   if event.prediction >= event.dynamicobject.lastcollision
     validate(event.diskorwall)
   end
-  #   end
+
   validcollision
 end
 
@@ -427,7 +328,7 @@ function update_position_disk(cell, t)
 end
 
 @doc """Extract the cell from the board with the index passed. By convention 0 is the index for the initial cell, and
-it goes growing negativeky at left and positively at right."""->
+it goes growing negatively at left and positively at right."""->
 function get_cell(board::Board, numberofcell::Int)
   deque = board.cells
   @assert -1023 <= numberofcell <= 1023
@@ -439,15 +340,20 @@ function get_cell(board::Board, numberofcell::Int)
   cell
 end
 
-function simplifiedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
+@doc doc"""#animatedsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
+Implements the simulation main loop but adds the storing of the back and front disk positions and velocities, together
+with a delta of energy for each collision.
+
+Returns `board, particle, particle_positions, particle_velocities, time, disk_positions_front,
+disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back, delta_e`"""->
+function animatedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
                               Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
   board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                  windowsize)
 
-
   particle_positions, particle_velocities =  createparticlelists(particle)
   disk_positions, disk_velocities = createdisklists(board)
-  initialcell = front(board.cells)
+  initialcell = front(board.cells) #La necesito para la animación
   label = 0
   delta_e = [0.]
   while(!isempty(pq))
@@ -494,6 +400,63 @@ function simplifiedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, m
   board, particle, particle_positions, particle_velocities, time, disk_positions, disk_velocities, delta_e, initialcell.disk
 end
 
+@doc """#simulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
+Contains the main loop of the project. The PriorityQueue is filled at each step with Events associated
+to a DynamicObject; and the element with the highest physical priority (lowest time) is removed
+from the Queue and ignored if it is physically meaningless. The loop goes until the last Event is removed
+from the Data Structure, which is delimited by the maximum time(t_max). Just to clarify Lx1 and Ly1 are the coordiantes
+(Lx1,Ly1) of the left bottom corner of the initial cell.
+
+Returns `board, particle, particle_positions, particle_velocities, time`"""->
+function simulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
+                    Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
+  board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
+                                                 windowsize)
+
+
+  particle_positions, particle_velocities =  createparticlelists(particle)
+
+  #Solo voy a trabajar con la posición en x para analizar la difusión
+  particle_xpositions = [particle_positions[1]]
+  particle_xvelocities = [particle_velocities[1]]
+  label = 0
+
+  while(!isempty(pq))
+    label += 1
+    event = dequeue!(pq)
+    validcollision = validatecollision(event, particle)
+
+    if validcollision
+      updatelabels(event,label)
+      cell = get_cell(board, particle.numberofcell)
+      move(particle,event.time -t)
+      update_position_disk(cell,event.time)
+      t = event.time
+      cell.last_t = t
+      push!(time,t)
+
+      collision(event.dynamicobject,event.diskorwall, board)
+      change_cell = false
+      is_new_cell = !is_cell_in_board(board, particle)
+      if particle.numberofcell != cell.numberofcell ###Si la partícula cambió de celda
+        change_cell = true
+        if is_new_cell
+          cell = newcell!(board, particle, t)
+        else
+          cell = get_cell(board,particle.numberofcell)
+          update_position_disk(cell, t)
+          cell.last_t = t
+        end
+      end
+
+      updateparticlexlist!(particle_xpositions, particle_xvelocities, particle)
+      futurecollisions!(event, cell, particle, t,t_max,pq, label, change_cell)
+    end
+  end
+
+  push!(time, t_max)
+  board, particle_xpositions, particle_xvelocities, time
+end
 
 
 
