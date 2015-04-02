@@ -15,7 +15,7 @@ using Compat  ## To handle versions less than 0.4
 using DataStructures
 
 #srand(1234)
-visual = true
+visual = false
 # To change a parameter, type: parameters[:nameofsymbol] = valueyouwanttoset
 parameters = @compat Dict(:t_initial => 0,
                   :t_max => 100,
@@ -51,8 +51,6 @@ else
     left = back(board.cells).numberofcell
     right = front(board.cells).numberofcell
     println("Left-cell, Right-cell: $left,$right")
-    numberofcells = right + abs(left) + 1
-    println("# of cells: $numberofcells")
     time = sim[4]
     nofevents = length(time)
     println("# of events: $nofevents")
