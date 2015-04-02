@@ -2,7 +2,7 @@ include("./HardDiskBilliardModel.jl")
 
 module HardDiskBilliardSimulation
 
-#VERSION < v"0.4-" && using Docile
+VERSION < v"0.4-" && using Docile
 
 importall HardDiskBilliardModel
 using DataStructures
