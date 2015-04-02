@@ -26,7 +26,7 @@ parameters = @compat Dict(:t_initial => 0,
 radiustovisualizeparticle = 0.02
 
 @time sim = simulation(;parameters...);
-println(length(sim[end]))
+println("#ofevents =" length(sim[end]))
 @time visualize(sim, radiustovisualizeparticle);
 
 #visualize_localenergy(sim);
