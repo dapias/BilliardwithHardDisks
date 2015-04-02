@@ -8,7 +8,8 @@
 #include("./Visual.jl")
 
 push!(LOAD_PATH,"./")
-using HardDiskBilliardSimulation
+include("./SimulationFunctions.jl")
+#using HardDiskBilliardSimulation
 using Visual
 using Compat  ## To handle versions less than 0.4
 using DataStructures
@@ -45,16 +46,16 @@ if visual
 #     println("# of events: $nofevents")
 else
     parameters[:t_max] = 100
-    @time sim = animatedsimulation(;parameters...);
-#     board = sim[1]
-#     left = back(board.cells).numberofcell
-#     right = front(board.cells).numberofcell
-#     println("Left-cell, Right-cell: $left,$right")
-#     numberofcells = right + abs(left) + 1
-#     println("# of cells: $numberofcells")
-#     time = sim[3]
-#     nofevents = length(time)
-#     println("# of events: $nofevents")
+    @time sim = simulation(;parameters...);
+    board = sim[1]
+    left = back(board.cells).numberofcell
+    right = front(board.cells).numberofcell
+    println("Left-cell, Right-cell: $left,$right")
+    numberofcells = right + abs(left) + 1
+    println("# of cells: $numberofcells")
+    time = sim[4]
+    nofevents = length(time)
+    println("# of events: $nofevents")
 end
 
 
