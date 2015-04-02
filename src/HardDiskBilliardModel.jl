@@ -204,7 +204,7 @@ function parameters_to_create_a_new_cell(cell::Cell)
     size_y = cell.walls[3].y - cell.walls[2].y
     radiusdisk = cell.disk.radius
     massdisk = cell.disk.mass
-    velocitydisk = 1.
+    velocitydisk = 0.
     #velocitydisk = norm(cell.disk.v)                      ######Ver la forma de mejorar esto
     windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
     size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize
