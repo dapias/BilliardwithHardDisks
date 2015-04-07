@@ -177,6 +177,12 @@ end
 
 function validatecollision(event::Event, particle::Particle)
   validcollision = false
+
+  #First the caller
+  if event.prediction >= event.dynamicobject.lastcollision
+    validate(event.diskorwall)
+  end
+
   function validate(d::Disk)
     if (event.prediction >= event.diskorwall.lastcollision)
       validcollision = true
@@ -184,10 +190,6 @@ function validatecollision(event::Event, particle::Particle)
   end
   function validate(w::Wall)
     validcollision  = true
-  end
-
-  if event.prediction >= event.dynamicobject.lastcollision
-    validate(event.diskorwall)
   end
 
   validcollision

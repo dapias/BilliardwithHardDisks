@@ -69,6 +69,7 @@ function simulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 
       collision(event.dynamicobject,event.diskorwall, board)
       change_cell = false
       is_new_cell = !is_cell_in_board(board, particle)
+
       if particle.numberofcell != cell.numberofcell ###Si la partícula cambió de celda
         change_cell = true
         if is_new_cell

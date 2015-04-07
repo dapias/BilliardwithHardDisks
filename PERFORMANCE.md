@@ -9,4 +9,4 @@
 |
 |Number of events* | 494 | 280 | 300 |
 ---------------------------------
-Average
+*Average
