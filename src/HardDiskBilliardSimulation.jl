@@ -10,15 +10,7 @@ importall HardDiskBilliardModel
 importall MyCollections
 using DataStructures
 using Compat
-#import Base.isless
-#importall Base.Collections
-# export initialcollisions!, futurecollisions!, validatecollision, createparticlelists, createdisklists
-# export updatelabels, get_cell, energy, update_position_disk, updatedisklists!, updateparticlexlist!
-# export updateparticlelists!
 export simulation, animatedsimulation, heatsimulation
-
-#This allows to use the PriorityQueue providing a criterion to select the priority of an Event.
-#isless(e1::Event, e2::Event) = e1.time < e2.time
 
 
 @doc """#initialcollisions!(board::Board,particle::Particle,t_initial::Real,t_max::Real,pq)
@@ -82,13 +74,6 @@ function updatelabels(event::Event,label::Int)
 
   update(event.dynamicobject,event.diskorwall)
 end
-
-
-
-
-
-
-
 
 
 function updateparticlexlist!(particle_xpositions,particle_xvelocities, particle::Particle)
