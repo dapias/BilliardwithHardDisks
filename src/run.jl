@@ -4,18 +4,16 @@
 #Visual.jl.
 ###########################
 
-#include("./HardDiskBilliardSimulation.jl")
-#include("./Visual.jl")
 
 push!(LOAD_PATH,"./")
-include("./SimulationFunctions.jl")
-#using HardDiskBilliardSimulation
+using HardDiskBilliardSimulation
 using Visual
 using Compat  ## To handle versions less than 0.4
 using DataStructures
 
 #srand(1234)
 visual = false
+
 # To change a parameter, type: parameters[:nameofsymbol] = valueyouwanttoset
 parameters = @compat Dict(:t_initial => 0,
                   :t_max => 100,
@@ -38,9 +36,9 @@ if visual
     radiustovisualizeparticle = 0.02
     sim = animatedsimulation(;parameters...);
     @time visualize(sim, radiustovisualizeparticle);
-#     delta_e_max, = findmax(sim[end])
-#     delta_e_min, = findmin(sim[end])
-#     println("Delta_E_max, Delta_E_min = $(delta_e_max),$(delta_e_min)")
+    delta_e_max, = findmax(sim[end-1])
+    delta_e_min, = findmin(sim[end - 1])
+    println("Delta_E_max, Delta_E_min = $(delta_e_max),$(delta_e_min)")
 #     time = sim[5]
 #     nofevents = length(time)
 #     println("# of events: $nofevents")
