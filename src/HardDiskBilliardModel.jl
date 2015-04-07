@@ -113,7 +113,7 @@ It says that in the cycle 2 of the main loop an event (aka collision) is predict
 It would occur at time 10.0.
 """->
 type Event
-    time :: Real
+    #time :: Real
     dynamicobject::DynamicObject           #Revisar en el diseño si conviene más tener un sólo objeto
     diskorwall ::Object                      ##tal como cell asociado a un evento y la partícula dentro de cell.
     prediction:: Integer
