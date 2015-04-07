@@ -11,7 +11,7 @@ using Lexicon
 using DataStructures
 
 export Wall, Disk, Event, Cell, Particle, Board, Object, DynamicObject
-export create_board_with_particle
+export create_board_with_particle, is_cell_in_board, newcell!
 export move, dtcollision, collision
 
 abstract Object
@@ -58,6 +58,7 @@ type Cell
     walls::Vector{Wall}
     disk::Disk
     numberofcell::Integer
+    last_t::Real
 end
 
 #Cell(walls,label) = Cell(walls,label,Disk([-100.,-100.],[0.,0.],0.))
@@ -101,7 +102,7 @@ immutable VerticalSharedWall <: Vertical
   sharedcells::(Integer,Integer) #Adjacent cells that share the wall
 end
 
-@doc doc"""Type with attributes time, dynamicobject, diskorwall and whenwaspredicted. It is the basic unit of information
+@doc doc"""Type with attributes time, dynamicobject, diskorwall and prediction. It is the basic unit of information
 for the implementation of a simulation, since it stores the basic information about a collision (what time, with whom and
 when was predicted). The last attributte makes reference to the cycle within the main loop in which the event was predicted
 (see *simulation* in **Simulation.jl**).
@@ -115,7 +116,7 @@ type Event
     time :: Real
     dynamicobject::DynamicObject           #Revisar en el diseño si conviene más tener un sólo objeto
     diskorwall ::Object                      ##tal como cell asociado a un evento y la partícula dentro de cell.
-    whenwaspredicted:: Integer
+    prediction:: Integer
 end
 
 @doc """#randuniform(liminf, limsup, dim=1)
@@ -158,7 +159,7 @@ function create_disk(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real,radius::Real, mass:
     vx = cos(theta)*velocitynorm
     vy = sin(theta)*velocitynorm
     v = [vx, vy]
-    Disk([x,y],v,radius, mass,numberofcell)
+    Disk([x;y],v,radius, mass,numberofcell)
 end
 
 @doc """#create_window(Ly1, Ly2, windowsize)
@@ -172,12 +173,12 @@ function create_window(Ly1::Real, Ly2::Real, windowsize::Real)
 end
 
 @doc """#create_initial_cell_with_particle( Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                           massparticle, velocityparticle, windowsize)
+                                           massparticle, velocityparticle, windowsize, t_initial)
 Creates an instance of Cell. Size of its sides and initial coordinates for the left down corner are passed (Lx1,Ly1)
 together with the needed data to create the embedded disk and a particle inside the cell."""->
 function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk,
                                            massdisk::Real, velocitydisk::Real,
-                                           massparticle::Real, velocityparticle::Real, windowsize::Real)
+                                           massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
     Lx2 = Lx1 + size_x
     Ly2 = Ly1 + size_y
     Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
@@ -192,7 +193,7 @@ function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,si
         disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
         particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
     end
-    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell)
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t_initial)
     cell, particle
 end
 
@@ -214,7 +215,7 @@ end
 Creates a new cell that shares the rightmost verticalwall of the passed cell. A Particle is passed
 to avoid overlap with the embedded Disk.
 """->
-function create_new_right_cell(cell::Cell, particle::Particle)
+function create_new_right_cell(cell::Cell, particle::Particle, t::Real)
     size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
 
     leftsharedwall = cell.walls[end]
@@ -231,7 +232,7 @@ function create_new_right_cell(cell::Cell, particle::Particle)
         disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
     end
     rightsharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
-    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell)
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t)
     cell
 end
 
@@ -240,7 +241,7 @@ end
 Creates a new cell that shares the leftmost verticalwall of the passed cell. A Particle is passed
 to avoid overlap with the embedded Disk.
 """->
-function create_new_left_cell(cell::Cell, particle::Particle)
+function create_new_left_cell(cell::Cell, particle::Particle, t::Real)
     size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
 
     Lx2 = cell.walls[1].x
@@ -257,7 +258,7 @@ function create_new_left_cell(cell::Cell, particle::Particle)
         disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
     end
     leftsharedwall = VerticalSharedWall(Lx1,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell-1))
-    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell)
+    cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t)
     cell
 end
 
@@ -266,9 +267,9 @@ Returns a Board instance with one cell and a particle inside it (that is also re
 together with the needed data to create the embedded disk and a particle inside the cell. """->
 function create_board_with_particle(Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk::Real,
                                     massdisk::Real, velocitydisk::Real,
-                                    massparticle::Real, velocityparticle::Real, windowsize::Real)
+                                    massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
     cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                                       massparticle, velocityparticle, windowsize)
+                                                       massparticle, velocityparticle, windowsize, t_initial::Real)
     board = Deque{Cell}()
     push!(board,cell)
     board = Board(board)
@@ -336,7 +337,7 @@ function dtcollision(d::Disk, c::Cell)
 end
 
 @doc """#dtcollision(::Disk,::Particle)
-Calculates the time of collision between a Disk and the Particle in the same cell.If they don't collide it retuns ∞"""->
+Calculates the time of collision between a Disk and the Particle.If they don't collide it retuns ∞"""->
 function dtcollision(d::Disk, p::Particle)
     deltar = p.r - d.r
     deltav = p.v - d.v
@@ -420,7 +421,7 @@ end
 ##########################################################################################
 #Rules
 ###############Disk##################################################
-@doc doc"""#collision(::Disk, ::Vertical, ::Board)
+@doc doc"""#collision(::Disk, ::Vertical)
 Update the velocity vector of a Disk (Disk.v) after it collides with a Vertical(Wall)."""->
 function collision(d::Disk, V::Vertical)
     d.v = [-d.v[1], d.v[2]]
@@ -433,7 +434,7 @@ function collision(d::Disk, V::Vertical,b::Board)
     collision(d,V)
 end
 
-@doc doc"""#collision(::Disk, ::HorizontalWall, ::Board)
+@doc doc"""#collision(::Disk, ::HorizontalWall)
 Update the velocity vector of a Disk (Disk.v) after it collides with a HorizontallWall."""->
 function collision(d::Disk, H::HorizontalWall)
     d.v = [d.v[1],-d.v[2]]
@@ -473,34 +474,34 @@ through the window, the label of the particle is updated to the label of the new
 done before. Else if the collision is through the rigid part of the wall, it updates the particle velocity according to a
 specular collision"""->
 function collision(p::Particle, VSW::VerticalSharedWall, b::Board)
-    new = false
-    if updateparticlelabel(p,VSW)
-        if !is_cell_in_board(b, p)
-            newcell!(b,p)
-            new = true
-        end
-    else
+  update = updateparticlenumberofcell(p,VSW)
+  if !update
         collision(p,VSW)
-    end
-    new
+  end
 end
+
+
+
+
+
+
 
 @doc """#updateparticlelabel(::Particle, ::VerticalSharedWall)
 Update the label of the particle when it passes through the window of the VerticalSharedWall."""->
-function updateparticlelabel(p::Particle, VSW::VerticalSharedWall)
+function updateparticlenumberofcell(p::Particle, VSW::VerticalSharedWall)
     update = false
     Ly1window = VSW.y[2]
     Ly2window= VSW.y[3]
     if Ly1window < p.r[2] < Ly2window
+        update = true
         pcell = p.numberofcell
         for nofcell in VSW.sharedcells
             if pcell != nofcell
                 p.numberofcell = nofcell
             end
         end
-        update = true
-    end
-    update
+     end
+  update
 end
 
 
@@ -508,24 +509,25 @@ end
 Ask for the existence of a Cell with the label associated to the Particle (Particle.numberofcell)"""->
 function is_cell_in_board(b::Board,p::Particle)
     iscell = false
-    if back(b.cells).numberofcell <= p.numberofcell <= front(b.cells).numberofcell
+    if front(b.cells).numberofcell <= p.numberofcell <= back(b.cells).numberofcell
         iscell = true
     end
     iscell
 end
 
 @doc """#newcell!(::Board, ::Particle)
-Integerroduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
+Introduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
 It may pushes the cell at the left or right side of the board to mantain the order in the **Deque** structure of the
-board: at the back the leftmost cell, at front the rightmost cell."""->
-function newcell!(b::Board, p::Particle)
-    if back(b.cells).numberofcell - 1 == p.numberofcell
-        cell = create_new_left_cell(back(b.cells),p)
-        push!(b.cells, cell)
-    elseif front(b.cells).numberofcell + 1 == p.numberofcell
-        cell = create_new_right_cell(front(b.cells),p)
+board: at the back the rightmost cell, at front the leftmost cell."""->
+function newcell!(b::Board, p::Particle, t)
+    if front(b.cells).numberofcell > p.numberofcell
+        cell = create_new_left_cell(front(b.cells),p, t)
         unshift!(b.cells,cell)
+    elseif back(b.cells).numberofcell < p.numberofcell
+        cell = create_new_right_cell(back(b.cells),p, t)
+        push!(b.cells,cell)
     end
+  cell
 end
 
 @doc """#collision(::Particle, ::Disk)

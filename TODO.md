@@ -22,5 +22,7 @@ haz un notebook donde se pone una liga al PDF que guardas en el mismo directorio
 
 - Aprender Gadfly
 
+- Desarrollar estructuras de datos propias
+
 ## Mejía-Monasterio, Larralde et al.:
 - Green--Kubo para transporte acoplado?

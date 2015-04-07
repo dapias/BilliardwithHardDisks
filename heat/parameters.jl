@@ -1,7 +1,7 @@
 using Compat
 
 @compat Dict(:t_initial => 0,
-             :t_max => 100,
+#              :t_max => 100,
              :radiusdisk => 1.0,
              :massdisk => 1.0,
              :velocitydisk => 1.0,
