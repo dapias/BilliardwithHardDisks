@@ -54,11 +54,11 @@ Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
 ##Example
 cell = Cell([wall1,wall2,wall3,wall4],disk,0)
 """->
-type Cell
-    walls::Vector{Wall}
-    disk::Disk
+type Cell{T}
+    walls::Vector{Wall{T}}
+    disk::Disk{T}
     numberofcell::Integer
-    last_t::Real
+    last_t::T
 end
 
 #Cell(walls,label) = Cell(walls,label,Disk([-100.,-100.],[0.,0.],0.))
