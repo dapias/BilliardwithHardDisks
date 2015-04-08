@@ -1,21 +1,16 @@
 include("./HardDiskBilliardModel.jl")
+push!(LOAD_PATH,"../myDataStructures/")
 
 module HardDiskBilliardSimulation
 
 VERSION < v"0.4-" && using Docile
 
+
 importall HardDiskBilliardModel
+importall MyCollections
 using DataStructures
 using Compat
-import Base.isless
-importall Base.Collections
-# export initialcollisions!, futurecollisions!, validatecollision, createparticlelists, createdisklists
-# export updatelabels, get_cell, energy, update_position_disk, updatedisklists!, updateparticlexlist!
-# export updateparticlelists!
 export simulation, animatedsimulation, heatsimulation
-
-#This allows to use the PriorityQueue providing a criterion to select the priority of an Event.
-isless(e1::Event, e2::Event) = e1.time < e2.time
 
 
 @doc """#initialcollisions!(board::Board,particle::Particle,t_initial::Real,t_max::Real,pq)
@@ -34,7 +29,7 @@ Calculates the feasible events that might occur in a time less than t_max involv
 function enqueuecollisions!(pq::PriorityQueue,disk::Disk,cell::Cell, t_initial::Real, prediction::Int, t_max::Real)
   dt,k = dtcollision(disk,cell)
   if t_initial + dt < t_max
-    enqueue!(pq,Event(t_initial+dt, disk, cell.walls[k],prediction),t_initial+dt)
+    enqueue!(pq,Event( disk, cell.walls[k],prediction),t_initial+dt)
   end
 end
 
@@ -43,7 +38,7 @@ Calculates the feasible events that might occur in a time less than t_max involv
 function enqueuecollisions!(pq::PriorityQueue,particle::Particle,cell::Cell, t_initial::Real, prediction::Int, t_max::Real)
   dt,k = dtcollision(particle,cell)
   if t_initial + dt < t_max
-    enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],prediction),t_initial+dt)
+    enqueue!(pq,Event( particle, cell.walls[k],prediction),t_initial+dt)
   end
 end
 
@@ -52,7 +47,7 @@ Calculates the feasible events that might occur in a time less than t_max involv
 function enqueuecollisions!(pq::PriorityQueue,particle::Particle,disk::Disk, t_initial::Real, prediction::Int, t_max::Real)
   dt = dtcollision(particle,disk)
   if t_initial + dt < t_max
-    enqueue!(pq,Event(t_initial+dt, particle, disk,prediction),t_initial+dt)
+    enqueue!(pq,Event( particle, disk,prediction),t_initial+dt)
   end
 end
 
@@ -79,13 +74,6 @@ function updatelabels(event::Event,label::Int)
 
   update(event.dynamicobject,event.diskorwall)
 end
-
-
-
-
-
-
-
 
 
 function updateparticlexlist!(particle_xpositions,particle_xvelocities, particle::Particle)
@@ -157,7 +145,7 @@ function futurecollisions!(event::Event,cell::Cell, particle::Particle, t_initia
   function future(particle::Particle, wall::Wall)
     dt,k = dtcollision(particle,cell, wall)
     if t_initial + dt < t_max
-      enqueue!(pq,Event(t_initial+dt, particle, cell.walls[k],prediction),t_initial+dt)
+      enqueue!(pq,Event( particle, cell.walls[k],prediction),t_initial+dt)
     end
     enqueuecollisions!(pq, particle, cell.disk, t_initial, prediction, t_max)
     if change_cell
@@ -287,11 +275,10 @@ function startsimulation(t_initial::Real, t_max::Real, radiusdisk::Real, massdis
                                                massparticle, velocityparticle, windowsize, t_initial)
 
   pq = PriorityQueue()
-  enqueue!(pq,Event(0., Particle([0.,0.],[0.,0.],1.0,0),Disk([0.,0.],[0.,0.],1.0,1.0,0), 0),0.) #Just to init pq
+  enqueue!(pq,Event(Particle([0.,0.],[0.,0.],1.0,0),Disk([0.,0.],[0.,0.],1.0,1.0,0), 0),0.) #Just to init pq
   initialcollisions!(board,particle,t_initial,t_max,pq)
-  event = dequeue!(pq) #It's deleted the event at time 0.0
-  t = event.time
-  time = [event.time]
+  event, t = dequeue!(pq) #It's deleted the event at time 0.0
+  time = [t]
   return board, particle, t, time, pq
 end
 
@@ -318,15 +305,15 @@ function simulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 
 
   while(!isempty(pq))
     label += 1
-    event = dequeue!(pq)
+    event, event_time = dequeue!(pq)
     validcollision = validatecollision(event, particle)
 
     if validcollision
       updatelabels(event,label)
       cell = get_cell(board, particle.numberofcell)
-      move(particle,event.time -t)
-      update_position_disk(cell,event.time)
-      t = event.time
+      move(particle,event_time - t)
+      update_position_disk(cell,event_time)
+      t = event_time
       cell.last_t = t
       push!(time,t)
 
@@ -372,14 +359,15 @@ function animatedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, mas
   delta_e = [0.]
   while(!isempty(pq))
     label += 1
-    event = dequeue!(pq)
+    event, event_time  = dequeue!(pq)
     validcollision = validatecollision(event, particle)
     if validcollision
       updatelabels(event,label)
       cell = get_cell(board, particle.numberofcell)
-      move(particle,event.time -t)
-      update_position_disk(cell,event.time)
-      t = event.time
+      move(particle,event_time -t)
+      update_position_disk(cell,event_time)
+      t = event_time
+
       cell.last_t = t
       push!(time,t)
       e1 = energy(event.dynamicobject,event.diskorwall)
@@ -422,14 +410,14 @@ function heatsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdis
 
   while(!isempty(pq))
     label += 1
-    event = dequeue!(pq)
+    event, event_time = dequeue!(pq)
     validcollision = validatecollision(event, particle)
     if validcollision
       updatelabels(event,label)
       cell = get_cell(board, particle.numberofcell)
-      move(particle,event.time -t)
-      update_position_disk(cell,event.time)
-      t = event.time
+      move(particle,event_time -t)
+      update_position_disk(cell,event_time)
+      t = event_time
       cell.last_t = t
       push!(time,t)
       collision(event.dynamicobject,event.diskorwall, board)

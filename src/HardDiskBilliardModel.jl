@@ -102,18 +102,16 @@ immutable VerticalSharedWall <: Vertical
   sharedcells::(Integer,Integer) #Adjacent cells that share the wall
 end
 
-@doc doc"""Type with attributes time, dynamicobject, diskorwall and prediction. It is the basic unit of information
+@doc doc"""Type with attributes dynamicobject, diskorwall and prediction. It is the basic unit of information
 for the implementation of a simulation, since it stores the basic information about a collision (what time, with whom and
 when was predicted). The last attributte makes reference to the cycle within the main loop in which the event was predicted
 (see *simulation* in **Simulation.jl**).
 ##Example
-`event = Event(10.,particle,horizontalwall,2)`
+`event = Event(particle,horizontalwall,2)`
 
 It says that in the cycle 2 of the main loop an event (aka collision) is predicted between a particle and a horizontalwall.
-It would occur at time 10.0.
 """->
 type Event
-    time :: Real
     dynamicobject::DynamicObject           #Revisar en el diseño si conviene más tener un sólo objeto
     diskorwall ::Object                      ##tal como cell asociado a un evento y la partícula dentro de cell.
     prediction:: Integer
