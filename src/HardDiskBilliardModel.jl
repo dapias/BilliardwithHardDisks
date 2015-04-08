@@ -24,10 +24,10 @@ with the main loop of the simulation (see *simulation* in **Simulation.jl**).
 ##Example
 particle = Particle([0.,0.],[1.,1.],1.0,0,0)
 """->
-type Particle <: DynamicObject
-    r::Array{Real,1}
-    v::Array{Real,1}
-    mass::Real
+type Particle{T} <: DynamicObject
+    r::Array{T,1}
+    v::Array{T,1}
+    mass::T
     numberofcell::Integer
     lastcollision::Integer
 end
@@ -38,10 +38,10 @@ Particle(r,v, mass, numberofcell) = Particle(r,v,mass , numberofcell, 0)
 with the main loop of the simulation (see *simulation* in **Simulation.jl**)
 ##Example
 disk = Disk([0.,0.],[1.,1.],1.0,0,0)"""->
-type Disk <: DynamicObject
-  r::Array{Real,1}
-  v::Array{Real,1}
-  radius::Real
+type Disk{T} <: DynamicObject
+  r::Array{T,1}
+  v::Array{T,1}
+  radius::T
   mass::Real
   numberofcell::Integer
   lastcollision ::Integer
@@ -84,9 +84,9 @@ end
 ##Example
 HW = HorizontalWall([x1, x2],y)
 """ ->
-immutable HorizontalWall <:Wall
-  x :: Array{Real,1}
-  y :: Real
+immutable HorizontalWall{T} <:Wall
+  x :: Array{T,1}
+  y :: T
 end
 
 @doc doc"""Type with attributes x, y and sharedcells. x corresponds to the horizontal position, y is an array that
@@ -97,8 +97,8 @@ The attribute sharedcells is a tuple that contains the label associated to the c
 VW = VerticalSharedWall(0.,[1.,2.,3.,4.],(0,1))
 """->
 immutable VerticalSharedWall <: Vertical
-  x :: Real
-  y :: Array{Real,1}  #Array of a length greater than the VerticalWall
+  x :: T
+  y :: Array{T,1}  #Array of a length greater than the VerticalWall
   sharedcells::(Integer,Integer) #Adjacent cells that share the wall
 end
 
