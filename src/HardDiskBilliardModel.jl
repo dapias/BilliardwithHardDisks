@@ -55,7 +55,7 @@ Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
 cell = Cell([wall1,wall2,wall3,wall4],disk,0)
 """->
 type Cell{T}
-    walls::Vector{Wall{T}}
+    walls::Vector{Wall}
     disk::Disk{T}
     numberofcell::Integer
     last_t::T
@@ -96,7 +96,7 @@ The attribute sharedcells is a tuple that contains the label associated to the c
 ##Example
 VW = VerticalSharedWall(0.,[1.,2.,3.,4.],(0,1))
 """->
-immutable VerticalSharedWall <: Vertical
+immutable VerticalSharedWall{T} <: Vertical
   x :: T
   y :: Array{T,1}  #Array of a length greater than the VerticalWall
   sharedcells::(Integer,Integer) #Adjacent cells that share the wall

@@ -1,5 +1,6 @@
 include("./HardDiskBilliardModel.jl")
-push!(LOAD_PATH,"../myDataStructures/")
+include("../myDataStructures/MyCollections.jl")
+#push!(LOAD_PATH,"../myDataStructures/")
 
 module HardDiskBilliardSimulation
 
@@ -274,7 +275,7 @@ function startsimulation(t_initial::Real, t_max::Real, radiusdisk::Real, massdis
   board, particle = create_board_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
                                                massparticle, velocityparticle, windowsize, t_initial)
 
-  pq = PriorityQueue()
+  pq = PriorityQueue{Event,Float64}()
   enqueue!(pq,Event(Particle([0.,0.],[0.,0.],1.0,0),Disk([0.,0.],[0.,0.],1.0,1.0,0), 0),0.) #Just to init pq
   initialcollisions!(board,particle,t_initial,t_max,pq)
   event, t = dequeue!(pq) #It's deleted the event at time 0.0
