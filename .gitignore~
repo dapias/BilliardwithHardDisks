@@ -1,0 +1,5 @@
+*.ipynb
+*.hdf5
+.gitignore
+
+
