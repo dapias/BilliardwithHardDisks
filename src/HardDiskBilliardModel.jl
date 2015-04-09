@@ -28,8 +28,8 @@ type Particle{T} <: DynamicObject
     r::Array{T,1}
     v::Array{T,1}
     mass::T
-    numberofcell::Integer
-    lastcollision::Integer
+    numberofcell::Int
+    lastcollision::Int
 end
 
 Particle(r,v, mass, numberofcell) = Particle(r,v,mass , numberofcell, 0)
@@ -43,8 +43,8 @@ type Disk{T} <: DynamicObject
   v::Array{T,1}
   radius::T
   mass::Real
-  numberofcell::Integer
-  lastcollision ::Integer
+  numberofcell::Int
+  lastcollision ::Int
 end
 
 Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
@@ -57,7 +57,7 @@ cell = Cell([wall1,wall2,wall3,wall4],disk,0)
 type Cell{T}
     walls::Vector{Wall}
     disk::Disk{T}
-    numberofcell::Integer
+    numberofcell::Int
     last_t::T
 end
 
@@ -99,7 +99,7 @@ VW = VerticalSharedWall(0.,[1.,2.,3.,4.],(0,1))
 immutable VerticalSharedWall{T} <: Vertical
   x :: T
   y :: Array{T,1}  #Array of a length greater than the VerticalWall
-  sharedcells::(Integer,Integer) #Adjacent cells that share the wall
+  sharedcells::(Int,Int) #Adjacent cells that share the wall
 end
 
 @doc doc"""Type with attributes dynamicobject, diskorwall and prediction. It is the basic unit of information
@@ -114,7 +114,7 @@ It says that in the cycle 2 of the main loop an event (aka collision) is predict
 type Event
     dynamicobject::DynamicObject           #Revisar en el diseño si conviene más tener un sólo objeto
     diskorwall ::Object                      ##tal como cell asociado a un evento y la partícula dentro de cell.
-    prediction:: Integer
+    prediction:: Int
 end
 
 @doc """#randuniform(liminf, limsup, dim=1)
