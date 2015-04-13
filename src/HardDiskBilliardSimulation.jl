@@ -237,6 +237,7 @@ end
 
 
 function update_position_disk(cell, t)
+  Lx1::Float64; Ly1::Float64; Lx2::Float64;Ly2::Float64; size_x::Float64; size_y::Float64
   delta_t = t - cell.last_t
   move(cell.disk,delta_t)
   Lx1 = cell.walls[2].x[1]
@@ -254,6 +255,7 @@ it goes growing negatively at left and positively at right."""->
 function get_cell(board::Board, numberofcell::Int)
   deque = board.cells
   @assert -1023 <= numberofcell <= 1023
+  cell::Cell{Float64}
   if numberofcell < 0
     cell = deque.head.data[end+numberofcell+1]
   else
