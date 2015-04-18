@@ -9,7 +9,7 @@ VERSION < v"0.4-" && using Docile
 
 importall HardDiskBilliardModel
 importall MyCollections
-using DataStructures
+import DataStructures.Deque, DataStructures.push!, DataStructures.unshift!, DataStructures.front, DataStructures.back
 using Compat
 export simulation, animatedsimulation, heatsimulation
 
