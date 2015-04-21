@@ -25,7 +25,7 @@ catch
   residencedata(nameoffile, parameters, nofrealizations)
 end
 
-println("Look for the file at the \"HDF5\" folder with the name \"$(nofrealizations)realizaciones\"")
+println("Look for the file at the \"HDF5\" folder with the name \"$nameoffile\"")
 
 
 

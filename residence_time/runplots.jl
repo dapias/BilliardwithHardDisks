@@ -20,6 +20,9 @@ try
   savefig("./images/$nameoffile/data.pdf")
   b = plothistogram(nameoffile, nofbars)
   savefig("./images/$nameoffile/histogram.pdf")
+  c = fitwithlinearsquares(nameoffile)
+  savefig("./images/$nameoffile/fit.pdf")
+
 catch
   println("
 If runplots.jl is executed directly the filename and the number of bars for the histogram should be provided, as:
