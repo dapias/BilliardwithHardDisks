@@ -20,6 +20,8 @@ haz un notebook donde se pone una liga al PDF que guardas en el mismo directorio
 
 - Checar cómo generar procesos continuous con tasas dadas (exponencial)
 
+- Ver la forma de pasar la velocidad del disco creado en la nueva celda de manera interactiva a través de la función parameters_to_create_a_new_cell
+
 - Aprender Gadfly
 
 - Desarrollar estructuras de datos propias
