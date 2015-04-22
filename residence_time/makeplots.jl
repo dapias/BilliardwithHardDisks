@@ -44,6 +44,17 @@ function plothistogram(nameoffile, nofbars)
 
 end
 
+function get_t_and_N(nameoffile, step = 30.)
+  tdata = getdata(nameoffile)
+  max, = findmax(tdata)
+  t = [0.:step:max]
+  N = Array(Float64, length(t))
+  for i in 1:length(t)
+    N[i] = length(find(tdata.>t[i]))  #Esta parte hace lento el código
+  end
+  t, N
+end
+
 
 function plotnumberoftrajectories(nameoffile)
   fig = plt.figure()
@@ -124,6 +135,8 @@ function fit(t,N)
   ax[:set_xlabel]("t")
   ax[:set_ylabel](L"$Log(Number of trajectories)$")
 
+  N = log(N)
+
   slope = Variable()
   intercept = Variable()
   line = intercept + t * slope
@@ -147,4 +160,5 @@ function fit(t,N)
   ax[:legend](handles, labels, loc =4)
 
   fig
+  slope
 end
