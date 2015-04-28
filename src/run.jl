@@ -7,7 +7,7 @@
 
 push!(LOAD_PATH,"./")
 using HardDiskBilliardSimulation
-#using Visual
+using Visual
 using Compat  ## To handle versions less than 0.4
 using DataStructures
 
@@ -15,7 +15,7 @@ using DataStructures
 
 function run(t_final = 100)
 
-    visual = false
+    visual = true
 
     # To change a parameter, type: parameters[:nameofsymbol] = valueyouwanttoset
     parameters = @compat Dict(:t_initial => 0.,
