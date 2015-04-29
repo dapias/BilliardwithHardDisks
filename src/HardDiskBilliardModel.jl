@@ -8,8 +8,7 @@ module HardDiskBilliardModel
 
 VERSION < v"0.4-" && using Docile
 using Lexicon
-using DataStructures
-
+import DataStructures.Deque, DataStructures.push!, DataStructures.unshift!, DataStructures.front, DataStructures.back
 export Wall, Disk, Event, Cell, Particle, Board, Object, DynamicObject
 export create_board_with_particle, is_cell_in_board, newcell!
 export move, dtcollision, collision
