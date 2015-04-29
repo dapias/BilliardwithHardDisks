@@ -135,40 +135,6 @@ end
 
 
 
-function create_initial_test( Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk,
-                             massdisk::Real, velocitydisk::Real,
-                             massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
-  Lx2 = Lx1 + size_x
-  Ly2 = Ly1 + size_y
-  Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
-  nofcell = 0
-  leftsharedwall = VerticalSharedWall(Lx1,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell-1))
-  wall2 = HorizontalWall([Lx1,Lx2],Ly1)
-  wall3 = HorizontalWall([Lx1,Lx2],Ly2)
-  rightsharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
-  disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
-  particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
-  while overlap(particle,disk)
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
-    particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
-  end
-
-
-  E = ((velocitydisk)^2 + (velocityparticle)^2)/2.
-  v = randn(4)
-  lambda_squared =  dot(v,v)
-  vx_d, vy_d, vx_p, vy_p = sqrt(2*E/lambda_squared)v
-
-  disk.v = [vx_d, vy_d]
-  particle.v = [vx_p, vy_p]
-
-  cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t_initial)
-  cell, particle
-end
-
-
-
-
 @doc """#overlap(::Particle,::Disk)
 Check if a Particle and a Disk overlap. Return a Boolean"""->
 function overlap(p::Particle, d::Disk)
@@ -211,8 +177,8 @@ end
 Creates an instance of Cell. Size of its sides and initial coordinates for the left down corner are passed (Lx1,Ly1)
 together with the needed data to create the embedded disk and a particle inside the cell."""->
 function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk,
-                                           massdisk::Real, velocitydisk::Real,
-                                           massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
+                             massdisk::Real, velocitydisk::Real,
+                             massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
   Lx2 = Lx1 + size_x
   Ly2 = Ly1 + size_y
   Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
@@ -227,11 +193,18 @@ function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,si
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
     particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
   end
+
+  #Microcanonical sampled if velocitydisk == velocityparticle. Falta implementar el caso más general.
+  E = ((velocitydisk)^2 + (velocityparticle)^2)/2.
+  v = randn(4)
+  lambda_squared =  dot(v,v)
+  vx_d, vy_d, vx_p, vy_p = sqrt(2*E/lambda_squared)v
+  disk.v = [vx_d, vy_d]
+  particle.v = [vx_p, vy_p]
+
   cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t_initial)
   cell, particle
 end
-
-
 
 
 
@@ -308,10 +281,8 @@ together with the needed data to create the embedded disk and a particle inside 
 function create_board_with_particle(Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk::Real,
                                     massdisk::Real, velocitydisk::Real,
                                     massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
-#   cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-#                                                      massparticle, velocityparticle, windowsize, t_initial::Real)
-  cell, particle =   cell, particle = create_initial_test(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                                     massparticle, velocityparticle, windowsize, t_initial::Real)
+  cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
+                                                      massparticle, velocityparticle, windowsize, t_initial::Real)
   board = Deque{Cell}()
   push!(board,cell)
   board = Board(board)
