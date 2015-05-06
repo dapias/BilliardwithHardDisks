@@ -1,0 +1,54 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc} \usepackage[spanish]{babel} \usepackage{amsmath}
+\usepackage{amsfonts} \usepackage{amssymb} \usepackage{graphicx} \usepackage{hyperref}
+\usepackage{mhchem} \usepackage{nameref} \usepackage{caption} \usepackage{subcaption}
+\usepackage[left=1.5cm,top=1.5cm,right=1.5cm,bottom=2.5cm]{geometry} \usepackage{color}
+\usepackage{epstopdf} \providecommand{\e}[1]{\ensuremath{\times 10^{#1}}}
+\usepackage{wrapfig} \newcommand{\ncd}{\newcommand} \ncd{\mrm} {\mathrm} \ncd{\beq}
+{\begin{equation}} \ncd{\eeq} {\end{equation}} \def\d{{\rm d}} \def\D{{\rm D}}
+\def\f{{\rm f}} \def\g{{\rm g}} \def\r{\mathbf{r}} \def\p{\mathbf{p}} \def\q{\mathbf{q}}
+\newcommand{\avg}[1]{\left< #1 \right>} % for average
+\newtheorem{prop}{Proposición}[section]
+\newtheorem{teor}[prop]{Teorema}
+
+
+\begin{document}
+\title{Compendio artículos}
+\maketitle
+
+\begin{abstract}
+Estas notas están hechas con el objeto de hacer un breve compendio de los principales trabajos relacionados con la simulación del Billar de Discos Duros.
+\end{abstract}
+
+\section*{Colloquium: Phononics: Manipulating heat flow with electronic
+analogs and beyond; Li, Nianbei et al., Rev. Mod. Phys. 2012}
+
+Se propone la fonónica como ``disciplina'' análoga a la electrónica. 
+
+Esencial:
+\begin{itemize}
+\item  Concepto de fonón (cadenas (an)armónicas).
+\item  Espectro de potencias. 
+\end{itemize}
+
+\section*{Anomalous Heat Diffusion; Li, Nianbei et al.; PRL, 2014.}
+
+Objetivo
+\begin{itemize}
+\item Mostrar que el comportamiento anómalo en la conductividad térmica puede ser unívocamente realcionada a la dispersión de energía anómala difusiva en ¡¿fases sólidas?!
+\end{itemize}
+
+Esencial
+\begin{itemize}
+\item En el caso del transporte anómalo la conductividad térmica no relaciona directamente la densidad de flujo de energía local con el gradiente de temperatura local.
+\item La variancia se representa como $\avg{\Delta x^2(t)}_E$ y puede tomar valores negativos. Los autores dicen que esto es muestra de que es la varianza para la distribución del exceso de energía y no para los desplazamientos de las posiciones de las partículas.
+\item En la derivación de la relación entre la función de autocorrelación y la variación de la enrgía local no entra ninguna temperatua local de equilibrio.
+\end{itemize}
+
+Resultado.
+\begin{itemize}
+\item Ecuación de movimiento para la varianza que da cuenta de la dispersión de enrgía.
+\end{itemize}
+
+\end{document}
