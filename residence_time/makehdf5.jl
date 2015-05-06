@@ -15,17 +15,18 @@ function createhdf5(nameoffile, parameters, nofrealizations)
   end
 end
 
-function residencedata(nameoffile, parameters, nofrealizations)
+function data(nameoffile, parameters, nofrealizations)
   file = h5open("./HDF5/$nameoffile.hdf5", "r+")
 
   tdata = Array(Float64, nofrealizations)
-
+  edata = Array(Float64, nofrealizations)
 
   for i in 1:nofrealizations
-      tdata[i] = residencetime(;parameters...)
+      tdata[i], edata[i] = residencetime(;parameters...)
   end
 
   file["tdata"] = tdata
+  file["edata"] = edata
 
   close(file)
 

@@ -18,11 +18,11 @@ And then include(\"runhdf5.jl\") \n")
 
 try
   createhdf5(nameoffile, parameters, nofrealizations)
-  residencedata(nameoffile, parameters, nofrealizations)
+  data(nameoffile, parameters, nofrealizations)
 catch
   nameoffile = "$(nofrealizations)realizaciones"
   createhdf5(nameoffile, parameters, nofrealizations)
-  residencedata(nameoffile, parameters, nofrealizations)
+  data(nameoffile, parameters, nofrealizations)
 end
 
 println("Look for the file at the \"HDF5\" folder with the name \"$nameoffile\"")

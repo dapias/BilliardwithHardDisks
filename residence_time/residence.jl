@@ -41,7 +41,11 @@ function residencetime(; t_initial = 0., t_max = 100., radiusdisk = 1.0, massdis
     end
   end
 #Tiempo de la última colisión antes de cambiar de celda.
-  t
+  e = energy(particle)
+  t, e
 end
 
+function energy(particle::Particle)
+  particle.mass*dot(particle.v,particle.v)/2.
+end
 
