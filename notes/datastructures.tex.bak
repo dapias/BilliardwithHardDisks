@@ -1,0 +1,76 @@
+% \documentclass[preprint]{revtex4-1}
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage[utf8]{inputenc} \usepackage[spanish]{babel} \usepackage{amsmath}
+\usepackage{amsfonts} \usepackage{amssymb} \usepackage{graphicx} \usepackage{hyperref}
+\usepackage{mhchem} \usepackage{nameref} \usepackage{caption} \usepackage{subcaption}
+\usepackage[left=1.5cm,top=1.5cm,right=1.5cm,bottom=2.5cm]{geometry} \usepackage{color}
+\usepackage{epstopdf} \providecommand{\e}[1]{\ensuremath{\times 10^{#1}}}
+\usepackage{wrapfig} \newcommand{\ncd}{\newcommand} \ncd{\mrm} {\mathrm} \ncd{\beq}
+{\begin{equation}} \ncd{\eeq} {\end{equation}} \def\d{{\rm d}} \def\D{{\rm D}}
+\def\f{{\rm f}} \def\g{{\rm g}} \def\r{\mathbf{r}} \def\p{\mathbf{p}} \def\q{\mathbf{q}}
+\newcommand{\avg}[1]{\left< #1 \right>} % for average
+\newtheorem{prop}{Proposición}[section]
+\newtheorem{teor}[prop]{Teorema}
+
+
+\begin{document}
+\title{Importancia de las estructuras de datos en el cómputo científico}
+\maketitle
+
+\begin{abstract}
+Estas notas están hechas con el objeto de describir la importancia de las estructuras de datos como herramientas necesarias para desarrollar código eficiente en el área del cómputo científico
+\end{abstract}
+
+\section{Generalidades}
+
+\section{Array}
+
+Un arreglo es implemente un número de lugares en la memoria, donde cada cual almacena un item de datos del mismo tipo y los cuales están referenciados por la misma variable.
+
+Cabe decir que es la estructura de datos más eficiente para acceder a un elemento dentro de un conjunto. En Java una vez un arreglo es creado, su longitud es fija y no puede ser cambiada ; así que para cambiar el tamaño del array se copian los contenidos a uno nuevo. Un arreglo dinámico en Java está dado por la clase ArrayList. 
+
+En términos más técnicos, accesos de lectura y escritura toman tiempo $O(1)$ en el arreglo mientras que operaciones de búsqueda (find_index) de una instancia de un elemento es linear en el tiempo $O(n)$.
+
+\section{Dynamic Array}
+
+Un arreglo dinámico es una estructura de datos que mantiene la propiedad de acceso aleatorio de los arreglos (esto es, accede con complejidad $O(1)$ a cualquier elemento dentro de sí) que permite agregar o remover elementos del mismo
+
+
+\section{Linked lists}
+
+La estructura de datis conocida como ``Linked lists'' sacrifica el acceso aleatorio a las estructuras para permitir eficiente reordenamiento, inserciones y eliminaciones de daatos dentro de la structura. En este juego de dos condiciones (acceso aleatorio y manejo eficiente de los datos, los arboles de búsqueda binarios parecen ser una inteligente solución.
+
+
+
+\section{Stacks, Queues y Deques}
+
+\section{Priority Queues}
+
+
+\end{document}
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
