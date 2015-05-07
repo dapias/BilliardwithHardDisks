@@ -13,7 +13,7 @@ using DataStructures
 
 #srand(1234)
 
-function run(t_final = 100000)
+function run(t_final = 100)
 
   # To change a parameter, type: parameters[:nameofsymbol] = valueyouwanttoset
   parameters = @compat Dict(:t_initial => 0.,
