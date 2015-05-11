@@ -24,9 +24,10 @@ parameters = @compat Dict(:t_initial => 0,
                   )
 
 radiustovisualizeparticle = 0.02
+vp = parameters[:velocityparticle]
 
 @time sim = simulation(;parameters...);
 println("#ofevents = $(length(sim[end]))")
-#@time visualize(sim, radiustovisualizeparticle);
+@time visualize(sim, radiustovisualizeparticle, vp);
 
 #visualize_localenergy(sim);
