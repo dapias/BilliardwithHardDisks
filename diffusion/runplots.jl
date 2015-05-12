@@ -3,22 +3,22 @@ include("plotfunctions.jl")
 pygui(false) #if you want see the plots set it true
 
 #This parameter have to be given if the file is executed directly.
-#nameoffile = "test3"
+#filename = "test3"
 
 
-mkdir("./images/$nameoffile")
+mkdir("./images/$filename")
 
-a = plotmsdperensemble(nameoffile)
-savefig("./images/$nameoffile/meansquaredisplacementeperensemble")
-b = plotdeltaxperensemble(nameoffile)
-savefig("./images/$nameoffile/deltaxperensemble")
-c = fitmsdwithlinearsquares(nameoffile)
-savefig("./images/$nameoffile/fitmsdwithlinearsquares")
-d = plotmsdmanyensembles(nameoffile)
-savefig("./images/$nameoffile/msdmanyensembles")
+a = plotmsdperensemble(filename)
+savefig("./images/$filename/meansquaredisplacementeperensemble")
+b = plotdeltaxperensemble(filename)
+savefig("./images/$filename/deltaxperensemble")
+c = fitmsdwithlinearsquares(filename)
+savefig("./images/$filename/fitmsdwithlinearsquares")
+d = plotmsdmanyensembles(filename)
+savefig("./images/$filename/msdmanyensembles")
 
 
-# a[:savefig]("./images/$nameoffile/meansquaredisplacementeperensemble")
-# b[:savefig]("./images/$nameoffile/deltaxperensemble")
-# c[:savefig]("./images/$nameoffile/fitmsdwithlinearsquares")
-# d[:savefig]("./images/$nameoffile/msdmanyensembles")
+# a[:savefig]("./images/$filename/meansquaredisplacementeperensemble")
+# b[:savefig]("./images/$filename/deltaxperensemble")
+# c[:savefig]("./images/$filename/fitmsdwithlinearsquares")
+# d[:savefig]("./images/$filename/msdmanyensembles")

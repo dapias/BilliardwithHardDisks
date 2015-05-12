@@ -6,11 +6,11 @@ time = parameters[:t_max]
 ##This parameters have to be given if the file is executed directly
 # nofrealizations = 10
 # nofensembles = 5
-# nameoffile = "test3"
+# filename = "test3"
 
-createhdf5(nameoffile, parameters, nofensembles, nofrealizations)
-initializefile!(nameoffile, parameters, nofensembles)
-runallrealizations!(nameoffile, nofensembles, nofrealizations)
-deltaxandmsd!(nameoffile,nofensembles,nofrealizations)
+createhdf5(filename, parameters, nofensembles, nofrealizations)
+initializefile!(filename, parameters, nofensembles)
+runallrealizations!(filename, nofensembles, nofrealizations)
+deltaxandmsd!(filename,nofensembles,nofrealizations)
 
-#See output at "../HDF5/nameoffile"
+#See output at "../HDF5/filename"

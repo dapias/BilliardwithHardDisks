@@ -1,4 +1,4 @@
-nameoffile = "prueba"  #It will throw an error if the nameoffile is already exists
+filename = "prueba"  #It will throw an error if the filename is already exists
 nofrealizations = 10
 nofensembles = 5
 
