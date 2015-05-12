@@ -2,8 +2,8 @@ using LinearLeastSquares
 using HDF5
 using PyPlot
 
-function gettime(nameoffile)
-    file = h5open("HDF5/$nameoffile.hdf5","r")
+function gettime(filename)
+    file = h5open("HDF5/$filename.hdf5","r")
     deltat = attrs(file)["Δt"]
     tmax = attrs(file)["t_max"]
     tmax = read(tmax)
@@ -13,45 +13,45 @@ function gettime(nameoffile)
     t
 end
 
-function getmsdperensemble(nameoffile, nofensemble = 1)
-    file = h5open("HDF5/$nameoffile.hdf5","r")
+function getmsdperensemble(filename, nofensemble = 1)
+    file = h5open("HDF5/$filename.hdf5","r")
     msd = file["ensemble-$nofensemble/meansquaredisplacement/"]
     msd = read(msd,"<(Δx)^2>")
     close(file)
     msd
 end
 
-function getnofensembles(nameoffile)
-    file = h5open("HDF5/$nameoffile.hdf5","r")
+function getnofensembles(filename)
+    file = h5open("HDF5/$filename.hdf5","r")
     nofensembles = attrs(file)["Nofensembles"]
     nofensembles = read(nofensembles)
     close(file)
     nofensembles
 end
 
-function plotmsdperensemble(nameoffile, nofensemble = 1)
+function plotmsdperensemble(filename, nofensemble = 1)
     fig = plt.figure()
     ax = fig[:add_subplot](111)
     ax[:set_xlabel]("t")
     ax[:set_ylabel](L"$\langle(\Delta x)^2\rangle_t$")
 
-    t = gettime(nameoffile)
-    msd = getmsdperensemble(nameoffile, nofensemble)
+    t = gettime(filename)
+    msd = getmsdperensemble(filename, nofensemble)
 
 
     ax[:plot](t,msd,".")
     fig
 end
 
-function plotdeltaxperensemble(nameoffile, nofensemble = 1, nofparticles = 100)
+function plotdeltaxperensemble(filename, nofensemble = 1, nofparticles = 100)
     fig = plt.figure()
     ax = fig[:add_subplot](111)
     ax[:set_xlabel]("t")
     ax[:set_ylabel](L"$\Delta x$")
 
-    t = gettime(nameoffile)
+    t = gettime(filename)
 
-    file = h5open("HDF5/$nameoffile.hdf5","r")
+    file = h5open("HDF5/$filename.hdf5","r")
     nofrealizations = attrs(file)["Nofrealizations"]
     nofrealizations = read(nofrealizations)
 
@@ -78,14 +78,14 @@ end
 
 
 
-function fitmsdwithlinearsquares(nameoffile, nofensemble=1)
+function fitmsdwithlinearsquares(filename, nofensemble=1)
     fig = plt.figure()
     ax = fig[:add_subplot](111)
     ax[:set_xlabel]("t")
     ax[:set_ylabel](L"$\langle(\Delta x)^2\rangle_t$")
 
-    t = gettime(nameoffile)
-    msd = getmsdperensemble(nameoffile, nofensemble)
+    t = gettime(filename)
+    msd = getmsdperensemble(filename, nofensemble)
 
     slope = Variable()
     intercept = Variable()
@@ -112,17 +112,17 @@ function fitmsdwithlinearsquares(nameoffile, nofensemble=1)
     fig
 end
 
-function plotmsdmanyensembles(nameoffile)
+function plotmsdmanyensembles(filename)
     fig = plt.figure()
     ax = fig[:add_subplot](111)
     ax[:set_xlabel]("t")
     ax[:set_ylabel](L"$\langle(\Delta x)^2\rangle_t$")
 
-    nofensembles = getnofensembles(nameoffile)
+    nofensembles = getnofensembles(filename)
 
     for ensemble in 1:nofensembles
-        t = gettime(nameoffile)
-        msd = getmsdperensemble(nameoffile, ensemble)
+        t = gettime(filename)
+        msd = getmsdperensemble(filename, ensemble)
         ax[:plot](t,msd,".")
     end
     fig
