@@ -6,8 +6,8 @@ using Docile
 
 
 
-function createhdf5(nameoffile, parameters, nofrealizations)
-  h5open("./HDF5/$nameoffile.hdf5", "w") do file
+function createhdf5(filename, parameters, nofrealizations)
+  h5open("./HDF5/$filename.hdf5", "w") do file
     attrs(file)["Nofrealizations"] = nofrealizations
     for (key,value) in parameters
       attrs(file)[string(key)] = value
@@ -15,11 +15,11 @@ function createhdf5(nameoffile, parameters, nofrealizations)
   end
 end
 
-@doc """#groupforafixedtime(nameoffile, parameters, nofrealizations, tfixed)
+@doc """#groupforafixedtime(filename, parameters, nofrealizations, tfixed)
 Generate the data \#ofcell and \<E\>_{disk} for the passed parameters.  The average ensemble energy is calculated
 for each disk of the board at time tfixed."""->
-function groupforafixedtime(nameoffile, parameters, nofrealizations, tfixed = 100.)
-  file = h5open("./HDF5/$nameoffile.hdf5", "r+")
+function groupforafixedtime(filename, parameters, nofrealizations, tfixed = 100.)
+  file = h5open("./HDF5/$filename.hdf5", "r+")
   dictionary = heatsimulation(;parameters...)
 
   for i in 2:nofrealizations
