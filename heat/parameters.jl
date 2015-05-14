@@ -1,7 +1,7 @@
 using Compat
 
 @compat Dict(:t_initial => 0.,
-#              :t_max => 100,
+             :t_max => 100,                      #Este parámetro será cambiado por el t que agreguemos como tiempo
              :radiusdisk => 1.0,
              :massdisk => 1.0,
              :velocitydisk => 1.0,
@@ -11,5 +11,5 @@ using Compat
              :massparticle => 1.0,
              :size_x => 3.,                     #Size of the cell in x
              :size_y => 3.,                     #Size of the cell in y
-             :velocityparticle => 0.0
+             :velocityparticle => 1.0
              )

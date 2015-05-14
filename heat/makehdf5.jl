@@ -18,8 +18,9 @@ end
 @doc """#groupforafixedtime(filename, parameters, nofrealizations, tfixed)
 Generate the data \#ofcell and \<E\>_{disk} for the passed parameters.  The average ensemble energy is calculated
 for each disk of the board at time tfixed."""->
-function groupforafixedtime(filename, parameters, nofrealizations, tfixed = 100.)
+function groupforafixedtime(filename, parameters, nofrealizations, tfixed)
   file = h5open("./HDF5/$filename.hdf5", "r+")
+  parameters[:t_max] = tfixed
   dictionary = heatsimulation(;parameters...)
 
   for i in 2:nofrealizations
