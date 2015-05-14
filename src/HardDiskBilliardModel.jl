@@ -212,12 +212,12 @@ end
 
 @doc """#parameters_to_create_a_new_cell(::Cell)
 Extract the general data associated to a previous created cell"""->
-function parameters_to_create_a_new_cell(cell::Cell)
+function parameters_to_create_a_new_cell(cell::Cell, vnewdisk::Real)
   size_x = cell.walls[4].x - cell.walls[1].x
   size_y = cell.walls[3].y - cell.walls[2].y
   radiusdisk = cell.disk.radius
   massdisk = cell.disk.mass
-  velocitydisk = 0.
+  velocitydisk = vnewdisk
   #velocitydisk = norm(cell.disk.v)                      ######Ver la forma de mejorar esto
   windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
   size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize
@@ -228,8 +228,8 @@ end
 Creates a new cell that shares the rightmost verticalwall of the passed cell. A Particle is passed
 to avoid overlap with the embedded Disk.
 """->
-function create_new_right_cell(cell::Cell, particle::Particle, t::Real)
-  size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
+function create_new_right_cell(cell::Cell, particle::Particle, t::Real, vnewdisk::Real)
+  size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell, vnewdisk)
 
   leftsharedwall = cell.walls[end]
   Lx1 = cell.walls[end].x
@@ -254,8 +254,8 @@ end
 Creates a new cell that shares the leftmost verticalwall of the passed cell. A Particle is passed
 to avoid overlap with the embedded Disk.
 """->
-function create_new_left_cell(cell::Cell, particle::Particle, t::Real)
-  size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell)
+function create_new_left_cell(cell::Cell, particle::Particle, t::Real, vnewdisk::Real)
+  size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell, vnewdisk)
 
   Lx2 = cell.walls[1].x
   Ly1 = cell.walls[1].y[1]
@@ -532,12 +532,12 @@ end
 Introduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
 It may pushes the cell at the left or right side of the board to mantain the order in the **Deque** structure of the
 board: at the back the rightmost cell, at front the leftmost cell."""->
-function newcell!(b::Board, p::Particle, t)
+function newcell!(b::Board, p::Particle, t::Real, vnewdisk::Real)
   if front(b.cells).numberofcell > p.numberofcell
-    cell = create_new_left_cell(front(b.cells),p, t)
+    cell = create_new_left_cell(front(b.cells),p, t, vnewdisk)
     unshift!(b.cells,cell)
   elseif back(b.cells).numberofcell < p.numberofcell
-    cell = create_new_right_cell(back(b.cells),p, t)
+    cell = create_new_right_cell(back(b.cells),p, t, vnewdisk)
     push!(b.cells,cell)
   end
   cell

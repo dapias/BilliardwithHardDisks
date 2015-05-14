@@ -294,7 +294,7 @@ from the Data Structure, which is delimited by the maximum time(t_max). Just to 
 
 Returns `board, particle, particle_positions, particle_velocities, time`"""->
 function simulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
-                    Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
+                    Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk = 0.0)
   board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                  windowsize)
 
@@ -326,7 +326,7 @@ function simulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 
       if particle.numberofcell != cell.numberofcell ###Si la partícula cambió de celda
         change_cell = true
         if is_new_cell
-          cell = newcell!(board, particle, t)
+          cell = newcell!(board, particle, t, vnewdisk)
         else
           cell = get_cell(board,particle.numberofcell)
           update_position_disk(cell, t)
@@ -350,7 +350,7 @@ with a delta of energy for each collision.
 Returns `board, particle, particle_positions, particle_velocities, time, disk_positions_front,
 disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back, delta_e`"""->
 function animatedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
-                            Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
+                            Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk = 0.0)
 
   board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                  windowsize)
@@ -380,7 +380,7 @@ function animatedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, mas
       if particle.numberofcell != cell.numberofcell
         change_cell = true
         if is_new_cell
-          cell = newcell!(board, particle, t)
+          cell = newcell!(board, particle, t, vnewdisk)
         else
           cell = get_cell(board,particle.numberofcell)
           update_position_disk(cell, t)
@@ -404,7 +404,7 @@ end
 @doc """#heatsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
 Implements the simulation main loop but returns a dictionary with the energies of the disks at time t_max"""->
 function heatsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
-                        Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5)
+                        Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk = 0.0)
   board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
                                                  windowsize)
 
@@ -430,7 +430,7 @@ function heatsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdis
       if particle.numberofcell != cell.numberofcell ###Si la partícula cambió de celda
         change_cell = true
         if is_new_cell
-          cell = newcell!(board, particle, t)
+          cell = newcell!(board, particle, t, vnewdisk)
           dict["disk$(cell.numberofcell)"] = [0.0]
         else
           cell = get_cell(board,particle.numberofcell)

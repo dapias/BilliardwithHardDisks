@@ -29,11 +29,9 @@ function run(t_final = 100)
                       :massparticle => 1.0,
                       :size_x => 3.,                     #Size of the cell in x
                       :size_y => 3.,                     #Size of the cell in y
-                      :velocityparticle => 1.0
+                      :velocityparticle => 1.0,
+                      :vnewdisk => 1.0
                       )
-
-
-    #parameters[:t_max] = 1000
 
     if visual
         parameters[:t_max] = t_final
@@ -61,17 +59,6 @@ function run(t_final = 100)
     elapsed_time
 
 end
-
-# if (ARGS)[1] != 0
-#     if ARGS[1] == "true"
-#         include("./Visual.jl")
-#         using Visual
-#         @time visualize(sim, radiustovisualizeparticle);
-#     end
-# end
-
-#visualize_localenergy(sim);
-#just for git
 
 try
     t_final = float(ARGS[1])

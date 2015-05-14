@@ -22,7 +22,7 @@ function plotmeanenergyperensemble(filename, tfixed)
   fig = plt.figure()
   ax = fig[:add_subplot](111)
   ax[:set_xlabel]("#ofcell")
-  ax[:set_ylabel](L"$<E>$")
+  ax[:set_ylabel](L"$<E_{cell}>$")
 
   nofcell = getnumbersofcell(filename, tfixed)
   meandisksenergy = getdisksenergy(filename, tfixed)
@@ -36,7 +36,7 @@ function plotfile(filename, time)
   fig = plt.figure()
   ax = fig[:add_subplot](111)
   ax[:set_xlabel]("#ofcell")
-  ax[:set_ylabel](L"$<E>$")
+  ax[:set_ylabel](L"$<E_{cell}>$")
 
   for t in time
     nofcell = getnumbersofcell(filename, t)
