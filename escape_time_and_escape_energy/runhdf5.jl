@@ -14,7 +14,7 @@ println("If runhdf5.jl is executed directly; the parameters and the number of re
 It can be done as:
 parameters = include(\"parameters.jl\")
 nofrealizations = number of realizations .
-filename = "filename" without .hdf5 ending
+filename = \"filename\" without .hdf5 ending
 And then include(\"runhdf5.jl\") \n")
 
 createhdf5(filename, parameters, nofrealizations)
