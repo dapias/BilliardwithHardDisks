@@ -8,7 +8,7 @@ end
 ##This parameters have to be given if the file is executed directly
 #parameters = include("parameters.jl")
 #nofrealizations = 10
-#nameoffile = "test3"
+#filename = "test3"
 
 println("If runhdf5.jl is executed directly; the parameters and the number of realizations must be passed.
 It can be done as:
@@ -17,16 +17,16 @@ nofrealizations = number of realizations .
 And then include(\"runhdf5.jl\") \n")
 
 try
-  createhdf5(nameoffile, parameters, nofrealizations)
-  data(nameoffile, parameters, nofrealizations)
+  createhdf5(filename, parameters, nofrealizations)
+  data(filename, parameters, nofrealizations)
 catch
-  nameoffile = "$(nofrealizations)realizaciones"
-  createhdf5(nameoffile, parameters, nofrealizations)
-  data(nameoffile, parameters, nofrealizations)
+  filename = "$(nofrealizations)realizaciones"
+  createhdf5(filename, parameters, nofrealizations)
+  data(filename, parameters, nofrealizations)
 end
 
-println("Look for the file at the \"HDF5\" folder with the name \"$nameoffile\"")
+println("Look for the file at the \"HDF5\" folder with the name \"$filename\"")
 
 
 
-#See output at "../HDF5/nameoffile"
+#See output at "../HDF5/filename"
