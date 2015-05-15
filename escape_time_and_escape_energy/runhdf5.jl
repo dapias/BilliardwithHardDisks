@@ -14,16 +14,11 @@ println("If runhdf5.jl is executed directly; the parameters and the number of re
 It can be done as:
 parameters = include(\"parameters.jl\")
 nofrealizations = number of realizations .
+filename = "filename" without .hdf5 ending
 And then include(\"runhdf5.jl\") \n")
 
-try
-  createhdf5(filename, parameters, nofrealizations)
-  data(filename, parameters, nofrealizations)
-catch
-  filename = "$(nofrealizations)realizaciones"
-  createhdf5(filename, parameters, nofrealizations)
-  data(filename, parameters, nofrealizations)
-end
+createhdf5(filename, parameters, nofrealizations)
+data(filename, parameters, nofrealizations)
 
 println("Look for the file at the \"HDF5\" folder with the name \"$filename\"")
 
