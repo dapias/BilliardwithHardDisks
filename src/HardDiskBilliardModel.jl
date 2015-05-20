@@ -39,14 +39,15 @@ with the main loop of the simulation (see *simulation* in **Simulation.jl**)
 disk = Disk([0.,0.],[1.,1.],1.0,0,0)"""->
 type Disk{T} <: DynamicObject
   r::Array{T,1}
-  v::Array{T,1}
+  w::Real
   radius::T
   mass::Real
   numberofcell::Int
   lastcollision ::Int
+  imoment::Real
 end
 
-Disk(r,v,radius, mass, numberofcell) = Disk(r,v,radius, mass , numberofcell, 0)
+Disk(r,w,radius, mass, numberofcell) = Disk(r,w,radius, mass , numberofcell, 0, 1.)
 
 
 @doc """Type that *contains* walls (array of Wall), a disk and a label called numberofcell
@@ -165,11 +166,8 @@ of constant norm. It is worth noting that the passed parameters define  corners 
 function create_disk(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real,radius::Real, mass::Real, velocitynorm::Real, numberofcell::Integer)
   x = randuniform(Lx1 + radius, Lx2 - radius)
   y = randuniform(Ly1 + radius, Ly2 - radius)
-  theta = rand()*2*pi
-  vx = cos(theta)*velocitynorm
-  vy = sin(theta)*velocitynorm
-  v = [vx, vy]
-  Disk([x;y],v,radius, mass,numberofcell)
+  w = velocitynorm*rand(-1.:2:1.)
+  Disk([x;y],w,radius, mass,numberofcell)
 end
 
 @doc """#create_initial_cell_with_particle( Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
@@ -194,12 +192,12 @@ function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,si
     particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
   end
 
-  #Microcanonical sampled if velocitydisk == velocityparticle. Falta implementar el caso más general.
-  E = ((velocitydisk)^2 + (velocityparticle)^2)/2.
-  v = randn(4)
+  #Microcanonical sampled if w == velocityparticle and the inertia moment is equal to 1. Falta implementar el caso más general.
+  E = (disk.imoment*(disk.w)^2 + (velocityparticle)^2)/2.
+  v = randn(3)
   lambda_squared =  dot(v,v)
-  vx_d, vy_d, vx_p, vy_p = sqrt(2*E/lambda_squared)v
-  disk.v = [vx_d, vy_d]
+  w, vx_p, vy_p = sqrt(2*E/lambda_squared)v
+  disk.w = w
   particle.v = [vx_p, vy_p]
 
   cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t_initial)
@@ -217,7 +215,7 @@ function parameters_to_create_a_new_cell(cell::Cell, vnewdisk::Real)
   size_y = cell.walls[3].y - cell.walls[2].y
   radiusdisk = cell.disk.radius
   massdisk = cell.disk.mass
-  velocitydisk = vnewdisk
+  velocitydisk = vnewdisk*rand(-1.:2:1.)
   #velocitydisk = norm(cell.disk.v)                      ######Ver la forma de mejorar esto
   windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
   size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize
@@ -292,7 +290,7 @@ end
 
 @doc """#move(::Disk, dt::Real)
 Update the  position of the Disk by moving it a time dt"""->
-move(d::Disk, dt::Real) = d.r += d.v * dt
+move(d::Disk, dt::Real) = d.r
 @doc """#move(::Particle, dt::Real)
 Update the  position of the Particle by moving it a time dt"""->
 move(p::Particle, dt::Real) = p.r += p.v*dt
@@ -305,15 +303,6 @@ Returns the time of collision between a Disk and a Vertical (Wall). If they don'
 function dtcollision(d::Disk, VW::Vertical)
   #La pared siempre va a estar acotada por números positivos
   dt = Inf
-  if d.v[1] > 0
-    if d.r[1] < VW.x
-      dt = (VW.x - (d.r[1] + d.radius))/d.v[1]
-    end
-  elseif d.v[1] < 0
-    if d.r[1] > VW.x
-      dt = ((d.r[1] - d.radius) - VW.x)/-d.v[1]
-    end
-  end
   dt
 end
 
@@ -322,15 +311,6 @@ end
 Returns the time of collision between a Disk and a HorizontallWall.If they don't collide it retuns ∞"""->
 function dtcollision(d::Disk, HW::HorizontalWall)
   dt = Inf
-  if d.v[2] > 0
-    if d.r[2] < HW.y
-      dt = (HW.y - (d.r[2] + d.radius))/d.v[2]
-    end
-  elseif d.v[2] < 0
-    if d.r[2] > HW.y
-      dt = ((d.r[2] - d.radius) - HW.y)/-d.v[2]
-    end
-  end
   dt
 end
 
@@ -339,21 +319,14 @@ Calculates the minimum time of collision between the Disk belonged to Cell and t
 the interval of time and the index of the Wall inside the Cell:
 > 1 = left wall, 2 = bottom wall, 3 = top wall, 4 = right wall."""->
 function dtcollision(d::Disk, c::Cell)
-  time = zeros(4)
-  index = 1
-  for wall in c.walls
-    dt = dtcollision(d,wall)
-    time[index] = dt
-    index += 1
-  end
-  dt,k = findmin(time)
+  dt,k = Inf, 1
 end
 
 @doc """#dtcollision(::Disk,::Particle)
 Calculates the time of collision between a Disk and the Particle.If they don't collide it retuns ∞"""->
 function dtcollision(d::Disk, p::Particle)
   deltar = p.r - d.r
-  deltav = p.v - d.v
+  deltav = p.v
   rdotv = dot(deltar, deltav)
   rcuadrado = dot(deltar,deltar)
   vcuadrado = dot(deltav, deltav)
@@ -437,7 +410,7 @@ end
 @doc doc"""#collision(::Disk, ::Vertical)
 Update the velocity vector of a Disk (Disk.v) after it collides with a Vertical(Wall)."""->
 function collision(d::Disk, V::Vertical)
-  d.v = [-d.v[1], d.v[2]]
+  d.w
 end
 
 @doc doc"""#collision(::Disk, ::Vertical, ::Board)
@@ -450,7 +423,7 @@ end
 @doc doc"""#collision(::Disk, ::HorizontalWall)
 Update the velocity vector of a Disk (Disk.v) after it collides with a HorizontallWall."""->
 function collision(d::Disk, H::HorizontalWall)
-  d.v = [d.v[1],-d.v[2]]
+  d.w
 end
 
 @doc doc"""#collision(::Disk, ::HorizontalWall, ::Board)
@@ -547,12 +520,13 @@ end
 Updates the velocities for the Particle and Disk after they collides through an elastic collision. """->
 function collision(p::Particle, d::Disk)
   deltar = p.r - d.r
-  deltav = p.v - d.v
-  h = dot(deltar,deltav)
-  sigma = d.radius
-  J = 2*p.mass*d.mass*h/(sigma*(p.mass + d.mass))
-  p.v -= J*deltar/(sigma*p.mass)
-  d.v += J*deltar/(sigma*d.mass)
+  en = deltar/norm(deltar)
+  rotation = [cos(pi/2.) sin(pi/2.); -sin(pi/2.) cos(pi/2.)]
+  et = rotation*en
+  vn = -dot(p.v,en)*(en)
+  vt = (d.w*d.radius)*et
+  d.w = dot(p.v,et)/d.radius
+  p.v = vt + vn
 end
 
 @doc """#collision(::Particle, ::Disk, ::Board)

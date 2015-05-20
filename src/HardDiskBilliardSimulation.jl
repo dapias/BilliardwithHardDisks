@@ -90,12 +90,12 @@ function updateparticlelists!(particle_positions, particle_velocities,particle::
   end
 end
 
-function updatedisklists!(disk_positions, disk_velocities,cell::Cell)
-  for i in 1:2
-    push!(disk_positions,cell.disk.r[i])
-    push!(disk_velocities,cell.disk.v[i])
-  end
-end
+# function updatedisklists!(disk_positions, disk_velocities,cell::Cell)
+#   for i in 1:2
+#     push!(disk_positions,cell.disk.r[i])
+#     push!(disk_velocities,cell.disk.v[i])
+#   end
+# end
 
 function createparticlelists(particle::Particle)
   particle_positions = [particle.r]
@@ -112,25 +112,24 @@ end
 @doc """#energy(::Disk,::Wall)
 Returns the kinetic energy of a Disk"""->
 function energy(disk::Disk,wall::Wall)
-  disk.mass*dot(disk.v,disk.v)/2.
+  disk.imoment*disk.w^2/2.
 end
 
 @doc """#energy(::Disk,::Wall)
 Returns the kinetic energy of a Disk"""->
 function energy(disk::Disk)
-  disk.mass*dot(disk.v,disk.v)/2.
+  disk.imoment*disk.w^2/2.
 end
 
 @doc """#energy(::Particle,::Disk)
 Returns the total kinetic energy of a particle and a Disk """->
 function energy(particle::Particle,disk::Disk)
-  disk.mass*dot(disk.v,disk.v)/2. + particle.mass*dot(particle.v,particle.v)/2.
+  disk.imoment*disk.w^2/2. + particle.mass*dot(particle.v,particle.v)/2.
 end
 
 function createdisklists(board::Board)
   disk_positions =  [front(board.cells).disk.r]
-  disk_velocities = [front(board.cells).disk.v]
-  disk_positions, disk_velocities
+  disk_positions
 end
 
 function futurecollisions!(event::Event,cell::Cell, particle::Particle, t_initial::Real,t_max::Real,pq::PriorityQueue,
@@ -185,53 +184,11 @@ function validatecollision(event::Event, particle::Particle)
 end
 
 function update_x_disk(disk,Lx1,size_x)
-  ###Ver qué pasa si son exactamente iguales
-  bx1 = Lx1 + disk.radius
-  bx2 = Lx1 + size_x - disk.radius
-  width = bx2 - bx1
-  if disk.r[1] >= bx2
-    distance = disk.r[1] - bx2
-    k = mod(distance,width)
-    if !iseven(int(fld(distance, width)))
-      disk.r[1] = bx1 + k
-    else
-      disk.r[1] = bx2 - k
-    end
-  else
-    distance = abs(disk.r[1] - bx1)
-    k = mod(distance,width)
-    if !iseven(int(fld(distance, width)))
-      disk.r[1] = bx2 - k
-    else
-      disk.r[1] = bx1 + k
-    end
-  end
   disk.r
 end
 
 
 function update_y_disk(disk,Ly1,size_y)
-  ###Ver qué pasa si son exactamente iguales
-  by1 = Ly1 + disk.radius
-  by2 = Ly1 + size_y - disk.radius
-  height = by2 - by1
-  if disk.r[2] >= by2
-    distance = disk.r[2] - by2
-    k = mod(distance,height)
-    if !iseven(int(fld(distance, height)))
-      disk.r[2] = by1 + k
-    else
-      disk.r[2] = by2 - k
-    end
-  else
-    distance = abs(disk.r[2] - by1)
-    k = mod(distance,height)
-    if !iseven(int(fld(distance, height)))
-      disk.r[2] = by2 - k
-    else
-      disk.r[2] = by1 + k
-    end
-  end
   disk.r
 end
 
@@ -278,7 +235,7 @@ function startsimulation(t_initial::Real, t_max::Real, radiusdisk::Real, massdis
                                                massparticle, velocityparticle, windowsize, t_initial)
 
   pq = PriorityQueue{Event,Float64}()
-  enqueue!(pq,Event(Particle([0.,0.],[0.,0.],1.0,0),Disk([0.,0.],[0.,0.],1.0,1.0,0), 0),0.) #Just to init pq
+  enqueue!(pq,Event(Particle([0.,0.],[0.,0.],1.0,0),Disk([0.,0.],0.,1.0,1.0,0), 0),0.) #Just to init pq
   initialcollisions!(board,particle,t_initial,t_max,pq)
   event, t = dequeue!(pq) #It's deleted the event at time 0.0
   time = [t]
@@ -356,7 +313,7 @@ function animatedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, mas
                                                  windowsize)
 
   particle_positions, particle_velocities =  createparticlelists(particle)
-  disk_positions, disk_velocities = createdisklists(board)
+  disk_positions = createdisklists(board)
   initialcell = front(board.cells) #La necesito para la animación
   label = 0
   delta_e = [0.]
@@ -390,13 +347,13 @@ function animatedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, mas
       e2 = energy(event.dynamicobject,event.diskorwall)
       push!(delta_e, e2 - e1)
       updateparticlelists!(particle_positions, particle_velocities,particle)
-      updatedisklists!(disk_positions, disk_velocities, cell)
+      #updatedisklists!(disk_positions, disk_velocities, cell)
 
       futurecollisions!(event, cell, particle, t,t_max,pq, label, change_cell)
     end
   end
   push!(time, t_max)
-  board, particle, particle_positions, particle_velocities, time, disk_positions, disk_velocities, delta_e, initialcell.disk
+  board, particle, particle_positions, particle_velocities, time, disk_positions, delta_e, initialcell.disk
 end
 
 

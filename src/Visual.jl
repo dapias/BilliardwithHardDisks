@@ -24,7 +24,8 @@ pygui(true)
 
 function visualize(simulation_results, radiusparticle)
 
-  board, particle, particle_positions, particle_velocities, time, disk_positions, disk_velocities, delta_e, disk = simulation_results
+  #board, particle, particle_positions, particle_velocities, time, disk_positions, disk_velocities, delta_e, disk = simulation_results
+  board, particle, particle_positions, particle_velocities, time, disk_positions, delta_e, disk = simulation_results
 
   radiusdisk = disk.radius
   massparticle = particle.mass
@@ -64,7 +65,7 @@ function visualize(simulation_results, radiusparticle)
     else
       #  circles[1][:center] = (disk_positions[1+2*(k-1)] + disk_velocities[1+2*(k-1)]*(i/10-time[k]), disk_positions[2+2*(k-1)]+disk_velocities[2+2*(k-1)]*(i/10-time[k]))
       puntual[1][:center] = (particle_positions[1+2*(k-1)] + particle_velocities[1+2*(k-1)]*(i/10-time[k]), particle_positions[2+2*(k-1)]+particle_velocities[2+2*(k-1)]*(i/10-time[k]))
-      circles[1][:center] = (disk_positions[1+2*(k-1)] + disk_velocities[1+2*(k-1)]*(i/10-time[k]), disk_positions[2+2*(k-1)]+disk_velocities[2+2*(k-1)]*(i/10-time[k]))
+    #  circles[1][:center] = (disk_positions[1+2*(k-1)] + disk_velocities[1+2*(k-1)]*(i/10-time[k]), disk_positions[2+2*(k-1)]+disk_velocities[2+2*(k-1)]*(i/10-time[k]))
       e_text = delta_e[k]
       t_text = time[k]
       energy_text[:set_text]("Delta_E = $(e_text)")
