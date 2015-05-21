@@ -4,8 +4,10 @@ push!(LOAD_PATH,"../myDataStructures/")
 using HardDiskBilliardSimulation
 using HardDiskBilliardModel
 using MyCollections
+using Docile
 
 
+@doc "Returns the escape-time and the energy of the particle that leaves the cell."->
 function residencetime(; t_initial = 0., t_max = 100., radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
                     Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk=0.)
 
@@ -21,8 +23,7 @@ function residencetime(; t_initial = 0., t_max = 100., radiusdisk = 1.0, massdis
     validcollision = HardDiskBilliardSimulation.validatecollision(event, particle)
 
     if validcollision
-      #En este bloque se considera el movimiento de la celda actual, ignorando si la colisión implica un
-      #cambio de celda.
+      #En este bloque se considera el movimiento de la celda actual.
 
       HardDiskBilliardSimulation.updatelabels(event,label)
       cell = HardDiskBilliardSimulation.get_cell(board, particle.numberofcell)
