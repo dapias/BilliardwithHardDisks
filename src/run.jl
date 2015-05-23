@@ -28,6 +28,6 @@ vp = parameters[:velocityparticle]
 
 @time sim = simulation(;parameters...);
 println("#ofevents = $(length(sim[end]))")
-@time visualize(sim, radiustovisualizeparticle, vp);
+#@time visualize(sim, radiustovisualizeparticle, vp);
 
 #visualize_localenergy(sim);
