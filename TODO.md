@@ -29,3 +29,5 @@ haz un notebook donde se pone una liga al PDF que guardas en el mismo directorio
 ##Análisis con los discos rotantes (mismo análisis)
 
 ##Momentos de Helfand (Viscardi - Gaspard)
+
+##Monte Carlo Sampling para la cola algebráica (ver Altmann)
