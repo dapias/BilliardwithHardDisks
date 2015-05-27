@@ -1,6 +1,7 @@
 using Compat
 
-@compat Dict(:t_initial => 0.,
+
+@compat a = Dict(:t_initial => 0.,
              :t_max => 100,
              :radiusdisk => 1.0,
              :massdisk => 1.0,
@@ -15,3 +16,7 @@ using Compat
              :vnewdisk => 0.0,
              :radius =>0.25
              )
+
+nofrealizations = 100
+
+a,nofrealizations
