@@ -9,7 +9,14 @@ end
 parameters, nofrealizations = include(ARGS[1])
 t_max = parameters[:t_max]
 today = today()
-filename = "$today""ensamble:""$nofrealizations""t_max:""t_max"
+
+try
+  mkdir("./HDF5/$today")
+end
+
+s = string(now())
+hour = s[end-7:end]
+filename = "$today/$hour""ensamble:""$nofrealizations""t_max:""t_max"
 
 ##This parameters have to be given if the file is executed directly
 #parameters = include("parameters.jl")
