@@ -1,6 +1,7 @@
 using Dates
 
 include("makehdf5.jl")
+include("extractdata.jl")
 
 try
   mkdir("./HDF5/")
@@ -32,6 +33,19 @@ filename = "$today/$hour""ensamble:""$nofrealizations""t_max:""$t_max"
 
 createhdf5(filename, parameters, nofrealizations)
 data(filename, parameters, nofrealizations)
+
+try
+  mkdir("./images")
+end
+
+try
+  mkdir("./images/$today")
+end
+
+
+plottdata(filename)
+plotehistogram(filename)
+
 
 println("Look for the file at the \"HDF5\" folder with the name \"$filename\"")
 
