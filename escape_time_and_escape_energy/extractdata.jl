@@ -28,7 +28,7 @@ function plotehistogram(filename)
   e = getedata(filename)
   plt.clf()
   plt.hist(e, 20)
-  savefig("./images/$(filename)ehistogram.pdf",format="pdf")
+  savefig("./images/$(filename)ehistogram.png")
 end
 
 function plottdata(filename)
@@ -41,7 +41,7 @@ function plottdata(filename)
   plt.plot(intervalo, Ps, ".--")
   plt.gca()[:set_yscale]("log")
   plt.gca()[:set_xscale]("log")
-  savefig("./images/$(filename)tcumulative.pdf",format="pdf")
+  savefig("./images/$(filename)tcumulative.png")
 end
 
 
