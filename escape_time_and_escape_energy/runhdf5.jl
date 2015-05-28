@@ -35,11 +35,11 @@ createhdf5(filename, parameters, nofrealizations)
 data(filename, parameters, nofrealizations)
 
 try
-  mkdir(".HDF5/images")
+  mkdir("./HDF5/images")
 end
 
 try
-  mkdir(".HDF5/images/$today")
+  mkdir("./HDF5/images/$today")
 end
 
 
