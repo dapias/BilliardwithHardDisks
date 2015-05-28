@@ -17,7 +17,7 @@ end
 
 s = string(now())
 hour = s[end-7:end]
-filename = "$today/$hour""ensamble:""$nofrealizations""t_max:""$t_max"
+filename = "$today/$hour""ensemble:""$nofrealizations""t_max:""$t_max"
 
 ##This parameters have to be given if the file is executed directly
 #parameters = include("parameters.jl")
