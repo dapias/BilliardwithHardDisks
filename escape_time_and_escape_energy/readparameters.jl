@@ -71,6 +71,7 @@ function parse_commandline()
   return parse_args(s)
 end
 
+k = open()
 
 parsed_args = parse_commandline()
 println("Parsed args:")
