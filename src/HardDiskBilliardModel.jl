@@ -281,9 +281,9 @@ Returns a Board instance with one cell and a particle inside it (that is also re
 together with the needed data to create the embedded disk and a particle inside the cell. """->
 function create_board_with_particle(Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk::Real,
                                     massdisk::Real, velocitydisk::Real,
-                                    massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real, radius)
+                                    massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real, radius::Real)
   cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                                      massparticle, velocityparticle, windowsize, t_initial::Real, radius)
+                                                      massparticle, velocityparticle, windowsize, t_initial, radius)
   board = Deque{Cell}()
   push!(board,cell)
   board = Board(board)

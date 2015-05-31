@@ -11,7 +11,7 @@ importall HardDiskBilliardModel
 importall MyCollections
 import DataStructures.Deque, DataStructures.push!, DataStructures.unshift!, DataStructures.front, DataStructures.back
 using Compat
-export simulation, animatedsimulation, heatsimulation
+export simulation, animatedsimulation, heatsimulation, startsimulation, validatecollision, updatelabels, get_cell, update_position_disk, futurecollisions!
 
 
 @doc """#initialcollisions!(board::Board,particle::Particle,t_initial::Real,t_max::Real,pq)
@@ -272,7 +272,7 @@ and time an array initialized with the t value.
                         """->
 function startsimulation(t_initial::Real, t_max::Real, radiusdisk::Real, massdisk::Real, velocitydisk::Real,
                          massparticle::Real, velocityparticle::Real, Lx1::Real, Ly1::Real,
-                         size_x::Real, size_y::Real, windowsize::Real, radius)
+                         size_x::Real, size_y::Real, windowsize::Real, radius::Real)
 
   board, particle = create_board_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
                                                massparticle, velocityparticle, windowsize, t_initial, radius)
