@@ -272,13 +272,13 @@ and time an array initialized with the t value.
                         """->
 function startsimulation(t_initial::Real, t_max::Real, radiusdisk::Real, massdisk::Real, velocitydisk::Real,
                          massparticle::Real, velocityparticle::Real, Lx1::Real, Ly1::Real,
-                         size_x::Real, size_y::Real, windowsize::Real)
+                         size_x::Real, size_y::Real, windowsize::Real, radius)
 
   board, particle = create_board_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                               massparticle, velocityparticle, windowsize, t_initial)
+                                               massparticle, velocityparticle, windowsize, t_initial, radius)
 
   pq = PriorityQueue{Event,Float64}()
-  enqueue!(pq,Event(Particle([0.,0.],[0.,0.],1.0,0),Disk([0.,0.],[0.,0.],1.0,1.0,0), 0),0.) #Just to init pq
+  enqueue!(pq,Event(Particle([0.,0.],[0.,0.],1.0,1.0,0),Disk([0.,0.],[0.,0.],1.0,1.0,0), 0),0.) #Just to init pq
   initialcollisions!(board,particle,t_initial,t_max,pq)
   event, t = dequeue!(pq) #It's deleted the event at time 0.0
   time = [t]
@@ -294,9 +294,9 @@ from the Data Structure, which is delimited by the maximum time(t_max). Just to 
 
 Returns `board, particle, particle_positions, particle_velocities, time`"""->
 function simulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
-                    Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk = 0.0)
+                    Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk = 0.0, radius=0.25)
   board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
-                                                 windowsize)
+                                                 windowsize, radius)
 
 
   particle_positions, particle_velocities =  createparticlelists(particle)
@@ -350,10 +350,10 @@ with a delta of energy for each collision.
 Returns `board, particle, particle_positions, particle_velocities, time, disk_positions_front,
 disk_velocities_front, initialcell.disk, disk_positions_back,disk_velocities_back, delta_e`"""->
 function animatedsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
-                            Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk = 0.0)
+                            Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk = 0.0, radius=0.25)
 
   board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
-                                                 windowsize)
+                                                 windowsize, radius)
 
   particle_positions, particle_velocities =  createparticlelists(particle)
   disk_positions, disk_velocities = createdisklists(board)
@@ -404,9 +404,9 @@ end
 @doc """#heatsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,windowsize)
 Implements the simulation main loop but returns a dictionary with the energies of the disks at time t_max"""->
 function heatsimulation(; t_initial = 0, t_max = 1000, radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
-                        Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk = 0.0)
+                        Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk = 0.0, radius = 0.25)
   board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
-                                                 windowsize)
+                                                 windowsize, radius)
 
   @compat dict = Dict("disk0" => [0.0])
   label = 0

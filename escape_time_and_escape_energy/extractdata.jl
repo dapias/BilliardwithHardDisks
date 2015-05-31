@@ -1,6 +1,8 @@
 using PyPlot
 using HDF5
 
+filename = "ARGS[1]"
+
 function getnofrealizations(filename)
   file = h5open("HDF5/$filename.hdf5","r")
   nofrealizations = read(attrs(file)["Nofrealizations"])
@@ -22,6 +24,13 @@ function getedata(filename)
   close(file)
   tdata
 end
+
+function plotehistogram(filename)
+  e = getedata(filename)
+  plt.hist(e)
+  plt.savefig("$filename"".pdf")
+end
+
 
 
 
