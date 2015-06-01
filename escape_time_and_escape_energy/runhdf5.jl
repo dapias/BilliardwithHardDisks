@@ -52,6 +52,7 @@ plotehistogram(filename)
 
 
 println("Look for the file at the \"HDF5\" folder with the name \"$filename\"")
+println(Pkg.status())
 
 
 
