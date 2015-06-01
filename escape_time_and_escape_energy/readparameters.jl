@@ -71,9 +71,10 @@ function parse_commandline()
   return parse_args(s)
 end
 
-k = open()
+k = open("parameters")
+s = readall(k)
 
-parsed_args = parse_commandline()
+parsed_args = parse_commandline(s)
 println("Parsed args:")
 for (arg,val) in parsed_args
   println("  $arg  =>  $val")
