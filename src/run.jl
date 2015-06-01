@@ -70,4 +70,3 @@ catch
     elapsed_time = run()
     println("# Tomé $elapsed_time segundos")
 end
-
