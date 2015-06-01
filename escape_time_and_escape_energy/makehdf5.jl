@@ -22,7 +22,7 @@ function data(nameoffile, parameters, nofrealizations)
   edata = Array(Float64, nofrealizations)
 
   for i in 1:nofrealizations
-      tdata[i], edata[i] = residencetime(;parameters...)
+      tdata[i], edata[i] = residencetime(parameters)
   end
 
   file["tdata"] = tdata

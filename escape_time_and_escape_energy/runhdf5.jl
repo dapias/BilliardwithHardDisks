@@ -1,4 +1,5 @@
 using Dates
+import YAML
 
 include("makehdf5.jl")
 include("extractdata.jl")
@@ -7,8 +8,11 @@ try
   mkdir("./HDF5/")
 end
 
-parameters, nofrealizations = include(ARGS[1])
-t_max = parameters[:t_max]
+parameters = YAML.load(open("parameters.yaml"))
+
+t_max = parameters["t_max"]
+nofrealizations = parameters["nofrealizations"]
+
 today = today()
 
 try

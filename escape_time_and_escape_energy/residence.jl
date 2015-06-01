@@ -1,7 +1,7 @@
 push!(LOAD_PATH,"../src/")
 push!(LOAD_PATH,"../myDataStructures/")
-include("../src/HardDiskBilliardSimulation.jl")
-include("../myDataStructures/MyCollections.jl")
+#include("../src/HardDiskBilliardSimulation.jl")
+#include("../myDataStructures/MyCollections.jl")
 
 using HardDiskBilliardSimulation
 using HardDiskBilliardModel
@@ -15,8 +15,22 @@ using Docile
 
 
 @doc "Returns the escape-time and the energy of the particle that leaves the cell."->
-function residencetime(t_initial = 0., t_max = 100., radiusdisk = 1.0, massdisk = 1.0, velocitydisk =1.0,massparticle = 1.0, velocityparticle =1.0,
-                    Lx1 = 0., Ly1=0., size_x = 3., size_y = 3.,windowsize = 0.5, vnewdisk=0., radius = 0.25, nofrealizations = 100)
+function residencetime(parameters)
+
+  t_initial = parameters["t_initial"]
+  t_max = parameters["t_max"]
+  radiusdisk = parameters["radiusdisk"]
+  massdisk = parameters["massdisk"]
+  velocitydisk = parameters["velocitydisk"]
+  massparticle = parameters["massparticle"]
+  velocityparticle = parameters["velocityparticle"]
+  Lx1 =  parameters["Lx1"]
+  Ly1 =  parameters["Ly1"]
+  size_x =  parameters["size_x"]
+  size_y =  parameters["size_y"]
+  windowsize =  parameters["windowsize"]
+  radius =  parameters["radius"]
+
 
 
   board, particle, t, time, pq = startsimulation(t_initial, t_max, radiusdisk, massdisk, velocitydisk, massparticle, velocityparticle, Lx1, Ly1, size_x, size_y,
