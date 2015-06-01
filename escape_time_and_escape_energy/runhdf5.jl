@@ -7,7 +7,7 @@ try
   mkdir("./HDF5/")
 end
 
-parameters, nofrealizations = include(ARGS[1])
+parameters, nofrealizations = include("parameters.jl")
 t_max = parameters[:t_max]
 today = today()
 

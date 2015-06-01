@@ -17,6 +17,6 @@ using Compat
              :radius =>0.25
              )
 
-nofrealizations = 100
+nofrealizations = 2
 
 a,nofrealizations
