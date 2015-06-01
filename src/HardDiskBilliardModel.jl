@@ -26,12 +26,13 @@ particle = Particle([0.,0.],[1.,1.],1.0,0,0)
 type Particle{T} <: DynamicObject
   r::Array{T,1}
   v::Array{T,1}
+  radius::T
   mass::T
   numberofcell::Int
   lastcollision::Int
 end
 
-Particle(r,v, mass, numberofcell) = Particle(r,v,mass , numberofcell, 0)
+Particle(r,v, radius, mass, numberofcell) = Particle(r,v, radius, mass , numberofcell, 0)
 
 @doc """Type with attributes position(r), velocity(v), radius, mass, numberofcell and lastcollision. This last label has to be
 with the main loop of the simulation (see *simulation* in **Simulation.jl**)
@@ -140,7 +141,7 @@ Check if a Particle and a Disk overlap. Return a Boolean"""->
 function overlap(p::Particle, d::Disk)
   deltar = d.r - p.r
   r = norm(deltar)
-  return r < d.radius
+  return r < (d.radius + p.radius)
 end
 
 @doc doc"""#create_particle(Lx1,Lx2,Ly1,Ly2, mass, velocitynorm, numberofcell::Integer)
@@ -148,14 +149,14 @@ Creates a Particle with Cartesian coordinates between the boundaries Lx1, Lx2, L
 of constant norm. It is worth noting that the passed parameters define corners with Cartesian coordinates:
 > (Lx1,Ly1),(Lx1, y2), (Lx2,Ly1), (Lx2,Ly2).
 """->
-function create_particle(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real, mass::Real, velocitynorm::Real, numberofcell::Integer)
-  x = randuniform(Lx1, Lx2)
-  y = randuniform(Ly1, Ly2)
+function create_particle(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real, mass::Real, velocitynorm::Real, numberofcell::Integer, radius)
+  x = randuniform(Lx1+radius, Lx2-radius)
+  y = randuniform(Ly1+radius, Ly2-radius)
   theta = rand()*2*pi
   vx = cos(theta)*velocitynorm
   vy = sin(theta)*velocitynorm
   v = [vx, vy]
-  Particle([x,y],v, mass, numberofcell,0)
+  Particle([x;y],v, radius, mass, numberofcell,0)
 end
 
 @doc doc"""#create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocitynorm, numberofcell::Integer)
@@ -178,7 +179,7 @@ Creates an instance of Cell. Size of its sides and initial coordinates for the l
 together with the needed data to create the embedded disk and a particle inside the cell."""->
 function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk,
                              massdisk::Real, velocitydisk::Real,
-                             massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
+                             massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real, radius)
   Lx2 = Lx1 + size_x
   Ly2 = Ly1 + size_y
   Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
@@ -188,10 +189,10 @@ function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,si
   wall3 = HorizontalWall([Lx1,Lx2],Ly2)
   rightsharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
   disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
-  particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
+  particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell, radius)
   while overlap(particle,disk)
     disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
-    particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
+    particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell, radius)
   end
 
   #Microcanonical sampled if velocitydisk == velocityparticle. Falta implementar el caso más general.
@@ -280,9 +281,9 @@ Returns a Board instance with one cell and a particle inside it (that is also re
 together with the needed data to create the embedded disk and a particle inside the cell. """->
 function create_board_with_particle(Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk::Real,
                                     massdisk::Real, velocitydisk::Real,
-                                    massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
+                                    massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real, radius::Real)
   cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                                      massparticle, velocityparticle, windowsize, t_initial::Real)
+                                                      massparticle, velocityparticle, windowsize, t_initial, radius)
   board = Deque{Cell}()
   push!(board,cell)
   board = Board(board)
@@ -360,35 +361,48 @@ function dtcollision(d::Disk, p::Particle)
   if rdotv >= 0
     return Inf
   end
-  dis = (rdotv)^2 -(vcuadrado)*(rcuadrado - (d.radius)^2)
+  dis = (rdotv)^2 -(vcuadrado)*(rcuadrado - (d.radius+p.radius)^2)
   if dis < 0
     return Inf
   end
-  dt = (rcuadrado - (d.radius)^2)/(-rdotv + sqrt(dis))
+  dt = (rcuadrado - (d.radius+p.radius)^2)/(-rdotv + sqrt(dis))
   return dt
 end
 
 ################################Particle#############################################################3
 
-@doc """#dtcollision(::Particle, ::Vertical)
-Calculates the time of collision between a Particle and a VerticalWall.If they don't collide it retuns ∞ """->
-function dtcollision(p::Particle, VW::Vertical)
-  dt = (VW.x - p.r[1])/p.v[1]
-  if dt < 0
-    return Inf
+function dtcollision(d::Particle, VW::Vertical)
+  #La pared siempre va a estar acotada por números positivos
+  dt = Inf
+  if d.v[1] > 0
+    if d.r[1] < VW.x
+      dt = (VW.x - (d.r[1] + d.radius))/d.v[1]
+    end
+  elseif d.v[1] < 0
+    if d.r[1] > VW.x
+      dt = ((d.r[1] - d.radius) - VW.x)/-d.v[1]
+    end
   end
   dt
 end
 
-@doc doc"""#dtcollision(::Particle,::HorizontalWall)
+
+@doc """#dtcollision(::Disk,::HorizontalWall)
 Returns the time of collision between a Disk and a HorizontallWall.If they don't collide it retuns ∞"""->
-function dtcollision(p::Particle, HW::HorizontalWall)
-  dt = (HW.y - p.r[2])/p.v[2]
-  if dt < 0
-    return Inf
+function dtcollision(d::Particle, HW::HorizontalWall)
+  dt = Inf
+  if d.v[2] > 0
+    if d.r[2] < HW.y
+      dt = (HW.y - (d.r[2] + d.radius))/d.v[2]
+    end
+  elseif d.v[2] < 0
+    if d.r[2] > HW.y
+      dt = ((d.r[2] - d.radius) - HW.y)/-d.v[2]
+    end
   end
   dt
 end
+
 
 @doc """#dtcollision(::Particle,::Disk)
 See *dtcollision(::Disk,::Particle)*"""->
@@ -494,18 +508,13 @@ function collision(p::Particle, VSW::VerticalSharedWall, b::Board)
 end
 
 
-
-
-
-
-
 @doc """#updateparticlelabel(::Particle, ::VerticalSharedWall)
 Update the label of the particle when it passes through the window of the VerticalSharedWall."""->
 function updateparticlenumberofcell(p::Particle, VSW::VerticalSharedWall)
   update = false
   Ly1window = VSW.y[2]
   Ly2window= VSW.y[3]
-  if Ly1window < p.r[2] < Ly2window
+  if Ly1window + p.radius < p.r[2] < Ly2window - p.radius
     update = true
     pcell = p.numberofcell
     for nofcell in VSW.sharedcells
@@ -549,7 +558,7 @@ function collision(p::Particle, d::Disk)
   deltar = p.r - d.r
   deltav = p.v - d.v
   h = dot(deltar,deltav)
-  sigma = d.radius
+  sigma = d.radius+p.radius
   J = 2*p.mass*d.mass*h/(sigma*(p.mass + d.mass))
   p.v -= J*deltar/(sigma*p.mass)
   d.v += J*deltar/(sigma*d.mass)

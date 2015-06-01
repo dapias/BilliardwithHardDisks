@@ -1,5 +1,6 @@
 using PyPlot
 using HDF5
+using StatsBase
 
 function getnofrealizations(filename)
   file = h5open("HDF5/$filename.hdf5","r")
@@ -22,6 +23,28 @@ function getedata(filename)
   close(file)
   tdata
 end
+
+function plotehistogram(filename)
+  e = getedata(filename)
+  plt.clf()
+  plt.hist(e, 20)
+  savefig("./HDF5/images/$(filename)ehistogram.png")
+end
+
+function plottdata(filename)
+  t = gettdata(filename)
+  empirica = ecdf(t)
+  max = findmax(t)[1]
+  intervalo = [0.:0.01:max]
+  Ps = 1 - empirica(intervalo)
+  plt.clf()
+  plt.plot(intervalo, Ps, ".--")
+  plt.gca()[:set_yscale]("log")
+  plt.gca()[:set_xscale]("log")
+  savefig("./HDF5/images/$(filename)tcumulative.png")
+end
+
+
 
 
 

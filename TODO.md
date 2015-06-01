@@ -1,9 +1,6 @@
 # ¿Qué podemos hacer ahora?
 
-- Calcular tiempo de residencia promedio de la particulita en una celda
-- ¿Dónde está un disco después de tiempo $t$ si no interactúa?
 - Desplazamiento cuadrático medio: de la posición y de la energía
-- Helfand moments
 
 - Si la partícula se queda suficiente tiempo en la celda $i$, la distribución de energía entre el disco $i$ y la partícula converge a la microcanónica. Ahí deberíamos poder calcular todo (la distribución de energía que se lleva consigo la partícula cuando sale de la celda, por ejemplo
 
@@ -26,3 +23,11 @@ haz un notebook donde se pone una liga al PDF que guardas en el mismo directorio
 
 ## Mejía-Monasterio, Larralde et al.:
 - Green--Kubo para transporte acoplado?
+
+##Escape en discos duros
+
+##Análisis con los discos rotantes (mismo análisis)
+
+##Momentos de Helfand (Viscardi - Gaspard)
+
+##Monte Carlo Sampling para la cola algebráica (ver Altmann)
