@@ -1,6 +1,6 @@
 push!(LOAD_PATH,"../src/")
 push!(LOAD_PATH,"../myDataStructures/")
-#include("../src/HardDiskBilliardSimulation.jl")
+include("../src/HardDiskBilliardSimulation.jl")
 #include("../myDataStructures/MyCollections.jl")
 
 using HardDiskBilliardSimulation

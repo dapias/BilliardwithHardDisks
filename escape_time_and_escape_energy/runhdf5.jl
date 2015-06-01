@@ -8,7 +8,7 @@ try
   mkdir("./HDF5/")
 end
 
-parameters = YAML.load(open("parameters.yaml"))
+parameters = YAML.load(open(ARGS[1]))
 
 t_max = parameters["t_max"]
 nofrealizations = parameters["nofrealizations"]
