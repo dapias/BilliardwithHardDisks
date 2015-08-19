@@ -31,3 +31,9 @@ haz un notebook donde se pone una liga al PDF que guardas en el mismo directorio
 ##Momentos de Helfand (Viscardi - Gaspard)
 
 ##Monte Carlo Sampling para la cola algebráica (ver Altmann)
+
+#Actualización 18/08/2015
+
+- Momentos de Helfand.
+- Monte Carlo para muestrear tiempos de escape largos.
+- CTRW.
