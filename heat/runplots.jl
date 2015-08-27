@@ -7,5 +7,7 @@ pygui(false) #if you want see the plots set it true
 #time = [10.,100.,1000.]
 
 a = plotfile(filename, time)
-mkdir("./images/$filename")
+try
+  mkdir("./images/$filename")
+end
 savefig("./images/$filename/energyversuscell.pdf")
