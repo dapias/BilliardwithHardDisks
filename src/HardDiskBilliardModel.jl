@@ -160,14 +160,14 @@ end
 
 @doc doc"""#create_disk(Lx1,Lx2,Ly1,Ly2, radius, mass, velocitynorm, numberofcell::Integer)
 Creates a Disk enclosed in a box with boundaries Lx1, Lx2, Ly1, Ly2; and a random velocity
-of constant norm. It is worth noting that the passed parameters define  corners with Cartesian coordinates:
+prescribed by the canonical distribution at the temperature passed. It is worth noting that the passed parameters define  corners with Cartesian coordinates:
 > (Lx1,Ly1),(Lx1, y2), (Lx2,Ly1), (Lx2,Ly2). """->
-function create_disk(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real,radius::Real, mass::Real, velocitynorm::Real, numberofcell::Integer)
+function create_disk(Lx1::Real,Lx2::Real,Ly1::Real,Ly2::Real,radius::Real, mass::Real, temperature::Real, numberofcell::Integer)
   x = randuniform(Lx1 + radius, Lx2 - radius)
   y = randuniform(Ly1 + radius, Ly2 - radius)
   theta = rand()*2*pi
-  vx = cos(theta)*velocitynorm
-  vy = sin(theta)*velocitynorm
+  vx = temperature*randn()
+  vy = temperature*randn()
   v = [vx, vy]
   Disk([x;y],v,radius, mass,numberofcell)
 end
@@ -177,8 +177,8 @@ end
 Creates an instance of Cell. Size of its sides and initial coordinates for the left down corner are passed (Lx1,Ly1)
 together with the needed data to create the embedded disk and a particle inside the cell."""->
 function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk,
-                             massdisk::Real, velocitydisk::Real,
-                             massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
+                                           massdisk::Real, temperature::Real,
+                                           massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
   Lx2 = Lx1 + size_x
   Ly2 = Ly1 + size_y
   Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
@@ -187,20 +187,12 @@ function create_initial_cell_with_particle( Lx1::Real, Ly1::Real,size_x::Real,si
   wall2 = HorizontalWall([Lx1,Lx2],Ly1)
   wall3 = HorizontalWall([Lx1,Lx2],Ly2)
   rightsharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
-  disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
+  disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, temperature, nofcell)
   particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
   while overlap(particle,disk)
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
+    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, temperature, nofcell)
     particle = create_particle(Lx1,Lx2,Ly1,Ly2, massparticle, velocityparticle, nofcell)
   end
-
-  #Microcanonical sampled if velocitydisk == velocityparticle. Falta implementar el caso más general.
-  E = ((velocitydisk)^2 + (velocityparticle)^2)/2.
-  v = randn(4)
-  lambda_squared =  dot(v,v)
-  vx_d, vy_d, vx_p, vy_p = sqrt(2*E/lambda_squared)v
-  disk.v = [vx_d, vy_d]
-  particle.v = [vx_p, vy_p]
 
   cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t_initial)
   cell, particle
@@ -212,15 +204,13 @@ end
 
 @doc """#parameters_to_create_a_new_cell(::Cell)
 Extract the general data associated to a previous created cell"""->
-function parameters_to_create_a_new_cell(cell::Cell, vnewdisk::Real)
+function parameters_to_create_a_new_cell(cell::Cell)
   size_x = cell.walls[4].x - cell.walls[1].x
   size_y = cell.walls[3].y - cell.walls[2].y
   radiusdisk = cell.disk.radius
   massdisk = cell.disk.mass
-  velocitydisk = vnewdisk
-  #velocitydisk = norm(cell.disk.v)                      ######Ver la forma de mejorar esto
   windowsize = cell.walls[1].y[3] - cell.walls[1].y[2]
-  size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize
+  size_x, size_y, radiusdisk, massdisk, windowsize
 end
 
 
@@ -228,8 +218,8 @@ end
 Creates a new cell that shares the rightmost verticalwall of the passed cell. A Particle is passed
 to avoid overlap with the embedded Disk.
 """->
-function create_new_right_cell(cell::Cell, particle::Particle, t::Real, vnewdisk::Real)
-  size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell, vnewdisk)
+function create_new_right_cell(cell::Cell, particle::Particle, t::Real, temperature::Real)
+  size_x, size_y, radiusdisk, massdisk, windowsize = parameters_to_create_a_new_cell(cell)
 
   leftsharedwall = cell.walls[end]
   Lx1 = cell.walls[end].x
@@ -240,9 +230,9 @@ function create_new_right_cell(cell::Cell, particle::Particle, t::Real, vnewdisk
   wall3 = HorizontalWall([Lx1,Lx2],Ly2)
   Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
   nofcell  = cell.numberofcell +1
-  disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
+  disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, temperature, nofcell)
   while overlap(particle,disk)
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
+    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, temperature, nofcell)
   end
   rightsharedwall = VerticalSharedWall(Lx2,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell+1))
   cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t)
@@ -254,8 +244,8 @@ end
 Creates a new cell that shares the leftmost verticalwall of the passed cell. A Particle is passed
 to avoid overlap with the embedded Disk.
 """->
-function create_new_left_cell(cell::Cell, particle::Particle, t::Real, vnewdisk::Real)
-  size_x, size_y, radiusdisk, massdisk, velocitydisk, windowsize = parameters_to_create_a_new_cell(cell, vnewdisk)
+function create_new_left_cell(cell::Cell, particle::Particle, t::Real, temperature::Real)
+  size_x, size_y, radiusdisk, massdisk, windowsize = parameters_to_create_a_new_cell(cell)
 
   Lx2 = cell.walls[1].x
   Ly1 = cell.walls[1].y[1]
@@ -266,9 +256,9 @@ function create_new_left_cell(cell::Cell, particle::Particle, t::Real, vnewdisk:
   rightsharedwall = cell.walls[1]
   Ly3, Ly4 = create_window(Ly1, Ly2, windowsize)
   nofcell  = cell.numberofcell - 1
-  disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk,nofcell)
+  disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, temperature,nofcell)
   while overlap(particle,disk)
-    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, velocitydisk, nofcell)
+    disk =  create_disk(Lx1,Lx2,Ly1,Ly2, radiusdisk, massdisk, temperature, nofcell)
   end
   leftsharedwall = VerticalSharedWall(Lx1,[Ly1,Ly3,Ly4,Ly2],(nofcell,nofcell-1))
   cell = Cell([leftsharedwall,wall2,wall3,rightsharedwall],disk,nofcell, t)
@@ -279,10 +269,10 @@ end
 Returns a Board instance with one cell and a particle inside it (that is also returned). Size of its sides and initial coordinates for the left down corner are passed (Lx1,Ly1)
 together with the needed data to create the embedded disk and a particle inside the cell. """->
 function create_board_with_particle(Lx1::Real, Ly1::Real,size_x::Real,size_y::Real,radiusdisk::Real,
-                                    massdisk::Real, velocitydisk::Real,
+                                    massdisk::Real, temperature::Real,
                                     massparticle::Real, velocityparticle::Real, windowsize::Real, t_initial::Real)
-  cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, velocitydisk,
-                                                      massparticle, velocityparticle, windowsize, t_initial::Real)
+  cell, particle = create_initial_cell_with_particle(Lx1, Ly1,size_x,size_y,radiusdisk, massdisk, temperature,
+                                                     massparticle, velocityparticle, windowsize, t_initial::Real)
   board = Deque{Cell}()
   push!(board,cell)
   board = Board(board)
@@ -528,16 +518,16 @@ function is_cell_in_board(b::Board,p::Particle)
   iscell
 end
 
-@doc """#newcell!(::Board, ::Particle)
+@doc """#newcell!(::Board, ::Particle, t::Real, temperature::Real)
 Introduces a new cell on the board according to the value of the attribute *numberofcell* of the particle.
 It may pushes the cell at the left or right side of the board to mantain the order in the **Deque** structure of the
 board: at the back the rightmost cell, at front the leftmost cell."""->
-function newcell!(b::Board, p::Particle, t::Real, vnewdisk::Real)
+function newcell!(b::Board, p::Particle, t::Real, temperature::Real)
   if front(b.cells).numberofcell > p.numberofcell
-    cell = create_new_left_cell(front(b.cells),p, t, vnewdisk)
+    cell = create_new_left_cell(front(b.cells),p, t, temperature)
     unshift!(b.cells,cell)
   elseif back(b.cells).numberofcell < p.numberofcell
-    cell = create_new_right_cell(back(b.cells),p, t, vnewdisk)
+    cell = create_new_right_cell(back(b.cells),p, t, temperature)
     push!(b.cells,cell)
   end
   cell
