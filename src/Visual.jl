@@ -29,7 +29,7 @@ function visualize(simulation_results, radiusparticle)
   radiusdisk = disk.radius
   massparticle = particle.mass
 
-  fig = plt.figure()
+  fig = plt[:figure]()
   ax = fig[:add_subplot](111)
   energy_text = ax[:text](0.02,0.88,"",transform=ax[:transAxes])
   time_text = ax[:text](0.60,0.88,"",transform=ax[:transAxes])
@@ -47,7 +47,7 @@ function visualize(simulation_results, radiusparticle)
   p = patch.Circle([particle_positions[1],particle_positions[2]],radiusparticle)
   puntual = [p]
   ax[:add_patch](p)
-  plt.gca()[:set_aspect]("equal")
+  plt[:gca]()[:set_aspect]("equal")
 
   drawwalls(board, ax)
 

@@ -112,14 +112,14 @@ end
 # element.
 type PriorityQueue{K,V} <: Associative{K,V}
     # Binary heap of (element, priority) pairs.
-    xs::Array{(K, V), 1}
+    xs::Array{Tuple{K,V}, 1}
     o::Ordering
 
     # Map elements to their index in xs
     index::Dict{K, Int}
 
     function PriorityQueue(o::Ordering)
-        new(Array((K, V), 0), o, Dict{K, Int}())
+        new(Array(Tuple{K, V}, 0), o, Dict{K, Int}())
     end
 
     PriorityQueue() = PriorityQueue{K,V}(Forward)
@@ -162,7 +162,7 @@ PriorityQueue{K,V}(ks::AbstractArray{K}, vs::AbstractArray{V},
 
 PriorityQueue{K,V}(kvs::Associative{K,V}, o::Ordering=Forward) = PriorityQueue{K,V}(kvs, o)
 
-PriorityQueue{K,V}(a::AbstractArray{(K,V)}, o::Ordering=Forward) = PriorityQueue{K,V}(a, o)
+PriorityQueue{K,V}(a::AbstractArray{Tuple{K,V}}, o::Ordering=Forward) = PriorityQueue{K,V}(a, o)
 
 length(pq::PriorityQueue) = length(pq.xs)
 isempty(pq::PriorityQueue) = isempty(pq.xs)

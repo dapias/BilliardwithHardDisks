@@ -2,14 +2,16 @@ include("./HardDiskBilliardModel.jl")
 include("../myDataStructures/MyCollections.jl")
 #push!(LOAD_PATH,"../myDataStructures/")
 
+#using DataStructures
+
+
 module HardDiskBilliardSimulation
 
 VERSION < v"0.4-" && using Docile
 
 
 importall HardDiskBilliardModel
-importall MyCollections
-import DataStructures.Deque, DataStructures.push!, DataStructures.unshift!, DataStructures.front, DataStructures.back
+import DataStructures.Deque, DataStructures.push!, DataStructures.unshift!, DataStructures.front, DataStructures.back, MyCollections.PriorityQueue, MyCollections.enqueue!, MyCollections.dequeue!
 using Compat
 export simulation, animatedsimulation, heatsimulation
 

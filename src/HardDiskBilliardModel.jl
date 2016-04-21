@@ -71,12 +71,12 @@ type Board
   cells::Deque{Cell}
 end
 
-# @doc doc"""Type with attributes x and y. x corresponds to its horizontal position in a Cartesian Plane
+@doc doc"""Type with attributes x and y. x corresponds to its horizontal position in a Cartesian Plane
 # (just a number) and y represents its initial and final height in the Plane (Array of length equal to 2)."""  ->
-# immutable VerticalWall <: Vertical
-#   x :: Real
-#   y :: Array{Real,1}
-# end
+immutable VerticalWall <: Vertical
+   x :: Real
+   y :: Array{Real,1}
+end
 
 @doc doc"""Type with attributes x and y. x corresponds to its horizontal extension in a Cartesian plane
 (initial and final position) and y corresponds to its vertical position.
@@ -98,7 +98,7 @@ VW = VerticalSharedWall(0.,[1.,2.,3.,4.],(0,1))
 immutable VerticalSharedWall{T} <: Vertical
   x :: T
   y :: Array{T,1}  #Array of a length greater than the VerticalWall
-  sharedcells::(Int,Int) #Adjacent cells that share the wall
+  sharedcells:: Tuple{Int,Int} #Adjacent cells that share the wall
 end
 
 @doc doc"""Type with attributes dynamicobject, diskorwall and prediction. It is the basic unit of information
