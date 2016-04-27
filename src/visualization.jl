@@ -33,14 +33,14 @@ function visualize(simulation_results, radiusparticle, velocityparticle)
   d_pos = [[disks_positions[k] for k in j:numberofcells:length(disks_positions)] for j in 1:numberofcells];
   d_vel = [[disks_velocities[k] for k in j:numberofcells:length(disks_velocities)] for j in 1:numberofcells];
 
-  fig = plt.figure()
+  fig = plt[:figure]()
 
   ax = fig[:add_subplot](211)
   energy_text = ax[:text](0.02,0.9,"",transform=ax[:transAxes])
   ax[:set_xlim](Lx1, Lx1 + numberofcells*size_x)
   ax[:set_ylim](Ly1, Ly1 + size_y + 1.0)
 
-  plt.gca()[:set_aspect]("equal")
+  plt[:gca]()[:set_aspect]("equal")
 
   c = patch.Circle(d_pos[1][1],radiusdisk) #En pos[1][1] el primer 1 se refiere a la particula, en tanto que el
   #segundo se refiere al evento.

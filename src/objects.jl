@@ -71,7 +71,7 @@ end
 immutable VerticalSharedWall <: Vertical
   x :: Float64
   y :: Array{Float64,1}  #Array of a length greater than the VerticalWall
-  sharedcells::(Int,Int) #Adjacent cells that share the wall
+  sharedcells::Tuple{Int,Int} #Adjacent cells that share the wall
 end
 
 @doc doc"""Type with attributes time, referenceobject, diskorwall and whenwaspredicted. The last attribute makes reference to the cycle
